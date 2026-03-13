@@ -94,6 +94,7 @@ const PEAKS = [
   { name: "Mt. San Antonio (Baldy)", lat: 34.288889, lon: -117.646944, elevFt: 10064 },
   { name: "Mt. Tamalpais", lat: 37.923889, lon: -122.596667, elevFt: 2572 },
   { name: "Mt. Umunhum", lat: 37.159167, lon: -121.8625, elevFt: 3486 },
+  { name: "Mt. San Gorgonio", lat: 34.099167, lon: -116.825, elevFt: 11503 },
   { name: "Mt. San Jacinto", lat: 33.814722, lon: -116.679444, elevFt: 10834 },
   { name: "Telescope Peak", lat: 36.169722, lon: -117.089167, elevFt: 11049 },
 ];
