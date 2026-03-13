@@ -1,10 +1,10 @@
 # CaliVibe
 
-> Interactive map for exploring California counties and cities — population, crime rates, temperature, 3D terrain, etc.
-
 🔗 [trekhleb.dev/cali-vibe](https://trekhleb.dev/cali-vibe)
 
-Vibecoded for fun: `~98%` of the code was written by Claude Code Opus with a few sprinkles from Gemini 3.1 Pro.
+> Interactive map for exploring California counties and cities — population, crime rates, temperature, 3D terrain, etc.
+
+Vibecoded for fun: `~98%` of the code was written by `Claude Code Opus` with a few sprinkles from `Gemini 3.1 Pro`.
 
 ## Why
 
