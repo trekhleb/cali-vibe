@@ -271,17 +271,22 @@ const California3DTerrain = forwardRef<
       labelRenderer.render(scene, camera);
     })();
 
-    // --- Resize ---
+    // --- Resize (debounced) ---
+    let resizeTimer: ReturnType<typeof setTimeout>;
     const ro = new ResizeObserver(() => {
       if (dead) return;
-      const w = el.clientWidth;
-      const h = el.clientHeight;
-      if (w === 0 || h === 0) return;
-      camera.aspect = w / h;
-      camera.setViewOffset(w, h, -overlayOffsetRef.current / 2, 0, w, h);
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-      labelRenderer.setSize(w, h);
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (dead) return;
+        const w = el.clientWidth;
+        const h = el.clientHeight;
+        if (w === 0 || h === 0) return;
+        camera.aspect = w / h;
+        camera.setViewOffset(w, h, -overlayOffsetRef.current / 2, 0, w, h);
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+        labelRenderer.setSize(w, h);
+      }, 100);
     });
     ro.observe(el);
 
@@ -468,6 +473,7 @@ const California3DTerrain = forwardRef<
     return () => {
       dead = true;
       cancelAnimationFrame(frameId);
+      clearTimeout(resizeTimer);
       ro.disconnect();
       controls.dispose();
       textureFlare0.dispose();
