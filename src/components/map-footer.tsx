@@ -11,7 +11,7 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
   return (
     <>
       <div
-        className="absolute bottom-1 left-4 md:left-6 z-10 flex items-center gap-1.5 text-[10px] text-white/70 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] transition-all duration-300"
+        className="absolute bottom-2.5 left-4 md:left-6 z-10 flex items-center gap-1.5 text-[10px] text-white/70 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] transition-all duration-300"
         style={overlayOffset ? { left: overlayOffset + 24 } : undefined}
       >
         <span>For illustration only.</span>
