@@ -470,6 +470,8 @@ const California3DTerrain = forwardRef<
       cancelAnimationFrame(frameId);
       ro.disconnect();
       controls.dispose();
+      textureFlare0.dispose();
+      textureFlare3.dispose();
       scene.traverse((obj) => {
         if (obj instanceof THREE.Mesh) {
           obj.geometry.dispose();

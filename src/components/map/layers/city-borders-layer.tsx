@@ -160,8 +160,8 @@ export default function CityBordersLayer({
 
       {activeName && (
         <div
-          className="absolute rounded-lg bg-white/90 px-3 py-2 shadow backdrop-blur-sm transition-all duration-300 left-4 top-[140px] md:left-6 md:top-[156px]"
-          style={overlayOffset ? { left: overlayOffset + 24, top: 68 } : undefined}
+          className="absolute rounded-lg bg-white/90 px-3 py-2 shadow backdrop-blur-sm transition-all duration-300 left-4 top-24 md:left-6 md:top-28"
+          style={overlayOffset ? { left: overlayOffset + 24, top: 24 } : undefined}
         >
           <div className="flex items-center gap-2">
             <div className="text-sm font-semibold text-gray-800">

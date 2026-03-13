@@ -44,6 +44,7 @@ import {
   LuSiren,
   LuMountain,
 } from "react-icons/lu";
+import { FaGithub } from "react-icons/fa";
 import type { California3DTerrainRef } from "@/components/map/terrain-3d/california-3d-terrain";
 
 const crimeTypeIds = Object.keys(CRIME_LABELS) as CrimeType[];
@@ -454,7 +455,7 @@ export default function Home() {
                 <LuHeart className="h-4 w-4" />
                 Favorites
                 {favorites.length > 0 && (
-                  <span className="ml-0.5 inline-flex items-center justify-center h-4 min-w-4 px-1 text-[10px] font-bold rounded-full bg-gray-400 text-white">
+                  <span className={`ml-0.5 inline-flex items-center justify-center h-4 min-w-4 px-1 text-[10px] font-bold rounded-full text-white ${activeTab === "favorites" ? "bg-black" : "bg-gray-500"}`}>
                     {favorites.length}
                   </span>
                 )}
@@ -719,11 +720,10 @@ export default function Home() {
                           <button
                             key={i}
                             onClick={() => setTempMonth(i)}
-                            className={`rounded px-1 py-1 text-[11px] font-medium transition-colors ${
-                              tempMonth === i
+                            className={`rounded px-1 py-1 text-[11px] font-medium transition-colors ${tempMonth === i
                                 ? "bg-gray-900 text-white"
                                 : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                            }`}
+                              }`}
                           >
                             {label}
                           </button>
@@ -857,6 +857,10 @@ export default function Home() {
             <span className="text-[11px] text-gray-400">
               Vibecoded for fun by{" "}
               <a href="https://trekhleb.dev" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-700 underline underline-offset-2 transition-colors">trekhleb.dev</a>
+              {" • "}
+              <a href="https://github.com/trekhleb/cali-vibe" target="_blank" rel="noopener noreferrer" className="inline-flex align-text-bottom text-gray-500 hover:text-gray-700 transition-colors" aria-label="GitHub repository">
+                <FaGithub className="h-3.5 w-3.5" />
+              </a>
               <br />
               For illustration only, data may be inaccurate
             </span>
@@ -883,10 +887,11 @@ export default function Home() {
         </div>
         <button
           onClick={() => setIsDrawerOpen(true)}
-          className="p-2 rounded-full text-black hover:bg-black/5 transition-colors"
+          className="relative p-2 rounded-full text-black hover:bg-black/5 transition-colors"
           title="Open Menu"
         >
-          <LuPanelLeftOpen className="h-5 w-5" />
+          <span className="absolute inset-0 rounded-full bg-gray-400/40" style={{ animation: "pulse-ring 4.5s ease-out infinite" }} />
+          <LuPanelLeftOpen className="relative h-5 w-5" />
         </button>
       </div>
 

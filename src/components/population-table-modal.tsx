@@ -25,14 +25,19 @@ export default function PopulationTableModal({
   nameLabel,
 }: PopulationTableModalProps) {
   const [rows, setRows] = useState<PopRow[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("population");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
+    setError(null);
     fetch(dataUrl)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((gj) => {
         if (cancelled) return;
         const parsed: PopRow[] = [];
@@ -44,7 +49,9 @@ export default function PopulationTableModal({
         }
         setRows(parsed);
       })
-      .catch(() => {});
+      .catch((err) => {
+        if (!cancelled) setError(err.message ?? "Failed to load data");
+      });
     return () => { cancelled = true; };
   }, [open, dataUrl]);
 
@@ -124,7 +131,9 @@ export default function PopulationTableModal({
           </tbody>
         </table>
         {rows.length === 0 && open && (
-          <div className="py-12 text-center text-sm text-gray-400">Loading...</div>
+          <div className="py-12 text-center text-sm text-gray-400">
+            {error ? `Error: ${error}` : "Loading..."}
+          </div>
         )}
       </div>
     </LegalModal>

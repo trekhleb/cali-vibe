@@ -95,6 +95,7 @@ export default function TemperatureTableModal({
   onSelectHex,
 }: TemperatureTableModalProps) {
   const [rows, setRows] = useState<TempRow[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>(activeMonth);
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [metric, setMetric] = useState<TempMetric>(activeMetric);
@@ -110,10 +111,16 @@ export default function TemperatureTableModal({
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
+    setError(null);
+
+    const fetchJson = (url: string) => fetch(url).then((r) => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    });
 
     Promise.all([
-      fetch(dataUrl).then((r) => r.json()),
-      fetch(`${import.meta.env.BASE_URL}data/california-city-labels.geojson`).then((r) => r.json()),
+      fetchJson(dataUrl),
+      fetchJson(`${import.meta.env.BASE_URL}data/california-city-labels.geojson`),
     ])
       .then(([gj, citiesGj]) => {
         if (cancelled) return;
@@ -166,7 +173,9 @@ export default function TemperatureTableModal({
         }
         setRows(parsed);
       })
-      .catch(() => {});
+      .catch((err) => {
+        if (!cancelled) setError(err.message ?? "Failed to load data");
+      });
     return () => { cancelled = true; };
   }, [open, dataUrl]);
 
@@ -321,7 +330,9 @@ export default function TemperatureTableModal({
           </tbody>
         </table>
         {rows.length === 0 && open && (
-          <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
+          <div className="py-12 text-center text-sm text-gray-400">
+            {error ? `Error: ${error}` : "Loading…"}
+          </div>
         )}
       </div>
     </LegalModal>

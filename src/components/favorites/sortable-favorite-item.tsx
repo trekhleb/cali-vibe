@@ -39,7 +39,7 @@ export default function SortableFavoriteItem({
       <button
         {...attributes}
         {...listeners}
-        className="flex-shrink-0 cursor-grab touch-none text-gray-300 hover:text-gray-500 active:cursor-grabbing"
+        className="flex-shrink-0 cursor-grab touch-none text-gray-500 hover:text-gray-700 active:cursor-grabbing"
         aria-label="Drag to reorder"
       >
         <LuGripVertical className="h-3 w-3" />

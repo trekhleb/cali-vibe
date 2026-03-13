@@ -26,7 +26,8 @@ export default function GeoSearch({ dataUrl, placeholder = "Search...", onSelect
           .filter(Boolean)
           .sort((a: string, b: string) => a.localeCompare(b));
         setNames(loaded);
-      });
+      })
+      .catch(() => {});
   }, [dataUrl]);
 
   // Filter suggestions
@@ -116,7 +117,7 @@ export default function GeoSearch({ dataUrl, placeholder = "Search...", onSelect
           onFocus={() => query.trim() && setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full rounded-md border border-gray-200 bg-white py-1.5 pl-8 pr-3 text-sm text-gray-700 placeholder:text-gray-400 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-colors"
+          className="w-full rounded-md border border-gray-200 bg-white py-1.5 pl-8 pr-3 text-base md:text-sm text-gray-700 placeholder:text-gray-400 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition-colors"
         />
       </div>
 
