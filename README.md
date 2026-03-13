@@ -23,9 +23,11 @@ Researching California neighborhoods usually means jumping between Census tables
 
 ![Temperature](./public/demo/02-framed.png)
 
-![Counties map](./public/demo/14-framed.png)
+![Counties map](./public/demo/03-framed.png)
 
-![Crime map](./public/demo/07-framed.png)
+![Crime map](./public/demo/05-framed.png)
+
+![Crime map](./public/demo/06-framed.png)
 
 ## Data sources
 
