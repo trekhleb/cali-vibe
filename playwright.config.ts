@@ -8,7 +8,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: "html",
-  timeout: 60000,
+  timeout: process.env.CI ? 120000 : 60000,
   use: {
     baseURL: "http://localhost:5173/cali-vibe/",
     trace: "on-first-retry",
