@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "tsc && vite build && cp dist/index.html dist/404.html",
     "preview": "vite preview",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -24,13 +29,20 @@
     "three": "^0.183.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4",
+    "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^9",
+    "jsdom": "^28.1.0",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vite": "^6"
+    "vite": "^6",
+    "vitest": "^4.1.0"
   }
 }

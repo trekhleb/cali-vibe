@@ -3,7 +3,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 
 const eslintConfig = defineConfig([
   js.configs.recommended,
-  globalIgnores(["dist/**"]),
+  globalIgnores(["dist/**", "scripts/**"]),
 ]);
 
 export default eslintConfig;

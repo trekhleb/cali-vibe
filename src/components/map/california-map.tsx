@@ -105,6 +105,7 @@ export default function CaliforniaMap({
       mapStyle={MAP_STYLES[mapStyleId].style}
       fadeDuration={50}
       padding={{ left: overlayOffset }}
+      onError={(e) => console.warn("Map error:", e.error)}
     >
       {terrain3d && (
         <Source {...TERRAIN_SOURCE} id={TERRAIN_SOURCE.id}>

@@ -183,7 +183,14 @@ const California3DTerrain = forwardRef<
     }
 
     // --- Renderers ---
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (e) {
+      console.warn("WebGL context could not be created:", e);
+      setLoading(false);
+      return () => { dead = true; };
+    }
     renderer.setSize(el.clientWidth, el.clientHeight);
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
