@@ -2,8 +2,11 @@ import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import Home from "@/app/page";
-import { vi } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { favoritesStore } from "@/lib/favorites";
+
+// CI runners are slower — allow enough time for multi-interaction tests
+vi.setConfig({ testTimeout: 30000 });
 
 // Mock the components that use WebGL or tricky to render
 vi.mock("@/components/map/california-map", () => {
