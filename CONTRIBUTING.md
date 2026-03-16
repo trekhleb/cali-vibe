@@ -56,6 +56,8 @@ When you change the UI, snapshot tests will fail because the screenshots no long
 npm run test:e2e:update
 ```
 
+This deletes all existing snapshots and regenerates them from scratch. This is necessary because Playwright's `--update-snapshots` won't overwrite a snapshot that passes its `maxDiffPixelRatio` threshold — small UI changes (like adding a tiny button) would be silently ignored otherwise.
+
 Review the updated images in `e2e/visual-snapshots.spec.ts-snapshots/` to confirm they look correct, then commit them.
 
 ### Writing Snapshot Tests

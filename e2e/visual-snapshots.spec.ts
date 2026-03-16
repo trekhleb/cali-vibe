@@ -12,6 +12,10 @@ const MAP_2D = "relief=0";
 
 async function waitForApp(page: Page, params = "") {
   // Block Google Analytics to keep analytics clean
+  await page.addInitScript(() => {
+    // GA4 official opt-out: prevents all data collection for this property
+    (window as any)["ga-disable-G-YJ73BX984Z"] = true;
+  });
   await page.route("**/googletagmanager.com/**", (route) => route.abort());
   await page.route("**/google-analytics.com/**", (route) => route.abort());
   await page.route("**/analytics.google.com/**", (route) => route.abort());
