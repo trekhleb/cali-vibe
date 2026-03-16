@@ -146,6 +146,16 @@ test.describe("Desktop - layer toggles", () => {
     await assertScreenshot(page, "temperature-january.png");
   });
 
+  test("temperature - selected hex cell", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&temp=1&drawer=0`);
+    // Click on a hex cell in California to select it
+    await page.locator("canvas").click({ position: { x: 400, y: 250 } });
+    // Wait for the info panel to appear in the DOM
+    await page.waitForSelector("text=Night Low", { timeout: 5000 });
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "temperature-selected-hex.png");
+  });
+
   // Three.js + SwiftShader times out on CI runners
   (IS_CI ? test.skip : test)("3D vibe with peaks (ft)", async ({ page }) => {
     await waitForApp(page, "relief=1&peaks=1&punit=ft");

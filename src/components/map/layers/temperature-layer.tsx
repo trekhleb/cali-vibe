@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { Source, Layer, useMap } from "react-map-gl/maplibre";
 import type {
   FillLayerSpecification,
@@ -119,6 +119,7 @@ interface TemperatureLayerProps {
   unit: TempUnit;
   resolution: HexResolution;
   selectedH3?: string | null;
+  onSelectHex?: (h3: string) => void;
   onDeselectHex?: () => void;
   overlayOffset?: number;
 }
@@ -170,11 +171,15 @@ export default function TemperatureLayer({
   unit,
   resolution,
   selectedH3 = null,
+  onSelectHex,
   onDeselectHex,
   overlayOffset = 0,
 }: TemperatureLayerProps) {
   const { current: map } = useMap();
   const [hoverInfo, setHoverInfo] = useState<HexTooltipInfo | null>(null);
+  const [selectedInfo, setSelectedInfo] = useState<HexTooltipInfo | null>(null);
+  // Track map-click selections so we skip flyTo (only table selections fly)
+  const selectedViaMapClick = useRef(false);
 
   const url = useMemo(() => dataUrl(resolution), [resolution]);
 
@@ -222,9 +227,17 @@ export default function TemperatureLayer({
     [selectedH3],
   );
 
-  // Fly to selected hex
+  // Fly to selected hex (only for table-driven selection, not map clicks)
   useEffect(() => {
-    if (!selectedH3 || !map) return;
+    if (!selectedH3 || !map) {
+      if (!selectedH3) setSelectedInfo(null);
+      return;
+    }
+    // Map clicks already have the info and don't need flyTo
+    if (selectedViaMapClick.current) {
+      selectedViaMapClick.current = false;
+      return;
+    }
     const tryFly = () => {
       const features = map.querySourceFeatures(SOURCE_ID, {
         filter: ["==", ["get", "h3"], selectedH3],
@@ -236,6 +249,7 @@ export default function TemperatureLayer({
         lat /= coords.length;
         lng /= coords.length;
         map.flyTo({ center: [lng, lat], zoom: resolution === 4 ? 7 : 8, duration: 1000 });
+        setSelectedInfo(parseTooltipInfo(features[0] as MapGeoJSONFeature));
       }
     };
     tryFly();
@@ -268,15 +282,25 @@ export default function TemperatureLayer({
 
   const onClick = useCallback(
     (e: MapMouseEvent) => {
-      if (!onDeselectHex || !selectedH3) return;
       const features = e.target.queryRenderedFeatures(e.point, {
         layers: [FILL_LAYER_ID],
       });
-      if (features.length === 0) {
-        onDeselectHex();
+      if (features.length > 0) {
+        const h3 = features[0].properties?.h3;
+        if (h3 && h3 !== selectedH3) {
+          selectedViaMapClick.current = true;
+          onSelectHex?.(h3);
+          setSelectedInfo(parseTooltipInfo(features[0]));
+        } else {
+          onDeselectHex?.();
+          setSelectedInfo(null);
+        }
+      } else {
+        onDeselectHex?.();
+        setSelectedInfo(null);
       }
     },
-    [onDeselectHex, selectedH3],
+    [onSelectHex, onDeselectHex, selectedH3],
   );
 
   useEffect(() => {
@@ -292,11 +316,13 @@ export default function TemperatureLayer({
     };
   }, [map, onMouseMove, onMouseLeave, onClick]);
 
-  const tooltipValues = hoverInfo
+  // Hover takes priority; fall back to selected hex info
+  const displayInfo = hoverInfo ?? selectedInfo;
+  const displayValues = displayInfo
     ? {
-      tmax: hoverInfo.tmax[month],
-      tmin: hoverInfo.tmin[month],
-      tavg: hoverInfo.tavg[month],
+      tmax: displayInfo.tmax[month],
+      tmin: displayInfo.tmin[month],
+      tavg: displayInfo.tavg[month],
     }
     : null;
 
@@ -308,23 +334,23 @@ export default function TemperatureLayer({
         <Layer {...selectedLineLayer} />
       </Source>
 
-      {hoverInfo && tooltipValues && (
+      {displayInfo && displayValues && (
         <div
           className="absolute rounded-lg bg-white/90 px-3 py-2 shadow backdrop-blur-sm transition-all duration-300 left-4 top-24 md:left-6 md:top-28"
           style={overlayOffset ? { left: overlayOffset + 24, top: 24 } : undefined}
         >
           <div className="text-xs text-gray-500">
-            {hoverInfo.lat.toFixed(2)}°N, {Math.abs(hoverInfo.lng).toFixed(2)}°W
+            {displayInfo.lat.toFixed(2)}°N, {Math.abs(displayInfo.lng).toFixed(2)}°W
           </div>
           <div className="mt-1 space-y-0.5 text-sm">
             <div className={`${metric === "tmax" ? "font-semibold text-gray-900" : "text-gray-600"}`}>
-              Day High: {formatTemp(tooltipValues.tmax, unit)}
+              Day High: {formatTemp(displayValues.tmax, unit)}
             </div>
             <div className={`${metric === "tmin" ? "font-semibold text-gray-900" : "text-gray-600"}`}>
-              Night Low: {formatTemp(tooltipValues.tmin, unit)}
+              Night Low: {formatTemp(displayValues.tmin, unit)}
             </div>
             <div className={`${metric === "tavg" ? "font-semibold text-gray-900" : "text-gray-600"}`}>
-              Average: {formatTemp(tooltipValues.tavg, unit)}
+              Average: {formatTemp(displayValues.tavg, unit)}
             </div>
           </div>
           <div className="mt-1 text-[10px] text-gray-400">{MONTH_LABELS[month]} avg</div>

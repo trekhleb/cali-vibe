@@ -378,6 +378,7 @@ export default function Home() {
                 tempUnit={tempUnit}
                 tempResolution={tempResolution}
                 selectedHexH3={selectedHexH3}
+                onSelectHex={setSelectedHexH3}
                 onDeselectHex={() => setSelectedHexH3(null)}
                 onToggleCountyFavorite={onToggleCountyFavorite}
                 isCountyFavorite={isCountyFavorite}

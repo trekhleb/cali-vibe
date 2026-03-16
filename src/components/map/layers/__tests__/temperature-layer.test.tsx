@@ -104,20 +104,144 @@ describe("TemperatureLayer", () => {
     unmount();
   });
 
-  it("handles click to deselect", () => {
+  it("handles click to deselect when clicking empty space", () => {
     const onDeselectHex = vi.fn();
     render(<TemperatureLayer metric="tavg" month={0} unit="C" resolution={4} selectedH3="some-id" onDeselectHex={onDeselectHex} />);
-    
+
     const onClick = mockMap.on.mock.calls.find((call: any) => call[0] === "click")[1];
-    
-    // empty features
+
     mockMap.queryRenderedFeatures.mockReturnValue([]);
-    
+
     act(() => {
       onClick({ target: mockMap, point: { x: 0, y: 0 } });
     });
 
     expect(onDeselectHex).toHaveBeenCalled();
+  });
+
+  it("selects a hex when clicking on it", () => {
+    const onSelectHex = vi.fn();
+    render(<TemperatureLayer metric="tavg" month={6} unit="F" resolution={5} onSelectHex={onSelectHex} />);
+
+    const onClick = mockMap.on.mock.calls.find((call: any) => call[0] === "click")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      geometry: { type: "Polygon", coordinates: [[[-118, 34], [-117, 34], [-117, 35], [-118, 34]]] },
+      properties: {
+        h3: "abc123",
+        tmin: JSON.stringify([1,2,3,4,5,6,7,8,9,10,11,12]),
+        tmax: JSON.stringify([10,11,12,13,14,15,16,17,18,19,20,21]),
+        tavg: JSON.stringify([5,6,7,8,9,10,11,12,13,14,15,16]),
+      },
+    }]);
+
+    act(() => {
+      onClick({ target: mockMap, point: { x: 100, y: 100 } });
+    });
+
+    expect(onSelectHex).toHaveBeenCalledWith("abc123");
+  });
+
+  it("shows persistent info panel after clicking a hex", () => {
+    const onSelectHex = vi.fn();
+    render(<TemperatureLayer metric="tavg" month={6} unit="F" resolution={5} onSelectHex={onSelectHex} />);
+
+    const onClick = mockMap.on.mock.calls.find((call: any) => call[0] === "click")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      geometry: { type: "Polygon", coordinates: [[[-118, 34], [-117, 34], [-117, 35], [-118, 34]]] },
+      properties: {
+        h3: "abc123",
+        tmin: JSON.stringify([1,2,3,4,5,6,7,8,9,10,11,12]),
+        tmax: JSON.stringify([10,11,12,13,14,15,16,17,18,19,20,21]),
+        tavg: JSON.stringify([5,6,7,8,9,10,11,12,13,14,15,16]),
+      },
+    }]);
+
+    act(() => {
+      onClick({ target: mockMap, point: { x: 100, y: 100 } });
+    });
+
+    // Info panel stays visible (not just on hover)
+    expect(screen.getByText(/Day High/i)).toBeInTheDocument();
+    expect(screen.getByText(/Night Low/i)).toBeInTheDocument();
+    expect(screen.getByText(/Average/i)).toBeInTheDocument();
+  });
+
+  it("does not fly to hex when selecting via map click", () => {
+    const onSelectHex = vi.fn();
+    const { rerender } = render(
+      <TemperatureLayer metric="tavg" month={0} unit="C" resolution={4} onSelectHex={onSelectHex} />,
+    );
+
+    const onClick = mockMap.on.mock.calls.find((call: any) => call[0] === "click")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      geometry: { type: "Polygon", coordinates: [[[-118, 34], [-117, 34], [-117, 35], [-118, 34]]] },
+      properties: {
+        h3: "map-click-hex",
+        tmin: JSON.stringify([1,2,3,4,5,6,7,8,9,10,11,12]),
+        tmax: JSON.stringify([10,11,12,13,14,15,16,17,18,19,20,21]),
+        tavg: JSON.stringify([5,6,7,8,9,10,11,12,13,14,15,16]),
+      },
+    }]);
+
+    act(() => {
+      onClick({ target: mockMap, point: { x: 100, y: 100 } });
+    });
+
+    mockMap.flyTo.mockClear();
+
+    // Simulate the parent setting selectedH3 after onSelectHex was called
+    rerender(
+      <TemperatureLayer metric="tavg" month={0} unit="C" resolution={4} selectedH3="map-click-hex" onSelectHex={onSelectHex} />,
+    );
+
+    expect(mockMap.flyTo).not.toHaveBeenCalled();
+  });
+
+  it("deselects when clicking the same hex again", () => {
+    const onDeselectHex = vi.fn();
+    render(
+      <TemperatureLayer metric="tavg" month={0} unit="C" resolution={4} selectedH3="abc123" onDeselectHex={onDeselectHex} />,
+    );
+
+    const onClick = mockMap.on.mock.calls.find((call: any) => call[0] === "click")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      geometry: { type: "Polygon", coordinates: [[[-118, 34], [-117, 34], [-117, 35], [-118, 34]]] },
+      properties: { h3: "abc123" },
+    }]);
+
+    act(() => {
+      onClick({ target: mockMap, point: { x: 100, y: 100 } });
+    });
+
+    expect(onDeselectHex).toHaveBeenCalled();
+  });
+
+  it("flies to hex when selected from table (prop change without map click)", () => {
+    mockMap.querySourceFeatures.mockReturnValue([{
+      geometry: { type: "Polygon", coordinates: [[[-118, 34], [-117, 34], [-117, 35], [-118, 34]]] },
+      properties: {
+        tmin: [1,2,3,4,5,6,7,8,9,10,11,12],
+        tmax: [10,11,12,13,14,15,16,17,18,19,20,21],
+        tavg: [5,6,7,8,9,10,11,12,13,14,15,16],
+      },
+    }]);
+
+    const { rerender } = render(
+      <TemperatureLayer metric="tavg" month={0} unit="C" resolution={4} />,
+    );
+
+    mockMap.flyTo.mockClear();
+
+    // Simulate table-driven selection (no map click happened)
+    rerender(
+      <TemperatureLayer metric="tavg" month={0} unit="C" resolution={4} selectedH3="table-hex" />,
+    );
+
+    expect(mockMap.flyTo).toHaveBeenCalled();
   });
 });
 

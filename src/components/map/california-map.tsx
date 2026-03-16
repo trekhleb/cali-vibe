@@ -60,6 +60,7 @@ interface CaliforniaMapProps {
   tempUnit?: TempUnit;
   tempResolution?: HexResolution;
   selectedHexH3?: string | null;
+  onSelectHex?: (h3: string) => void;
   onDeselectHex?: () => void;
   showCities?: boolean;
   cityDisplayMode?: CityDisplayMode;
@@ -88,6 +89,7 @@ export default function CaliforniaMap({
   tempUnit = "F",
   tempResolution = 5,
   selectedHexH3 = null,
+  onSelectHex,
   onDeselectHex,
   showCities = false,
   cityDisplayMode = "borders",
@@ -150,6 +152,7 @@ export default function CaliforniaMap({
           unit={tempUnit}
           resolution={tempResolution}
           selectedH3={selectedHexH3}
+          onSelectHex={onSelectHex}
           onDeselectHex={onDeselectHex}
           overlayOffset={overlayOffset}
         />
