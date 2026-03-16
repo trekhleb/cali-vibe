@@ -7,6 +7,8 @@ vi.mock("react-map-gl/maplibre", () => ({
   ScaleControl: () => <div data-testid="ScaleControl" />,
   Source: ({ children, id }: any) => <div data-testid={`Source-[${id}]`}>{children}</div>,
   Layer: ({ id }: any) => <div data-testid={`Layer-[${id}]`} />,
+  Marker: ({ children }: any) => <div data-testid="Marker">{children}</div>,
+  useMap: () => ({ current: null }),
 }));
 
 vi.mock("@/components/map/layers/county-borders-layer", () => ({ default: () => <div data-testid="CountyBordersLayer" /> }));

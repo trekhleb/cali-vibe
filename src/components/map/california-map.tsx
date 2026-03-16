@@ -29,6 +29,7 @@ import TemperatureLayer, {
   type TempUnit,
   type HexResolution,
 } from "./layers/temperature-layer";
+import LocateControl from "./locate-control";
 
 const hillshadeLayer: HillshadeLayerSpecification = {
   id: "hillshade",
@@ -98,6 +99,12 @@ export default function CaliforniaMap({
   selectedCountyName = null,
   selectedCityName = null,
 }: CaliforniaMapProps) {
+  // Smart zoom for "locate me": city layers → street level, county → county level
+  const locateZoom =
+    showCities || showCityCrime ? 11 :
+    showCounties || showPopulation || showCrime ? 8 :
+    showTemperature ? 9 : 10;
+
   return (
     <Map
       initialViewState={INITIAL_VIEW_STATE}
@@ -156,6 +163,7 @@ export default function CaliforniaMap({
         />
       )}
       <NavigationControl position="top-right" />
+      <LocateControl targetZoom={locateZoom} />
       <ScaleControl position="bottom-right" />
     </Map>
   );
