@@ -110,6 +110,9 @@ describe("Home page", () => {
 
     // Turn on temperature
     await user.click(screen.getByRole("checkbox", { name: /Temperature/i }));
+
+    // Turn on sunshine
+    await user.click(screen.getByRole("checkbox", { name: /Sunshine/i }));
   });
 
   it("interacts with tables", async () => {
@@ -126,6 +129,9 @@ describe("Home page", () => {
     await user.click(await screen.findByText("View Table"));
 
     await user.click(screen.getByRole("checkbox", { name: /Temperature/i }));
+    await user.click(await screen.findByText("View Table"));
+
+    await user.click(screen.getByRole("checkbox", { name: /Sunshine/i }));
     await user.click(await screen.findByText("View Table"));
   });
 
@@ -191,6 +197,45 @@ describe("Home page", () => {
 
     const resetBtn = screen.getByText(/Reset View/i);
     await user.click(resetBtn);
+  });
+
+  it("sunshine toggle shows controls and interacts", async () => {
+    render(<Home />);
+    await waitForApp();
+
+    // Switch to 2D map
+    await user.click(screen.getByRole("checkbox", { name: /3D Vibe/i }));
+    await waitFor(() =>
+      expect(screen.getByTestId("california-map")).toBeInTheDocument(),
+    );
+
+    // Turn on sunshine
+    await user.click(screen.getByRole("checkbox", { name: /Sunshine/i }));
+
+    // Month buttons should appear
+    await waitFor(() => expect(screen.getByRole("button", { name: "Jan" })).toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "Feb" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Year" })).toBeInTheDocument();
+
+    // Click a different month
+    await user.click(screen.getByRole("button", { name: "Mar" }));
+
+    // Click Year for annual average
+    await user.click(screen.getByRole("button", { name: "Year" }));
+
+    // Resolution selector should be visible
+    expect(screen.getByText("Large")).toBeInTheDocument();
+    expect(screen.getByText("Small")).toBeInTheDocument();
+    await user.click(screen.getByText("Large"));
+    await user.click(screen.getByText("Small"));
+
+    // View Table button
+    expect(screen.getByText("View Table")).toBeInTheDocument();
+
+    // Turning on sunshine should turn off other layers
+    expect(screen.getByRole("checkbox", { name: /Counties/i })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: /County Population/i })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: /Temperature/i })).not.toBeChecked();
   });
 
   it("closes modals when buttons are clicked", async () => {

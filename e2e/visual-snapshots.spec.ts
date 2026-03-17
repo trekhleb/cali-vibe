@@ -156,6 +156,34 @@ test.describe("Desktop - layer toggles", () => {
     await assertScreenshot(page, "temperature-selected-hex.png");
   });
 
+  test("sunshine - default (small hex, current month)", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&shine=1`);
+    await assertScreenshot(page, "sunshine-default.png");
+  });
+
+  test("sunshine - large hex", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&shine=1&sres=4`);
+    await assertScreenshot(page, "sunshine-large-hex.png");
+  });
+
+  test("sunshine - January", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&shine=1&smonth=0`);
+    await assertScreenshot(page, "sunshine-january.png");
+  });
+
+  test("sunshine - yearly average", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&shine=1&smonth=12`);
+    await assertScreenshot(page, "sunshine-yearly-average.png");
+  });
+
+  test("sunshine - selected hex cell", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&shine=1&drawer=0`);
+    await page.locator("canvas").click({ position: { x: 400, y: 250 } });
+    await page.waitForSelector("text=Annual avg", { timeout: 5000 });
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "sunshine-selected-hex.png");
+  });
+
   // Three.js + SwiftShader times out on CI runners
   (IS_CI ? test.skip : test)("3D vibe with peaks (ft)", async ({ page }) => {
     await waitForApp(page, "relief=1&peaks=1&punit=ft");
@@ -236,6 +264,13 @@ test.describe("Desktop - modals", () => {
     await page.locator("text=View Table").click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await assertScreenshot(page, "modal-temperature-table.png", 0.15);
+  });
+
+  test("sunshine table modal", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&shine=1`);
+    await page.locator("text=View Table").click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "modal-sunshine-table.png", 0.15);
   });
 });
 
@@ -357,6 +392,11 @@ test.describe("Mobile views", () => {
   test("mobile - temperature", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&drawer=1&temp=1`);
     await assertScreenshot(page, "mobile-temperature.png");
+  });
+
+  test("mobile - sunshine", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&shine=1`);
+    await assertScreenshot(page, "mobile-sunshine.png");
   });
 
   (IS_CI ? test.skip : test)("mobile - 3D vibe", async ({ page }) => {
