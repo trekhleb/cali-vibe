@@ -106,6 +106,43 @@ describe("CrimeTableModal", () => {
     );
   });
 
+  it("renders names as clickable links when onSelectName is provided", async () => {
+    const onSelectName = vi.fn();
+    render(
+      <CrimeTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Crime" nameLabel="County" activeCrimeType="total" onSelectName={onSelectName} />
+    );
+    await waitFor(() => expect(screen.getByText("County A")).toBeInTheDocument());
+
+    // Name should be a button
+    const nameButton = screen.getByRole("button", { name: "County A" });
+    expect(nameButton).toBeInTheDocument();
+    expect(nameButton).toHaveClass("text-blue-600");
+  });
+
+  it("calls onSelectName and onClose when clicking a name", async () => {
+    const user = userEvent.setup();
+    const onSelectName = vi.fn();
+    const onClose = vi.fn();
+    render(
+      <CrimeTableModal open={true} onClose={onClose} dataUrl="/data.json" title="Crime" nameLabel="County" activeCrimeType="total" onSelectName={onSelectName} />
+    );
+    await waitFor(() => expect(screen.getByText("County A")).toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: "County A" }));
+    expect(onSelectName).toHaveBeenCalledWith("County A");
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("renders names as plain text when onSelectName is not provided", async () => {
+    render(
+      <CrimeTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Crime" nameLabel="County" activeCrimeType="total" />
+    );
+    await waitFor(() => expect(screen.getByText("County A")).toBeInTheDocument());
+
+    // Should not be a button
+    expect(screen.queryByRole("button", { name: "County A" })).toBeNull();
+  });
+
   it("handles crime data as string (JSON parse)", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
       ok: true,

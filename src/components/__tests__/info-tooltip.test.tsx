@@ -3,9 +3,13 @@ import userEvent from "@testing-library/user-event";
 import InfoTooltip from "@/components/info-tooltip";
 
 describe("InfoTooltip", () => {
-  it("renders 'i' icon", () => {
-    render(<InfoTooltip>Tooltip content</InfoTooltip>);
-    expect(screen.getByText("i")).toBeInTheDocument();
+  function getInfoIcon() {
+    return screen.getByRole("generic", { hidden: false }).querySelector("svg")!.closest("span")!;
+  }
+
+  it("renders info icon", () => {
+    const { container } = render(<InfoTooltip>Tooltip content</InfoTooltip>);
+    expect(container.querySelector("svg")).toBeInTheDocument();
   });
 
   it("tooltip is not rendered initially", () => {
@@ -14,16 +18,15 @@ describe("InfoTooltip", () => {
   });
 
   it("click shows tooltip, second click hides", async () => {
-    render(<InfoTooltip>Tooltip content</InfoTooltip>);
+    const { container } = render(<InfoTooltip>Tooltip content</InfoTooltip>);
+    const icon = container.querySelector("svg")!.closest("span")!;
     // Open
-    await userEvent.click(screen.getByText("i"));
+    await userEvent.click(icon);
     expect(screen.getByText("Tooltip content")).toBeInTheDocument();
 
-    // Close by clicking "i" again
-    await userEvent.click(screen.getByText("i"));
-    await userEvent.unhover(screen.getByText("i"));
-    // After toggling off, tooltip should disappear since neither open nor hover
-    // The component uses `visible = open || hover`; after second click open=false, hover=false
+    // Close by clicking icon again
+    await userEvent.click(icon);
+    await userEvent.unhover(icon);
     expect(screen.queryByText("Tooltip content")).toBeNull();
   });
 });

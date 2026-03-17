@@ -95,6 +95,15 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">10-year monthly normals (2014–2023). H3 hex grid.</span>
           </li>
           <li>
+            <strong>Sunshine Data</strong>
+            <br />
+            <a href="https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">ERA5 Reanalysis (ECMWF)</a>
+            {" "}via{" "}
+            <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">Open-Meteo</a>
+            <br />
+            <span className="text-gray-500">Daily sunshine hours, 2014–2023 avg. H3 hex grid.</span>
+          </li>
+          <li>
             <strong>Elevation Data</strong>
             <br />
             <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">AWS Terrain Tiles</a>

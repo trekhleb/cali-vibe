@@ -18,6 +18,7 @@ interface CrimeTableModalProps {
   title: string;
   nameLabel: string;
   activeCrimeType: CrimeType;
+  onSelectName?: (name: string) => void;
 }
 
 const COLUMNS: { key: CrimeType; short: string }[] = [
@@ -53,6 +54,7 @@ export default function CrimeTableModal({
   title,
   nameLabel,
   activeCrimeType,
+  onSelectName,
 }: CrimeTableModalProps) {
   const [rows, setRows] = useState<CrimeRow[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -183,7 +185,16 @@ export default function CrimeTableModal({
               >
                 <td className={`${tdBase} font-medium text-gray-900 whitespace-nowrap sticky left-0 z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)] ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
                   <span className="inline-block w-8 text-center text-xs text-gray-400 font-normal">{i + 1}</span>
-                  {row.name}
+                  {onSelectName ? (
+                    <button
+                      onClick={() => { onSelectName(row.name); onClose(); }}
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      {row.name}
+                    </button>
+                  ) : (
+                    row.name
+                  )}
                 </td>
                 {COLUMNS.map((col) => {
                   const val = getValue(row, col.key, dataMode);

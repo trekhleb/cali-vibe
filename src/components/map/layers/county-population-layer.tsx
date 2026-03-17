@@ -121,8 +121,12 @@ export function PopulationLegend({ overlayOffset = 0 }: { overlayOffset?: number
   );
 }
 
-export default function CountyPopulationLayer({ overlayOffset = 0 }: { overlayOffset?: number }) {
-  const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID);
+export default function CountyPopulationLayer({ overlayOffset = 0, selectName = null }: { overlayOffset?: number; selectName?: string | null }) {
+  const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
+    selectName,
+    geojsonUrl: GEOJSON_URL,
+    flyToMaxZoom: 11,
+  });
 
   const activePop = (activeProperties?.population as number) ?? null;
 

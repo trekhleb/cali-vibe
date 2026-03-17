@@ -15,6 +15,7 @@ interface PopulationTableModalProps {
   dataUrl: string;
   title: string;
   nameLabel: string;
+  onSelectName?: (name: string) => void;
 }
 
 export default function PopulationTableModal({
@@ -23,6 +24,7 @@ export default function PopulationTableModal({
   dataUrl,
   title,
   nameLabel,
+  onSelectName,
 }: PopulationTableModalProps) {
   const [rows, setRows] = useState<PopRow[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -118,7 +120,16 @@ export default function PopulationTableModal({
                   {i + 1}
                 </td>
                 <td className={`${tdBase} font-medium text-gray-900 whitespace-nowrap`}>
-                  {row.name}
+                  {onSelectName ? (
+                    <button
+                      onClick={() => { onSelectName(row.name); onClose(); }}
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      {row.name}
+                    </button>
+                  ) : (
+                    row.name
+                  )}
                 </td>
                 <td className={`${tdBase} text-right ${sortKey === "population" ? "bg-amber-50 font-medium" : "text-gray-600"}`}>
                   {row.population.toLocaleString()}

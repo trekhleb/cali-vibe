@@ -89,6 +89,7 @@ function parseCrimeRate(props: Record<string, unknown> | null, type: CrimeType):
 interface CityCrimeLayerProps {
   crimeType: CrimeType;
   overlayOffset?: number;
+  selectName?: string | null;
 }
 
 export function CityCrimeLegend({ crimeType, overlayOffset = 0 }: { crimeType: CrimeType; overlayOffset?: number }) {
@@ -115,8 +116,12 @@ export function CityCrimeLegend({ crimeType, overlayOffset = 0 }: { crimeType: C
   );
 }
 
-export default function CityCrimeLayer({ crimeType, overlayOffset = 0 }: CityCrimeLayerProps) {
-  const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID);
+export default function CityCrimeLayer({ crimeType, overlayOffset = 0, selectName = null }: CityCrimeLayerProps) {
+  const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
+    selectName,
+    geojsonUrl: GEOJSON_URL,
+    flyToMaxZoom: 13,
+  });
 
   const activeRate = parseCrimeRate(activeProperties, crimeType);
 

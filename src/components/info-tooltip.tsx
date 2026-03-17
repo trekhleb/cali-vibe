@@ -1,5 +1,6 @@
 import { type ReactNode, useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { LuInfo } from "react-icons/lu";
 
 interface InfoTooltipProps {
   children: ReactNode;
@@ -48,9 +49,9 @@ export default function InfoTooltip({ children }: InfoTooltipProps) {
         onClick={(e) => { e.preventDefault(); setOpen((v) => !v); }}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-        className="ml-1 inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-gray-400 text-[10px] font-semibold text-gray-500 hover:border-gray-600 hover:text-black hover:bg-gray-100 transition-colors"
+        className="ml-1 inline-flex cursor-help items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
       >
-        i
+        <LuInfo className="h-3.5 w-3.5" />
       </span>
       {visible && pos && createPortal(
         <span

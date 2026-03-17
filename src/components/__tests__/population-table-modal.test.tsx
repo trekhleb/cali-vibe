@@ -88,6 +88,40 @@ describe("PopulationTableModal", () => {
     expect(screen.getByText("71.4%")).toBeInTheDocument();
   });
 
+  it("renders names as clickable links when onSelectName is provided", async () => {
+    const onSelectName = vi.fn();
+    render(
+      <PopulationTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Population" nameLabel="County" onSelectName={onSelectName} />
+    );
+    await waitFor(() => expect(screen.getByText("Los Angeles")).toBeInTheDocument());
+
+    const nameButton = screen.getByRole("button", { name: "Los Angeles" });
+    expect(nameButton).toHaveClass("text-blue-600");
+  });
+
+  it("calls onSelectName and onClose when clicking a name", async () => {
+    const user = userEvent.setup();
+    const onSelectName = vi.fn();
+    const onClose = vi.fn();
+    render(
+      <PopulationTableModal open={true} onClose={onClose} dataUrl="/data.json" title="Population" nameLabel="County" onSelectName={onSelectName} />
+    );
+    await waitFor(() => expect(screen.getByText("Los Angeles")).toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: "Los Angeles" }));
+    expect(onSelectName).toHaveBeenCalledWith("Los Angeles");
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("renders names as plain text when onSelectName is not provided", async () => {
+    render(
+      <PopulationTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Population" nameLabel="County" />
+    );
+    await waitFor(() => expect(screen.getByText("Los Angeles")).toBeInTheDocument());
+
+    expect(screen.queryByRole("button", { name: "Los Angeles" })).toBeNull();
+  });
+
   it("handles fetch network error", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network error")));
     render(

@@ -19,8 +19,11 @@ import MapFooter from "@/components/map-footer";
 import CrimeTableModal from "@/components/crime-table-modal";
 import PopulationTableModal from "@/components/population-table-modal";
 import TemperatureTableModal from "@/components/temperature-table-modal";
+import SunshineTableModal from "@/components/sunshine-table-modal";
+import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution } from "@/components/map/layers/sunshine-layer";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useGeoJsonFeatureCount } from "@/hooks/use-geojson-feature-count";
 import SortableFavoriteList from "@/components/favorites/sortable-favorite-list";
 import GeoSearch from "@/components/city-search";
 import {
@@ -83,6 +86,9 @@ const DEFAULTS = {
   tmonth: new Date().getMonth() as number,
   tunit: "F" as TempUnit,
   tres: 5 as HexResolution,
+  shine: false,
+  smonth: new Date().getMonth() as number,
+  sres: 5 as SunshineHexResolution,
   relief: true,
   peaks: true,
   punit: "ft" as "ft" | "m",
@@ -125,6 +131,18 @@ function readParams() {
       if (v === "4") return 4 as HexResolution;
       return 5 as HexResolution;
     })(),
+    shine: bool("shine", DEFAULTS.shine),
+    smonth: (() => {
+      const v = p.get("smonth");
+      if (v === null) return DEFAULTS.smonth;
+      const n = parseInt(v, 10);
+      return (n >= 0 && n <= 12) ? n : DEFAULTS.smonth; // 12 = annual
+    })(),
+    sres: (() => {
+      const v = p.get("sres");
+      if (v === "4") return 4 as SunshineHexResolution;
+      return 5 as SunshineHexResolution;
+    })(),
     style: str("style", DEFAULTS.style, styleIds),
     relief: bool("relief", DEFAULTS.relief),
     peaks: bool("peaks", DEFAULTS.peaks),
@@ -154,6 +172,11 @@ export default function Home() {
   const [tempResolution, setTempResolution] = useState<HexResolution>(init.tres);
   const [showTempTable, setShowTempTable] = useState(false);
   const [selectedHexH3, setSelectedHexH3] = useState<string | null>(null);
+  const [showSunshine, setShowSunshine] = useState(init.shine);
+  const [sunshineMonth, setSunshineMonth] = useState(init.smonth);
+  const [sunshineResolution, setSunshineResolution] = useState<SunshineHexResolution>(init.sres);
+  const [showSunshineTable, setShowSunshineTable] = useState(false);
+  const [selectedSunshineH3, setSelectedSunshineH3] = useState<string | null>(null);
   const [mapStyleId, setMapStyleId] = useState<MapStyleId>(init.style);
   const [showRelief, setShowRelief] = useState(init.relief);
   const [showPeaks, setShowPeaks] = useState(init.peaks);
@@ -164,10 +187,18 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"layers" | "favorites">(init.tab);
   const [selectedCountyName, setSelectedCountyName] = useState<string | null>(null);
   const [selectedCityName, setSelectedCityName] = useState<string | null>(null);
+  const [selectedPopulationCountyName, setSelectedPopulationCountyName] = useState<string | null>(null);
+  const [selectedCrimeCountyName, setSelectedCrimeCountyName] = useState<string | null>(null);
+  const [selectedCrimeCityName, setSelectedCrimeCityName] = useState<string | null>(null);
   const [showPopulationTable, setShowPopulationTable] = useState(false);
   const [showCountyCrimeTable, setShowCountyCrimeTable] = useState(false);
   const [showCityCrimeTable, setShowCityCrimeTable] = useState(false);
   const isMobile = useIsMobile();
+
+  const tempHexUrl = `${import.meta.env.BASE_URL}data/california-temperature-h3-res${tempResolution}.geojson`;
+  const sunshineHexUrl = `${import.meta.env.BASE_URL}data/california-sunshine-h3-res${sunshineResolution}.geojson`;
+  const tempHexCount = useGeoJsonFeatureCount(showTemperature ? tempHexUrl : "");
+  const sunshineHexCount = useGeoJsonFeatureCount(showSunshine ? sunshineHexUrl : "");
 
   const terrainRef = useRef<California3DTerrainRef>(null);
 
@@ -195,6 +226,9 @@ export default function Home() {
     if (tempMonth !== DEFAULTS.tmonth) p.set("tmonth", String(tempMonth));
     setStr("tunit", tempUnit, DEFAULTS.tunit);
     if (tempResolution !== DEFAULTS.tres) p.set("tres", String(tempResolution));
+    setBool("shine", showSunshine, DEFAULTS.shine);
+    if (sunshineMonth !== DEFAULTS.smonth) p.set("smonth", String(sunshineMonth));
+    if (sunshineResolution !== DEFAULTS.sres) p.set("sres", String(sunshineResolution));
     setStr("style", mapStyleId, DEFAULTS.style);
     setBool("relief", showRelief, DEFAULTS.relief);
     setBool("peaks", showPeaks, DEFAULTS.peaks);
@@ -204,7 +238,7 @@ export default function Home() {
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -228,27 +262,31 @@ export default function Home() {
   // --- Mutually exclusive toggle helpers ---
   const toggleCounties = (on: boolean) => {
     setShowCounties(on);
-    if (on) { setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowRelief(false); }
+    if (on) { setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const togglePopulation = (on: boolean) => {
     setShowPopulation(on);
-    if (on) { setShowCounties(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleCrime = (on: boolean) => {
     setShowCrime(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCityCrime(false); setShowTemperature(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleCityCrime = (on: boolean) => {
     setShowCityCrime(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCities(false); setShowTemperature(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCities(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleTemperature = (on: boolean) => {
     setShowTemperature(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowCities(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowCities(false); setShowSunshine(false); setShowRelief(false); }
+  };
+  const toggleSunshine = (on: boolean) => {
+    setShowSunshine(on);
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowCities(false); setShowTemperature(false); setShowRelief(false); }
   };
   const toggleCities = (on: boolean) => {
     setShowCities(on);
-    if (on) { setShowCityCrime(false); setShowTemperature(false); setShowRelief(false); }
+    if (on) { setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleTerrain3d = (on: boolean) => {
     setTerrain3d(on);
@@ -256,7 +294,7 @@ export default function Home() {
   };
   const toggleRelief = (on: boolean) => {
     setShowRelief(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowCities(false); setTerrain3d(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setTerrain3d(false); }
   };
 
   const resetAll = useCallback(() => {
@@ -275,6 +313,9 @@ export default function Home() {
     setTempMonth(new Date().getMonth());
     setTempUnit("F");
     setTempResolution(DEFAULTS.tres);
+    setShowSunshine(false);
+    setSunshineMonth(new Date().getMonth());
+    setSunshineResolution(DEFAULTS.sres);
     setMapStyleId(DEFAULTS.style);
     setShowRelief(true);
     setShowPeaks(true);
@@ -282,6 +323,9 @@ export default function Home() {
     setActiveTab("layers");
     setSelectedCountyName(null);
     setSelectedCityName(null);
+    setSelectedPopulationCountyName(null);
+    setSelectedCrimeCountyName(null);
+    setSelectedCrimeCityName(null);
   }, []);
 
   const goToFavoriteCounty = useCallback((name: string) => {
@@ -291,6 +335,7 @@ export default function Home() {
     setShowCrime(false);
     setShowCityCrime(false);
     setShowTemperature(false);
+    setShowSunshine(false);
     setShowRelief(false);
     setShowCounties(true);
     setSelectedCountyName(name);
@@ -303,9 +348,18 @@ export default function Home() {
     setShowCrime(false);
     setShowCityCrime(false);
     setShowTemperature(false);
+    setShowSunshine(false);
     setShowRelief(false);
     setShowCities(true);
     setSelectedCityName(name);
+  }, []);
+
+  const goToCrimeCounty = useCallback((name: string) => {
+    setSelectedCrimeCountyName(name);
+  }, []);
+
+  const goToCrimeCity = useCallback((name: string) => {
+    setSelectedCrimeCityName(name);
   }, []);
 
   const hasAnyFavorites = favorites.length > 0;
@@ -366,12 +420,15 @@ export default function Home() {
                 showCounties={showCounties}
                 countyDisplayMode={countyDisplayMode}
                 showPopulation={showPopulation}
+                selectedPopulationCountyName={selectedPopulationCountyName}
                 showCities={showCities}
                 cityDisplayMode={cityDisplayMode}
                 showCrime={showCrime}
                 crimeType={crimeType}
+                selectedCrimeCountyName={selectedCrimeCountyName}
                 showCityCrime={showCityCrime}
                 cityCrimeType={cityCrimeType}
+                selectedCrimeCityName={selectedCrimeCityName}
                 showTemperature={showTemperature}
                 tempMetric={tempMetric}
                 tempMonth={tempMonth}
@@ -380,6 +437,12 @@ export default function Home() {
                 selectedHexH3={selectedHexH3}
                 onSelectHex={setSelectedHexH3}
                 onDeselectHex={() => setSelectedHexH3(null)}
+                showSunshine={showSunshine}
+                sunshineMonth={sunshineMonth}
+                sunshineResolution={sunshineResolution}
+                selectedSunshineH3={selectedSunshineH3}
+                onSelectSunshineHex={setSelectedSunshineH3}
+                onDeselectSunshineHex={() => setSelectedSunshineH3(null)}
                 onToggleCountyFavorite={onToggleCountyFavorite}
                 isCountyFavorite={isCountyFavorite}
                 onToggleCityFavorite={onToggleCityFavorite}
@@ -758,6 +821,92 @@ export default function Home() {
                         <LuTable className="h-4 w-4 text-gray-900" />
                         View Table
                       </button>
+                      {tempHexCount != null && (
+                        <span className="text-[10px] text-gray-400">
+                          {tempHexCount.toLocaleString()} hexagons
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Sunshine toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showSunshine ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showSunshine} onChange={toggleSunshine} />
+                    <LuSun className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">Sunshine</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        ERA5 Reanalysis (ECMWF)
+                      </a>
+                      <br />
+                      via{" "}
+                      <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        Open-Meteo
+                      </a>
+                      <br />
+                      Daily sunshine hours, 2014–2023 avg.
+                      <br />
+                      H3 hexagonal grid by Uber.
+                      <br />
+                      <br />
+                      Note: ERA5 grid resolution (~31 km) may underestimate
+                      fog effects in coastal areas (e.g. San Francisco),
+                      smoothing out microclimate differences with nearby
+                      inland locations.
+                    </InfoTooltip>
+                  </label>
+                  {showSunshine && (
+                    <div className="mt-2 ml-14 flex flex-col gap-3">
+                      {/* Month selector grid + Year */}
+                      <div className="grid grid-cols-6 gap-0.5">
+                        {MONTH_LABELS.map((label, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setSunshineMonth(i)}
+                            className={`rounded px-1 py-1 text-[11px] font-medium transition-colors ${sunshineMonth === i
+                                ? "bg-gray-900 text-white"
+                                : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                              }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => setSunshineMonth(ANNUAL_MONTH)}
+                          className={`rounded px-1 py-1 text-[11px] font-medium transition-colors col-span-2 ${sunshineMonth === ANNUAL_MONTH
+                              ? "bg-gray-900 text-white"
+                              : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                            }`}
+                        >
+                          Year
+                        </button>
+                      </div>
+
+                      {/* Resolution row */}
+                      <SegmentedControl
+                        value={String(sunshineResolution)}
+                        onChange={(v) => setSunshineResolution(Number(v) as SunshineHexResolution)}
+                        options={[
+                          { value: "4", label: "Large", icon: <LuHexagon className="h-4 w-4" /> },
+                          { value: "5", label: "Small", icon: <LuHexagon className="h-3 w-3" /> },
+                        ]}
+                      />
+
+                      <button
+                        onClick={() => setShowSunshineTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                      {sunshineHexCount != null && (
+                        <span className="text-[10px] text-gray-400">
+                          {sunshineHexCount.toLocaleString()} hexagons
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -903,6 +1052,7 @@ export default function Home() {
         dataUrl={`${import.meta.env.BASE_URL}data/california-county-labels.geojson`}
         title="County Population (2024)"
         nameLabel="County"
+        onSelectName={setSelectedPopulationCountyName}
       />
       <CrimeTableModal
         open={showCountyCrimeTable}
@@ -911,6 +1061,7 @@ export default function Home() {
         title="County Crime Rates per 100K (2023)"
         nameLabel="County"
         activeCrimeType={crimeType}
+        onSelectName={goToCrimeCounty}
       />
       <CrimeTableModal
         open={showCityCrimeTable}
@@ -919,6 +1070,7 @@ export default function Home() {
         title="City Crime Rates per 100K (2023)"
         nameLabel="City"
         activeCrimeType={cityCrimeType}
+        onSelectName={goToCrimeCity}
       />
       <TemperatureTableModal
         open={showTempTable}
@@ -930,6 +1082,15 @@ export default function Home() {
         activeMetric={tempMetric}
         unit={tempUnit}
         onSelectHex={setSelectedHexH3}
+      />
+      <SunshineTableModal
+        open={showSunshineTable}
+        onClose={() => setShowSunshineTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-sunshine-h3-res${sunshineResolution}.geojson`}
+        title="Daily Sunshine Hours (2014–2023 avg)"
+        nameLabel="Location"
+        activeMonth={sunshineMonth}
+        onSelectHex={setSelectedSunshineH3}
       />
     </div>
   );

@@ -29,6 +29,10 @@ import TemperatureLayer, {
   type TempUnit,
   type HexResolution,
 } from "./layers/temperature-layer";
+import SunshineLayer, {
+  SunshineLegend,
+  type HexResolution as SunshineHexResolution,
+} from "./layers/sunshine-layer";
 import LocateControl from "./locate-control";
 
 const hillshadeLayer: HillshadeLayerSpecification = {
@@ -50,10 +54,13 @@ interface CaliforniaMapProps {
   showCounties?: boolean;
   countyDisplayMode?: CountyDisplayMode;
   showPopulation?: boolean;
+  selectedPopulationCountyName?: string | null;
   showCrime?: boolean;
   crimeType?: CrimeType;
+  selectedCrimeCountyName?: string | null;
   showCityCrime?: boolean;
   cityCrimeType?: CrimeType;
+  selectedCrimeCityName?: string | null;
   showTemperature?: boolean;
   tempMetric?: TempMetric;
   tempMonth?: number;
@@ -62,6 +69,12 @@ interface CaliforniaMapProps {
   selectedHexH3?: string | null;
   onSelectHex?: (h3: string) => void;
   onDeselectHex?: () => void;
+  showSunshine?: boolean;
+  sunshineMonth?: number;
+  sunshineResolution?: SunshineHexResolution;
+  selectedSunshineH3?: string | null;
+  onSelectSunshineHex?: (h3: string) => void;
+  onDeselectSunshineHex?: () => void;
   showCities?: boolean;
   cityDisplayMode?: CityDisplayMode;
   onToggleCountyFavorite?: (name: string) => void;
@@ -79,10 +92,13 @@ export default function CaliforniaMap({
   showCounties = false,
   countyDisplayMode = "colored",
   showPopulation = false,
+  selectedPopulationCountyName = null,
   showCrime = false,
   crimeType = "total",
+  selectedCrimeCountyName = null,
   showCityCrime = false,
   cityCrimeType = "total",
+  selectedCrimeCityName = null,
   showTemperature = false,
   tempMetric = "tavg",
   tempMonth = 6,
@@ -91,6 +107,12 @@ export default function CaliforniaMap({
   selectedHexH3 = null,
   onSelectHex,
   onDeselectHex,
+  showSunshine = false,
+  sunshineMonth = 6,
+  sunshineResolution = 5,
+  selectedSunshineH3 = null,
+  onSelectSunshineHex,
+  onDeselectSunshineHex,
   showCities = false,
   cityDisplayMode = "borders",
   onToggleCountyFavorite,
@@ -105,7 +127,7 @@ export default function CaliforniaMap({
   const locateZoom =
     showCities || showCityCrime ? 11 :
     showCounties || showPopulation || showCrime ? 8 :
-    showTemperature ? 9 : 10;
+    showTemperature || showSunshine ? 9 : 10;
 
   return (
     <Map
@@ -130,7 +152,7 @@ export default function CaliforniaMap({
           selectName={selectedCountyName}
         />
       )}
-      {showPopulation && !showCrime && <CountyPopulationLayer overlayOffset={overlayOffset} />}
+      {showPopulation && !showCrime && <CountyPopulationLayer overlayOffset={overlayOffset} selectName={selectedPopulationCountyName} />}
       {showPopulation && !showCrime && <PopulationLegend overlayOffset={overlayOffset} />}
       {showCities && (
         <CityBordersLayer
@@ -141,9 +163,9 @@ export default function CaliforniaMap({
           selectName={selectedCityName}
         />
       )}
-      {showCrime && <CountyCrimeLayer crimeType={crimeType} overlayOffset={overlayOffset} />}
+      {showCrime && <CountyCrimeLayer crimeType={crimeType} overlayOffset={overlayOffset} selectName={selectedCrimeCountyName} />}
       {showCrime && <CrimeLegend crimeType={crimeType} overlayOffset={overlayOffset} />}
-      {showCityCrime && <CityCrimeLayer crimeType={cityCrimeType} overlayOffset={overlayOffset} />}
+      {showCityCrime && <CityCrimeLayer crimeType={cityCrimeType} overlayOffset={overlayOffset} selectName={selectedCrimeCityName} />}
       {showCityCrime && <CityCrimeLegend crimeType={cityCrimeType} overlayOffset={overlayOffset} />}
       {showTemperature && (
         <TemperatureLayer
@@ -162,6 +184,22 @@ export default function CaliforniaMap({
           metric={tempMetric}
           month={tempMonth}
           unit={tempUnit}
+          overlayOffset={overlayOffset}
+        />
+      )}
+      {showSunshine && (
+        <SunshineLayer
+          month={sunshineMonth}
+          resolution={sunshineResolution}
+          selectedH3={selectedSunshineH3}
+          onSelectHex={onSelectSunshineHex}
+          onDeselectHex={onDeselectSunshineHex}
+          overlayOffset={overlayOffset}
+        />
+      )}
+      {showSunshine && (
+        <SunshineLegend
+          month={sunshineMonth}
           overlayOffset={overlayOffset}
         />
       )}
