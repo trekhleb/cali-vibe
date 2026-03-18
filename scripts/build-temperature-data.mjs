@@ -17,17 +17,17 @@ import { writeFileSync, existsSync, readFileSync } from "fs";
 import { cellToBoundary, cellToLatLng, polygonToCells } from "h3-js";
 
 // ── Simplified California polygon (GeoJSON winding: CCW outer ring) ──
-// Rough outline covering the state land area
+// Expanded ~0.3° into the ocean so coastal H3 hexagons are included
 const CA_POLYGON = [
-  [-124.41, 42.00], [-120.00, 42.00], [-119.99, 39.00],
+  [-124.80, 42.10], [-120.00, 42.00], [-119.99, 39.00],
   [-117.03, 39.00], [-114.63, 35.00], [-114.13, 34.26],
-  [-114.57, 32.74], [-117.13, 32.53], [-117.25, 32.67],
-  [-117.28, 33.05], [-118.08, 33.73], [-118.52, 34.03],
-  [-119.15, 34.10], [-119.64, 34.42], [-120.47, 34.45],
-  [-120.64, 34.58], [-120.63, 35.13], [-121.89, 36.31],
-  [-121.93, 36.64], [-122.41, 37.19], [-122.51, 37.78],
-  [-122.95, 38.03], [-123.73, 38.95], [-123.82, 39.35],
-  [-124.33, 40.26], [-124.41, 42.00],
+  [-114.57, 32.74], [-117.13, 32.30], [-117.50, 32.50],
+  [-117.60, 33.00], [-118.40, 33.60], [-118.90, 33.90],
+  [-119.50, 33.90], [-120.00, 34.20], [-120.80, 34.30],
+  [-121.00, 34.40], [-121.00, 35.00], [-122.20, 36.20],
+  [-122.30, 36.50], [-122.80, 37.00], [-122.90, 37.60],
+  [-123.30, 37.90], [-124.10, 38.80], [-124.20, 39.20],
+  [-124.70, 40.10], [-124.80, 42.10],
 ];
 
 // ── Generate H3 cells for a given resolution ──
@@ -116,7 +116,19 @@ async function buildGeoJSON(resolution, cacheFile, outFile) {
   if (existsSync(cacheFile)) {
     try {
       cache = JSON.parse(readFileSync(cacheFile, "utf-8"));
-      console.log(`  Loaded ${Object.keys(cache).length} cached entries`);
+      console.log(`  Loaded ${Object.keys(cache).length} cached entries from cache file`);
+    } catch { /* ignore */ }
+  }
+  // Seed cache from existing GeoJSON output if cache is empty
+  if (Object.keys(cache).length === 0 && existsSync(outFile)) {
+    try {
+      const geojson = JSON.parse(readFileSync(outFile, "utf-8"));
+      for (const f of geojson.features) {
+        const h3 = f.properties.h3;
+        const { h3: _, ...data } = f.properties;
+        cache[h3] = data;
+      }
+      console.log(`  Seeded ${Object.keys(cache).length} entries from existing GeoJSON`);
     } catch { /* ignore */ }
   }
 
