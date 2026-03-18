@@ -11,6 +11,7 @@ import type {
 // ── Public types ──
 
 export type HexResolution = 4 | 5;
+export type SunshineDataSource = "nsrdb" | "era5";
 
 export const MONTH_LABELS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -29,8 +30,8 @@ export function monthLabel(month: number): string {
 const SOURCE_ID = "sunshine-hex";
 const FILL_LAYER_ID = "sunshine-hex-fill";
 
-function dataUrl(resolution: HexResolution) {
-  return `${import.meta.env.BASE_URL}data/california-sunshine-h3-res${resolution}.geojson`;
+function dataUrl(resolution: HexResolution, dataSource: SunshineDataSource) {
+  return `${import.meta.env.BASE_URL}data/california-sunshine-${dataSource}-h3-res${resolution}.geojson`;
 }
 
 // Sunshine color scale (gray/blue → yellow → orange)
@@ -120,6 +121,7 @@ function parseTooltipInfo(feature: MapGeoJSONFeature): HexTooltipInfo | null {
 interface SunshineLayerProps {
   month: number; // 0-11 or ANNUAL_MONTH (12)
   resolution: HexResolution;
+  dataSource?: SunshineDataSource;
   selectedH3?: string | null;
   onSelectHex?: (h3: string) => void;
   onDeselectHex?: () => void;
@@ -128,9 +130,11 @@ interface SunshineLayerProps {
 
 export function SunshineLegend({
   month,
+  dataSource = "nsrdb",
   overlayOffset = 0,
 }: {
   month: number;
+  dataSource?: SunshineDataSource;
   overlayOffset?: number;
 }) {
   return (
@@ -152,7 +156,7 @@ export function SunshineLegend({
         ))}
       </div>
       <div className="mt-1 text-[9px] text-gray-400">
-        ERA5 reanalysis · 2014–2023 avg
+        {dataSource === "nsrdb" ? "NSRDB satellite · GOES TMY" : "ERA5 reanalysis · 2014–2023 avg"}
       </div>
     </div>
   );
@@ -161,6 +165,7 @@ export function SunshineLegend({
 export default function SunshineLayer({
   month,
   resolution,
+  dataSource = "nsrdb",
   selectedH3 = null,
   onSelectHex,
   onDeselectHex,
@@ -171,7 +176,7 @@ export default function SunshineLayer({
   const [selectedInfo, setSelectedInfo] = useState<HexTooltipInfo | null>(null);
   const selectedViaMapClick = useRef(false);
 
-  const url = useMemo(() => dataUrl(resolution), [resolution]);
+  const url = useMemo(() => dataUrl(resolution, dataSource), [resolution, dataSource]);
 
   const fillLayer: FillLayerSpecification = useMemo(
     () => ({

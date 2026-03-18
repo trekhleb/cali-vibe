@@ -20,7 +20,7 @@ import CrimeTableModal from "@/components/crime-table-modal";
 import PopulationTableModal from "@/components/population-table-modal";
 import TemperatureTableModal from "@/components/temperature-table-modal";
 import SunshineTableModal from "@/components/sunshine-table-modal";
-import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution } from "@/components/map/layers/sunshine-layer";
+import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution, type SunshineDataSource } from "@/components/map/layers/sunshine-layer";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useGeoJsonFeatureCount } from "@/hooks/use-geojson-feature-count";
@@ -89,6 +89,7 @@ const DEFAULTS = {
   shine: false,
   smonth: new Date().getMonth() as number,
   sres: 5 as SunshineHexResolution,
+  ssrc: "nsrdb" as SunshineDataSource,
   relief: true,
   peaks: true,
   punit: "ft" as "ft" | "m",
@@ -143,6 +144,7 @@ function readParams() {
       if (v === "4") return 4 as SunshineHexResolution;
       return 5 as SunshineHexResolution;
     })(),
+    ssrc: str("ssrc", DEFAULTS.ssrc, ["nsrdb", "era5"] as const),
     style: str("style", DEFAULTS.style, styleIds),
     relief: bool("relief", DEFAULTS.relief),
     peaks: bool("peaks", DEFAULTS.peaks),
@@ -175,6 +177,7 @@ export default function Home() {
   const [showSunshine, setShowSunshine] = useState(init.shine);
   const [sunshineMonth, setSunshineMonth] = useState(init.smonth);
   const [sunshineResolution, setSunshineResolution] = useState<SunshineHexResolution>(init.sres);
+  const [sunshineDataSource, setSunshineDataSource] = useState<SunshineDataSource>(init.ssrc);
   const [showSunshineTable, setShowSunshineTable] = useState(false);
   const [selectedSunshineH3, setSelectedSunshineH3] = useState<string | null>(null);
   const [mapStyleId, setMapStyleId] = useState<MapStyleId>(init.style);
@@ -196,7 +199,7 @@ export default function Home() {
   const isMobile = useIsMobile();
 
   const tempHexUrl = `${import.meta.env.BASE_URL}data/california-temperature-h3-res${tempResolution}.geojson`;
-  const sunshineHexUrl = `${import.meta.env.BASE_URL}data/california-sunshine-h3-res${sunshineResolution}.geojson`;
+  const sunshineHexUrl = `${import.meta.env.BASE_URL}data/california-sunshine-${sunshineDataSource}-h3-res${sunshineResolution}.geojson`;
   const tempHexCount = useGeoJsonFeatureCount(showTemperature ? tempHexUrl : "");
   const sunshineHexCount = useGeoJsonFeatureCount(showSunshine ? sunshineHexUrl : "");
 
@@ -229,6 +232,7 @@ export default function Home() {
     setBool("shine", showSunshine, DEFAULTS.shine);
     if (sunshineMonth !== DEFAULTS.smonth) p.set("smonth", String(sunshineMonth));
     if (sunshineResolution !== DEFAULTS.sres) p.set("sres", String(sunshineResolution));
+    if (sunshineDataSource !== DEFAULTS.ssrc) p.set("ssrc", sunshineDataSource);
     setStr("style", mapStyleId, DEFAULTS.style);
     setBool("relief", showRelief, DEFAULTS.relief);
     setBool("peaks", showPeaks, DEFAULTS.peaks);
@@ -238,7 +242,7 @@ export default function Home() {
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -316,6 +320,7 @@ export default function Home() {
     setShowSunshine(false);
     setSunshineMonth(new Date().getMonth());
     setSunshineResolution(DEFAULTS.sres);
+    setSunshineDataSource(DEFAULTS.ssrc);
     setMapStyleId(DEFAULTS.style);
     setShowRelief(true);
     setShowPeaks(true);
@@ -440,6 +445,7 @@ export default function Home() {
                 showSunshine={showSunshine}
                 sunshineMonth={sunshineMonth}
                 sunshineResolution={sunshineResolution}
+                sunshineDataSource={sunshineDataSource}
                 selectedSunshineH3={selectedSunshineH3}
                 onSelectSunshineHex={setSelectedSunshineH3}
                 onDeselectSunshineHex={() => setSelectedSunshineH3(null)}
@@ -837,29 +843,70 @@ export default function Home() {
                     <LuSun className="h-4 w-4 text-gray-900" />
                     <span className="text-sm font-medium">Sunshine</span>
                     <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        ERA5 Reanalysis (ECMWF)
-                      </a>
+                      Average daily sunshine hours.
                       <br />
-                      via{" "}
-                      <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        Open-Meteo
-                      </a>
-                      <br />
-                      Daily sunshine hours, 2014–2023 avg.
+                      Sunshine = DNI &gt; 120 W/m² (WMO standard).
                       <br />
                       H3 hexagonal grid by Uber.
-                      <br />
-                      <br />
-                      Note: ERA5 grid resolution (~31 km) may underestimate
-                      fog effects in coastal areas (e.g. San Francisco),
-                      smoothing out microclimate differences with nearby
-                      inland locations.
                     </InfoTooltip>
                   </label>
                   {showSunshine && (
                     <div className="mt-2 ml-14 flex flex-col gap-3">
+                      {/* Data source row */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center">
+                          <button
+                            onClick={() => setSunshineDataSource("nsrdb")}
+                            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                              sunshineDataSource === "nsrdb"
+                                ? "bg-black text-white"
+                                : "bg-white text-gray-700 hover:bg-gray-200"
+                            }`}
+                          >
+                            NSRDB
+                          </button>
+                          <InfoTooltip>
+                            <a href="https://nsrdb.nrel.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                              NSRDB (NREL)
+                            </a>
+                            {" "}— satellite-derived, 4 km resolution.
+                            <br />
+                            GOES TMY (Typical Meteorological Year).
+                            <br />
+                            Better accuracy for coastal fog and microclimates.
+                          </InfoTooltip>
+                        </div>
+                        <div className="flex items-center">
+                          <button
+                            onClick={() => setSunshineDataSource("era5")}
+                            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                              sunshineDataSource === "era5"
+                                ? "bg-black text-white"
+                                : "bg-white text-gray-700 hover:bg-gray-200"
+                            }`}
+                          >
+                            ERA5
+                          </button>
+                          <InfoTooltip>
+                          <a href="https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                            ERA5 Reanalysis (ECMWF)
+                          </a>
+                          {" "}via{" "}
+                          <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                            Open-Meteo
+                          </a>
+                          <br />
+                          ~31 km grid, 2014–2023 avg.
+                          <br />
+                          <br />
+                          Note: ERA5 grid resolution (~31 km) may
+                          underestimate fog effects in coastal areas
+                          (e.g. San Francisco), smoothing out microclimate
+                          differences with nearby inland locations.
+                          </InfoTooltip>
+                        </div>
+                      </div>
+
                       {/* Month selector grid + Year */}
                       <div className="grid grid-cols-6 gap-0.5">
                         {MONTH_LABELS.map((label, i) => (
@@ -1086,7 +1133,7 @@ export default function Home() {
       <SunshineTableModal
         open={showSunshineTable}
         onClose={() => setShowSunshineTable(false)}
-        dataUrl={`${import.meta.env.BASE_URL}data/california-sunshine-h3-res${sunshineResolution}.geojson`}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-sunshine-${sunshineDataSource}-h3-res${sunshineResolution}.geojson`}
         title="Daily Sunshine Hours (2014–2023 avg)"
         nameLabel="Location"
         activeMonth={sunshineMonth}

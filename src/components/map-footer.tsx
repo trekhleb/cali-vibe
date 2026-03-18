@@ -14,12 +14,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
         className="absolute bottom-2.5 left-4 md:left-6 z-10 flex items-center gap-1.5 text-[10px] text-white/70 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] transition-all duration-300"
         style={overlayOffset ? { left: overlayOffset + 24 } : undefined}
       >
-        <span>For illustration only.</span>
         <button onClick={() => setModal("disclaimer")} className="underline underline-offset-2 hover:text-white transition-colors">Disclaimer</button>
         <span className="text-white/30">|</span>
         <button onClick={() => setModal("privacy")} className="underline underline-offset-2 hover:text-white transition-colors">Privacy</button>
         <span className="text-white/30">|</span>
         <button onClick={() => setModal("sources")} className="underline underline-offset-2 hover:text-white transition-colors">Sources</button>
+        <span className="text-white/30">|</span>
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white transition-colors">&copy; OpenStreetMap</a>
       </div>
 
       <LegalModal open={modal === "disclaimer"} onClose={() => setModal(null)} title="Disclaimer">
@@ -97,11 +98,9 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
           <li>
             <strong>Sunshine Data</strong>
             <br />
-            <a href="https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">ERA5 Reanalysis (ECMWF)</a>
-            {" "}via{" "}
-            <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">Open-Meteo</a>
+            <a href="https://nsrdb.nrel.gov/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">NSRDB GOES TMY v4 (NREL)</a>
             <br />
-            <span className="text-gray-500">Daily sunshine hours, 2014–2023 avg. H3 hex grid.</span>
+            <span className="text-gray-500">Satellite-derived, 4 km resolution. Sunshine = DNI &gt; 120 W/m² (WMO). H3 hex grid.</span>
           </li>
           <li>
             <strong>Elevation Data</strong>

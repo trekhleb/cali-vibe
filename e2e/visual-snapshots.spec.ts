@@ -184,6 +184,17 @@ test.describe("Desktop - layer toggles", () => {
     await assertScreenshot(page, "sunshine-selected-hex.png");
   });
 
+  test("sunshine - ERA5 data source", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&shine=1&ssrc=era5`);
+    await expect(page.getByRole("button", { name: "ERA5" })).toBeVisible();
+    await assertScreenshot(page, "sunshine-era5.png");
+  });
+
+  test("sunshine - ERA5 large hex", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&shine=1&ssrc=era5&sres=4`);
+    await assertScreenshot(page, "sunshine-era5-large-hex.png");
+  });
+
   // Three.js + SwiftShader times out on CI runners
   (IS_CI ? test.skip : test)("3D vibe with peaks (ft)", async ({ page }) => {
     await waitForApp(page, "relief=1&peaks=1&punit=ft");
@@ -397,6 +408,11 @@ test.describe("Mobile views", () => {
   test("mobile - sunshine", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&drawer=1&shine=1`);
     await assertScreenshot(page, "mobile-sunshine.png");
+  });
+
+  test("mobile - sunshine ERA5", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&shine=1&ssrc=era5`);
+    await assertScreenshot(page, "mobile-sunshine-era5.png");
   });
 
   (IS_CI ? test.skip : test)("mobile - 3D vibe", async ({ page }) => {

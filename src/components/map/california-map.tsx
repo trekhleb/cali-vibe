@@ -32,6 +32,7 @@ import TemperatureLayer, {
 import SunshineLayer, {
   SunshineLegend,
   type HexResolution as SunshineHexResolution,
+  type SunshineDataSource,
 } from "./layers/sunshine-layer";
 import LocateControl from "./locate-control";
 
@@ -72,6 +73,7 @@ interface CaliforniaMapProps {
   showSunshine?: boolean;
   sunshineMonth?: number;
   sunshineResolution?: SunshineHexResolution;
+  sunshineDataSource?: SunshineDataSource;
   selectedSunshineH3?: string | null;
   onSelectSunshineHex?: (h3: string) => void;
   onDeselectSunshineHex?: () => void;
@@ -110,6 +112,7 @@ export default function CaliforniaMap({
   showSunshine = false,
   sunshineMonth = 6,
   sunshineResolution = 5,
+  sunshineDataSource = "nsrdb",
   selectedSunshineH3 = null,
   onSelectSunshineHex,
   onDeselectSunshineHex,
@@ -191,6 +194,7 @@ export default function CaliforniaMap({
         <SunshineLayer
           month={sunshineMonth}
           resolution={sunshineResolution}
+          dataSource={sunshineDataSource}
           selectedH3={selectedSunshineH3}
           onSelectHex={onSelectSunshineHex}
           onDeselectHex={onDeselectSunshineHex}
@@ -200,6 +204,7 @@ export default function CaliforniaMap({
       {showSunshine && (
         <SunshineLegend
           month={sunshineMonth}
+          dataSource={sunshineDataSource}
           overlayOffset={overlayOffset}
         />
       )}

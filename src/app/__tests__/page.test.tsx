@@ -238,6 +238,65 @@ describe("Home page", () => {
     expect(screen.getByRole("checkbox", { name: /Temperature/i })).not.toBeChecked();
   });
 
+  it("sunshine data source selector switches between NSRDB and ERA5", async () => {
+    render(<Home />);
+    await waitForApp();
+
+    // Switch to 2D map
+    await user.click(screen.getByRole("checkbox", { name: /3D Vibe/i }));
+    await waitFor(() =>
+      expect(screen.getByTestId("california-map")).toBeInTheDocument(),
+    );
+
+    // Turn on sunshine
+    await user.click(screen.getByRole("checkbox", { name: /Sunshine/i }));
+
+    // Data source buttons should appear — NSRDB and ERA5
+    const nsrdbBtn = await screen.findByRole("button", { name: "NSRDB" });
+    const era5Btn = screen.getByRole("button", { name: "ERA5" });
+    expect(nsrdbBtn).toBeInTheDocument();
+    expect(era5Btn).toBeInTheDocument();
+
+    // NSRDB is selected by default (black bg)
+    expect(nsrdbBtn.className).toContain("bg-black");
+    expect(era5Btn.className).not.toContain("bg-black");
+
+    // Switch to ERA5
+    await user.click(era5Btn);
+    expect(era5Btn.className).toContain("bg-black");
+    expect(nsrdbBtn.className).not.toContain("bg-black");
+
+    // Switch back to NSRDB
+    await user.click(nsrdbBtn);
+    expect(nsrdbBtn.className).toContain("bg-black");
+    expect(era5Btn.className).not.toContain("bg-black");
+  });
+
+  it("sunshine data source has info tooltips for both sources", async () => {
+    render(<Home />);
+    await waitForApp();
+
+    // Switch to 2D map and turn on sunshine
+    await user.click(screen.getByRole("checkbox", { name: /3D Vibe/i }));
+    await waitFor(() =>
+      expect(screen.getByTestId("california-map")).toBeInTheDocument(),
+    );
+    await user.click(screen.getByRole("checkbox", { name: /Sunshine/i }));
+
+    // There should be info icons — find all info icons within the data source row
+    // The data source row has NSRDB and ERA5 buttons, each with an info tooltip
+    const nsrdbBtn = await screen.findByRole("button", { name: "NSRDB" });
+    const era5Btn = screen.getByRole("button", { name: "ERA5" });
+
+    // Both buttons should be in the document
+    expect(nsrdbBtn).toBeInTheDocument();
+    expect(era5Btn).toBeInTheDocument();
+
+    // Data source controls should appear before month/resolution controls
+    expect(screen.getByRole("button", { name: "Jan" })).toBeInTheDocument();
+    expect(screen.getByText("Large")).toBeInTheDocument();
+  });
+
   it("closes modals when buttons are clicked", async () => {
     render(<Home />);
     await waitForApp();

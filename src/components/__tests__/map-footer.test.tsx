@@ -3,10 +3,10 @@ import userEvent from "@testing-library/user-event";
 import MapFooter from "@/components/map-footer";
 
 describe("MapFooter", () => {
-  it("renders illustration text and action buttons", () => {
+  it("renders footer links", () => {
     render(<MapFooter />);
-    expect(screen.getByText("For illustration only.")).toBeInTheDocument();
     expect(screen.getAllByText("Disclaimer").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("© OpenStreetMap")).toBeInTheDocument();
   });
 
   it("clicking Disclaimer opens disclaimer modal and closes", async () => {
