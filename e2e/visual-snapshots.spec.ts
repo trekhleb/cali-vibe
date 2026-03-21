@@ -213,28 +213,32 @@ test.describe("Desktop - layer toggles", () => {
     await assertScreenshot(page, "3d-vibe-meters.png", 0.15);
   });
 
+  // ── Transit: BART only (Caltrain toggled off) ──
+
   test("transit - BART default (all lines)", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&transit=1`);
+    // Disable Caltrain so only BART is visible
+    await page.getByText("Caltrain", { exact: true }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
     await expect(page.getByPlaceholder("Search BART stations...")).toBeVisible();
     await assertScreenshot(page, "transit-bart-default.png");
   });
 
   test("transit - BART solo red line", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&transit=1`);
-    // Click the red line toggle (first colored circle button)
-    await page.locator('button[title="Red"]').click();
+    await page.getByText("Caltrain", { exact: true }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
-    // "All" reset button should appear when filtering
-    await expect(page.getByRole("button", { name: "All" })).toBeVisible();
+    await page.getByRole("button", { name: "Red" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
     await assertScreenshot(page, "transit-bart-solo-red.png");
   });
 
   test("transit - BART solo red then restore all", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&transit=1`);
-    // Solo red
-    await page.locator('button[title="Red"]').click();
+    await page.getByText("Caltrain", { exact: true }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
-    // Click "All" to restore
+    await page.getByRole("button", { name: "Red" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
     await page.getByRole("button", { name: "All" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await assertScreenshot(page, "transit-bart-restore-all.png");
@@ -242,11 +246,72 @@ test.describe("Desktop - layer toggles", () => {
 
   test("transit - BART station search", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&transit=1`);
+    await page.getByText("Caltrain", { exact: true }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
     const searchInput = page.getByPlaceholder("Search BART stations...");
-    await expect(searchInput).toBeVisible();
     await searchInput.fill("Embarcadero");
     await expect(page.locator("text=Embarcadero")).toBeVisible();
     await assertScreenshot(page, "transit-bart-search.png");
+  });
+
+  // ── Transit: Caltrain only (BART toggled off) ──
+
+  test("transit - Caltrain default (all lines)", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1`);
+    // Disable BART so only Caltrain is visible
+    await page.getByText("BART", { exact: true }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await expect(page.getByPlaceholder("Search Caltrain stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-caltrain-default.png");
+  });
+
+  test("transit - Caltrain solo express line", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1`);
+    await page.getByText("BART", { exact: true }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await page.getByRole("button", { name: "Express" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "transit-caltrain-solo-express.png");
+  });
+
+  test("transit - Caltrain solo express then restore all", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1`);
+    await page.getByText("BART", { exact: true }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await page.getByRole("button", { name: "Express" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await page.getByRole("button", { name: "All" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "transit-caltrain-restore-all.png");
+  });
+
+  test("transit - Caltrain station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1`);
+    await page.getByText("BART", { exact: true }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    const searchInput = page.getByPlaceholder("Search Caltrain stations...");
+    await searchInput.fill("Palo Alto");
+    await expect(page.locator("text=Palo Alto Station")).toBeVisible();
+    await assertScreenshot(page, "transit-caltrain-search.png");
+  });
+
+  // ── Transit: Both BART + Caltrain together ──
+
+  test("transit - both systems default view", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1`);
+    await expect(page.getByPlaceholder("Search BART stations...")).toBeVisible();
+    await expect(page.getByPlaceholder("Search Caltrain stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-both-default.png");
+  });
+
+  test("transit - both systems with solo lines", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1`);
+    // Solo BART Red and Caltrain Express simultaneously
+    await page.getByRole("button", { name: "Red" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await page.getByRole("button", { name: "Express" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "transit-both-solo-lines.png");
   });
 
   test("terrain 3D map checkbox", async ({ page }) => {
@@ -364,17 +429,17 @@ test.describe("Desktop - favorites & selection", () => {
   test("favorites tab - with items", async ({ page }) => {
     await seedFavorites(page);
     await waitForApp(page, `${MAP_2D}&tab=favorites`);
-    await expect(page.locator("text=Los Angeles")).toBeVisible();
-    await expect(page.locator("text=San Diego")).toBeVisible();
-    await expect(page.locator("text=San Jose")).toBeVisible();
-    await expect(page.locator("text=San Francisco")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Los Angeles" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "San Diego" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "San Jose" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "San Francisco" })).toBeVisible();
     await assertScreenshot(page, "favorites-tab-with-items.png");
   });
 
   test("selected county on map", async ({ page }) => {
     await seedFavorites(page);
     await waitForApp(page, `${MAP_2D}&tab=favorites`);
-    await page.locator("text=Los Angeles").click();
+    await page.getByRole("button", { name: "Los Angeles" }).click();
     await page.waitForTimeout(MAP_SETTLE);
     await expect(page.locator("text=Los Angeles County")).toBeVisible();
     await assertScreenshot(page, "selected-county.png");
@@ -383,7 +448,7 @@ test.describe("Desktop - favorites & selection", () => {
   test("selected city on map", async ({ page }) => {
     await seedFavorites(page);
     await waitForApp(page, `${MAP_2D}&tab=favorites`);
-    await page.locator("text=San Jose").click();
+    await page.getByRole("button", { name: "San Jose" }).click();
     await page.waitForTimeout(MAP_SETTLE);
     await assertScreenshot(page, "selected-city.png");
   });
@@ -451,17 +516,34 @@ test.describe("Mobile views", () => {
     await assertScreenshot(page, "mobile-sunshine-era5.png");
   });
 
-  test("mobile - transit BART", async ({ page }) => {
+  test("mobile - transit BART only", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&drawer=1&transit=1`);
-    await expect(page.getByPlaceholder("Search BART stations...")).toBeVisible();
-    await assertScreenshot(page, "mobile-transit.png");
+    await page.getByText("Caltrain", { exact: true }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "mobile-transit-bart.png");
   });
 
   test("mobile - transit BART solo line", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&drawer=1&transit=1`);
-    await page.locator('button[title="Blue"]').click();
+    await page.getByText("Caltrain", { exact: true }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
-    await assertScreenshot(page, "mobile-transit-solo.png");
+    await page.getByRole("button", { name: "Blue" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "mobile-transit-bart-solo.png");
+  });
+
+  test("mobile - transit Caltrain solo line", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1`);
+    await page.getByText("BART", { exact: true }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await page.getByRole("button", { name: "Limited" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "mobile-transit-caltrain-solo.png");
+  });
+
+  test("mobile - transit both systems", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1`);
+    await assertScreenshot(page, "mobile-transit-both.png");
   });
 
   (IS_CI ? test.skip : test)("mobile - 3D vibe", async ({ page }) => {

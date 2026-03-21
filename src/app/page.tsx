@@ -1067,6 +1067,7 @@ export default function Home() {
                                           <span key={line.color} className="group relative">
                                             <button
                                               type="button"
+                                              aria-label={line.label}
                                               className="h-5 w-5 rounded-full border-2 transition-all hover:scale-110"
                                               style={{
                                                 backgroundColor: isActive ? line.color : "transparent",
