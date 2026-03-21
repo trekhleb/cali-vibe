@@ -21,11 +21,13 @@ import PopulationTableModal from "@/components/population-table-modal";
 import TemperatureTableModal from "@/components/temperature-table-modal";
 import SunshineTableModal from "@/components/sunshine-table-modal";
 import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution, type SunshineDataSource } from "@/components/map/layers/sunshine-layer";
+import { TRANSIT_SYSTEMS, BART_LINES, type TransitSystem } from "@/components/map/layers/transit-layer";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useGeoJsonFeatureCount } from "@/hooks/use-geojson-feature-count";
 import SortableFavoriteList from "@/components/favorites/sortable-favorite-list";
 import GeoSearch from "@/components/city-search";
+import TransitStopSearch from "@/components/transit-stop-search";
 import {
   LuPanelLeftClose,
   LuPanelLeftOpen,
@@ -46,6 +48,7 @@ import {
   LuBuilding2,
   LuSiren,
   LuMountain,
+  LuTrainFront,
 } from "react-icons/lu";
 import { FaGithub } from "react-icons/fa";
 import type { California3DTerrainRef } from "@/components/map/terrain-3d/california-3d-terrain";
@@ -90,6 +93,7 @@ const DEFAULTS = {
   smonth: new Date().getMonth() as number,
   sres: 5 as SunshineHexResolution,
   ssrc: "nsrdb" as SunshineDataSource,
+  transit: false,
   relief: true,
   peaks: true,
   punit: "ft" as "ft" | "m",
@@ -145,6 +149,7 @@ function readParams() {
       return 5 as SunshineHexResolution;
     })(),
     ssrc: str("ssrc", DEFAULTS.ssrc, ["nsrdb", "era5"] as const),
+    transit: bool("transit", DEFAULTS.transit),
     style: str("style", DEFAULTS.style, styleIds),
     relief: bool("relief", DEFAULTS.relief),
     peaks: bool("peaks", DEFAULTS.peaks),
@@ -180,6 +185,14 @@ export default function Home() {
   const [sunshineDataSource, setSunshineDataSource] = useState<SunshineDataSource>(init.ssrc);
   const [showSunshineTable, setShowSunshineTable] = useState(false);
   const [selectedSunshineH3, setSelectedSunshineH3] = useState<string | null>(null);
+  const [showTransit, setShowTransit] = useState(init.transit);
+  const [transitSystems, setTransitSystems] = useState<TransitSystem[]>(
+    init.transit ? ["bart"] : ["bart"],
+  );
+  const [selectedTransitStopName, setSelectedTransitStopName] = useState<string | null>(null);
+  const [flyToTransitStop, setFlyToTransitStop] = useState(false);
+  // null = all lines visible; string[] = only these colors visible
+  const [bartActiveColors, setBartActiveColors] = useState<string[] | null>(null);
   const [mapStyleId, setMapStyleId] = useState<MapStyleId>(init.style);
   const [showRelief, setShowRelief] = useState(init.relief);
   const [showPeaks, setShowPeaks] = useState(init.peaks);
@@ -233,6 +246,7 @@ export default function Home() {
     if (sunshineMonth !== DEFAULTS.smonth) p.set("smonth", String(sunshineMonth));
     if (sunshineResolution !== DEFAULTS.sres) p.set("sres", String(sunshineResolution));
     if (sunshineDataSource !== DEFAULTS.ssrc) p.set("ssrc", sunshineDataSource);
+    setBool("transit", showTransit, DEFAULTS.transit);
     setStr("style", mapStyleId, DEFAULTS.style);
     setBool("relief", showRelief, DEFAULTS.relief);
     setBool("peaks", showPeaks, DEFAULTS.peaks);
@@ -242,7 +256,7 @@ export default function Home() {
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -296,9 +310,13 @@ export default function Home() {
     setTerrain3d(on);
     if (on) { setShowRelief(false); }
   };
+  const toggleTransit = (on: boolean) => {
+    setShowTransit(on);
+    if (on) { setShowRelief(false); }
+  };
   const toggleRelief = (on: boolean) => {
     setShowRelief(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setTerrain3d(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
   };
 
   const resetAll = useCallback(() => {
@@ -321,6 +339,11 @@ export default function Home() {
     setSunshineMonth(new Date().getMonth());
     setSunshineResolution(DEFAULTS.sres);
     setSunshineDataSource(DEFAULTS.ssrc);
+    setShowTransit(false);
+    setTransitSystems(["bart"]);
+    setBartActiveColors(null);
+    setSelectedTransitStopName(null);
+    setFlyToTransitStop(false);
     setMapStyleId(DEFAULTS.style);
     setShowRelief(true);
     setShowPeaks(true);
@@ -449,6 +472,13 @@ export default function Home() {
                 selectedSunshineH3={selectedSunshineH3}
                 onSelectSunshineHex={setSelectedSunshineH3}
                 onDeselectSunshineHex={() => setSelectedSunshineH3(null)}
+                showTransit={showTransit}
+                transitSystems={transitSystems}
+                activeRouteColors={bartActiveColors}
+                selectedTransitStopName={selectedTransitStopName}
+                flyToTransitStop={flyToTransitStop}
+                onSelectTransitStop={(name) => { setFlyToTransitStop(false); setSelectedTransitStopName(name); }}
+                onDeselectTransitStop={() => { setFlyToTransitStop(false); setSelectedTransitStopName(null); }}
                 onToggleCountyFavorite={onToggleCountyFavorite}
                 isCountyFavorite={isCountyFavorite}
                 onToggleCityFavorite={onToggleCityFavorite}
@@ -954,6 +984,109 @@ export default function Home() {
                           {sunshineHexCount.toLocaleString()} hexagons
                         </span>
                       )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Transit toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showTransit ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showTransit} onChange={toggleTransit} />
+                    <LuTrainFront className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">Transit</span>
+                    <InfoTooltip>
+                      Public rail transit systems.
+                      <br />
+                      Data: GTFS feeds from transit agencies.
+                      <br />
+                      Click a station for details.
+                    </InfoTooltip>
+                  </label>
+                  {showTransit && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      {TRANSIT_SYSTEMS.map((sys) => {
+                        const enabled = transitSystems.includes(sys.id);
+                        return (
+                          <div key={sys.id}>
+                            <label className="flex cursor-pointer items-center gap-2">
+                              <Toggle
+                                checked={enabled}
+                                onChange={(on) => {
+                                  setTransitSystems((prev) =>
+                                    on
+                                      ? [...prev, sys.id]
+                                      : prev.filter((s) => s !== sys.id),
+                                  );
+                                }}
+                                size="sm"
+                              />
+                              <span className="text-sm font-medium text-gray-700">{sys.label}</span>
+                              {sys.id === "bart" && (
+                                <InfoTooltip>
+                                  <a href="https://www.bart.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    Bay Area Rapid Transit
+                                  </a>
+                                  <br />
+                                  6 lines, 50 stations.
+                                  <br />
+                                  Data:{" "}
+                                  <a href="https://www.bart.gov/schedules/developers/gtfs" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    BART GTFS
+                                  </a>
+                                </InfoTooltip>
+                              )}
+                            </label>
+                            {enabled && (
+                              <div className="mt-1.5 ml-9 flex flex-col gap-1.5">
+                                {sys.id === "bart" && (
+                                  <div className="flex items-center gap-1.5">
+                                    {BART_LINES.map((line) => {
+                                      const isActive = !bartActiveColors || bartActiveColors.includes(line.color);
+                                      return (
+                                        <button
+                                          key={line.color}
+                                          type="button"
+                                          title={line.label}
+                                          className="h-5 w-5 rounded-full border-2 transition-all hover:scale-110"
+                                          style={{
+                                            backgroundColor: isActive ? line.color : "transparent",
+                                            borderColor: line.color,
+                                            opacity: isActive ? 1 : 0.5,
+                                          }}
+                                          onClick={() => {
+                                            setBartActiveColors((prev) => {
+                                              // Already solo on this color → restore all
+                                              if (prev && prev.length === 1 && prev[0] === line.color) {
+                                                return null;
+                                              }
+                                              // Otherwise → solo this color
+                                              return [line.color];
+                                            });
+                                          }}
+                                        />
+                                      );
+                                    })}
+                                    {bartActiveColors && (
+                                      <button
+                                        type="button"
+                                        className="ml-1 rounded px-1.5 py-0.5 text-xs font-medium text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                                        onClick={() => setBartActiveColors(null)}
+                                      >
+                                        All
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                                <TransitStopSearch
+                                  dataUrl={`${import.meta.env.BASE_URL}data/transit/${sys.id}-stops.geojson`}
+                                  placeholder={`Search ${sys.label} stations...`}
+                                  onSelect={(name) => { setFlyToTransitStop(true); setSelectedTransitStopName(name); }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

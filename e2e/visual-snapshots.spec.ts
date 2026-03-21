@@ -213,6 +213,42 @@ test.describe("Desktop - layer toggles", () => {
     await assertScreenshot(page, "3d-vibe-meters.png", 0.15);
   });
 
+  test("transit - BART default (all lines)", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1`);
+    await expect(page.getByPlaceholder("Search BART stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-bart-default.png");
+  });
+
+  test("transit - BART solo red line", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1`);
+    // Click the red line toggle (first colored circle button)
+    await page.locator('button[title="Red"]').click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    // "All" reset button should appear when filtering
+    await expect(page.getByRole("button", { name: "All" })).toBeVisible();
+    await assertScreenshot(page, "transit-bart-solo-red.png");
+  });
+
+  test("transit - BART solo red then restore all", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1`);
+    // Solo red
+    await page.locator('button[title="Red"]').click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    // Click "All" to restore
+    await page.getByRole("button", { name: "All" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "transit-bart-restore-all.png");
+  });
+
+  test("transit - BART station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1`);
+    const searchInput = page.getByPlaceholder("Search BART stations...");
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill("Embarcadero");
+    await expect(page.locator("text=Embarcadero")).toBeVisible();
+    await assertScreenshot(page, "transit-bart-search.png");
+  });
+
   test("terrain 3D map checkbox", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&terrain3d=1`);
     await assertScreenshot(page, "map-terrain-3d.png");
@@ -413,6 +449,19 @@ test.describe("Mobile views", () => {
   test("mobile - sunshine ERA5", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&drawer=1&shine=1&ssrc=era5`);
     await assertScreenshot(page, "mobile-sunshine-era5.png");
+  });
+
+  test("mobile - transit BART", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1`);
+    await expect(page.getByPlaceholder("Search BART stations...")).toBeVisible();
+    await assertScreenshot(page, "mobile-transit.png");
+  });
+
+  test("mobile - transit BART solo line", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1`);
+    await page.locator('button[title="Blue"]').click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "mobile-transit-solo.png");
   });
 
   (IS_CI ? test.skip : test)("mobile - 3D vibe", async ({ page }) => {

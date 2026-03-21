@@ -103,6 +103,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">Satellite-derived, 4 km resolution. Sunshine = DNI &gt; 120 W/m² (WMO). H3 hex grid.</span>
           </li>
           <li>
+            <strong>Transit Data (BART)</strong>
+            <br />
+            <a href="https://www.bart.gov/schedules/developers/gtfs" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">BART GTFS</a>
+            <br />
+            <span className="text-gray-500">Routes and stations. Bay Area Rapid Transit.</span>
+          </li>
+          <li>
             <strong>Elevation Data</strong>
             <br />
             <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">AWS Terrain Tiles</a>
