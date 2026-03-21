@@ -110,6 +110,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">Routes and stations. Bay Area Rapid Transit.</span>
           </li>
           <li>
+            <strong>Transit Data (Caltrain)</strong>
+            <br />
+            <a href="https://www.caltrain.com/developer-resources" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">Caltrain GTFS</a>
+            <br />
+            <span className="text-gray-500">Routes and stations. San Francisco to San Jose/Gilroy.</span>
+          </li>
+          <li>
             <strong>Elevation Data</strong>
             <br />
             <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">AWS Terrain Tiles</a>

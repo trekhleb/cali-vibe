@@ -34,7 +34,7 @@ import SunshineLayer, {
   type HexResolution as SunshineHexResolution,
   type SunshineDataSource,
 } from "./layers/sunshine-layer";
-import TransitLayer, { type TransitSystem } from "./layers/transit-layer";
+import TransitLayer, { type TransitSystem, type ActiveColorMap } from "./layers/transit-layer";
 import LocateControl from "./locate-control";
 
 const hillshadeLayer: HillshadeLayerSpecification = {
@@ -87,7 +87,7 @@ interface CaliforniaMapProps {
   overlayOffset?: number;
   showTransit?: boolean;
   transitSystems?: TransitSystem[];
-  activeRouteColors?: string[] | null;
+  activeColorMap?: ActiveColorMap;
   selectedTransitStopName?: string | null;
   flyToTransitStop?: boolean;
   onSelectTransitStop?: (name: string) => void;
@@ -132,7 +132,7 @@ export default function CaliforniaMap({
   isCityFavorite,
   showTransit = false,
   transitSystems = [],
-  activeRouteColors = null,
+  activeColorMap = {},
   selectedTransitStopName = null,
   flyToTransitStop = false,
   onSelectTransitStop,
@@ -226,7 +226,7 @@ export default function CaliforniaMap({
       {showTransit && transitSystems.length > 0 && (
         <TransitLayer
           systems={transitSystems}
-          activeRouteColors={activeRouteColors}
+          activeColorMap={activeColorMap}
           selectedStopName={selectedTransitStopName}
           flyToSelected={flyToTransitStop}
           onSelectStop={onSelectTransitStop}

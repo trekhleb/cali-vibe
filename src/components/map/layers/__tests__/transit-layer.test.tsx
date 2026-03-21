@@ -2,6 +2,7 @@ import { render, screen, act } from "@testing-library/react";
 import TransitLayer, {
   TRANSIT_SYSTEMS,
   BART_LINES,
+  CALTRAIN_LINES,
   type TransitSystem,
 } from "@/components/map/layers/transit-layer";
 import { useMap } from "react-map-gl/maplibre";
@@ -88,8 +89,11 @@ describe("TransitLayer", () => {
 
   // ── Exports ──
 
-  it("exports TRANSIT_SYSTEMS with bart", () => {
-    expect(TRANSIT_SYSTEMS).toEqual([{ id: "bart", label: "BART" }]);
+  it("exports TRANSIT_SYSTEMS with bart and caltrain", () => {
+    expect(TRANSIT_SYSTEMS).toEqual([
+      { id: "bart", label: "BART" },
+      { id: "caltrain", label: "Caltrain" },
+    ]);
   });
 
   it("exports BART_LINES with 6 lines and correct colors", () => {
@@ -103,8 +107,23 @@ describe("TransitLayer", () => {
     expect(colors).toContain("#B0BEC7");
   });
 
+  it("exports CALTRAIN_LINES with 4 lines and correct colors", () => {
+    expect(CALTRAIN_LINES).toHaveLength(4);
+    const colors = CALTRAIN_LINES.map((l) => l.color);
+    expect(colors).toContain("#808080");
+    expect(colors).toContain("#00A5B8");
+    expect(colors).toContain("#CE202F");
+    expect(colors).toContain("#E8A317");
+  });
+
   it("every BART_LINES entry has a non-empty label", () => {
     for (const line of BART_LINES) {
+      expect(line.label.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("every CALTRAIN_LINES entry has a non-empty label", () => {
+    for (const line of CALTRAIN_LINES) {
       expect(line.label.length).toBeGreaterThan(0);
     }
   });
@@ -113,13 +132,13 @@ describe("TransitLayer", () => {
 
   it("renders sources and layers when system is provided", () => {
     render(<TransitLayer systems={["bart"]} />);
-    expect(screen.getByTestId("Source-transit-routes")).toBeInTheDocument();
-    expect(screen.getByTestId("Source-transit-stops")).toBeInTheDocument();
-    expect(screen.getByTestId("Layer-transit-routes-line-casing")).toBeInTheDocument();
-    expect(screen.getByTestId("Layer-transit-routes-line")).toBeInTheDocument();
-    expect(screen.getByTestId("Layer-transit-stops-circle")).toBeInTheDocument();
-    expect(screen.getByTestId("Layer-transit-stops-label")).toBeInTheDocument();
-    expect(screen.getByTestId("Layer-transit-stops-highlight")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-bart-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-bart-stops")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-bart-routes-line-casing")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-bart-routes-line")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-bart-stops-circle")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-bart-stops-label")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-bart-stops-highlight")).toBeInTheDocument();
   });
 
   it("renders nothing when systems array is empty", () => {
@@ -127,20 +146,28 @@ describe("TransitLayer", () => {
     expect(container.innerHTML).toBe("");
   });
 
+  it("renders layers for multiple systems", () => {
+    render(<TransitLayer systems={["bart", "caltrain"]} />);
+    expect(screen.getByTestId("Source-transit-bart-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-caltrain-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-bart-stops")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-caltrain-stops")).toBeInTheDocument();
+  });
+
   // ── Route filter ──
 
-  it("applies no route filter when activeRouteColors is null", () => {
-    render(<TransitLayer systems={["bart"]} activeRouteColors={null} />);
-    const casingLayer = screen.getByTestId("Layer-transit-routes-line-casing");
-    const routeLayer = screen.getByTestId("Layer-transit-routes-line");
+  it("applies no route filter when activeColorMap is empty", () => {
+    render(<TransitLayer systems={["bart"]} activeColorMap={{}} />);
+    const casingLayer = screen.getByTestId("Layer-transit-bart-routes-line-casing");
+    const routeLayer = screen.getByTestId("Layer-transit-bart-routes-line");
     expect(casingLayer).not.toHaveAttribute("data-filter");
     expect(routeLayer).not.toHaveAttribute("data-filter");
   });
 
-  it("applies route filter when activeRouteColors is provided", () => {
-    render(<TransitLayer systems={["bart"]} activeRouteColors={["#FF0000"]} />);
-    const casingLayer = screen.getByTestId("Layer-transit-routes-line-casing");
-    const routeLayer = screen.getByTestId("Layer-transit-routes-line");
+  it("applies route filter when activeColorMap has colors for system", () => {
+    render(<TransitLayer systems={["bart"]} activeColorMap={{ bart: ["#FF0000"] }} />);
+    const casingLayer = screen.getByTestId("Layer-transit-bart-routes-line-casing");
+    const routeLayer = screen.getByTestId("Layer-transit-bart-routes-line");
 
     const expectedFilter = JSON.stringify(["in", ["get", "color"], ["literal", ["#FF0000"]]]);
     expect(casingLayer).toHaveAttribute("data-filter", expectedFilter);
@@ -148,41 +175,57 @@ describe("TransitLayer", () => {
   });
 
   it("applies route filter with multiple colors", () => {
-    render(<TransitLayer systems={["bart"]} activeRouteColors={["#FF0000", "#339933"]} />);
-    const routeLayer = screen.getByTestId("Layer-transit-routes-line");
+    render(<TransitLayer systems={["bart"]} activeColorMap={{ bart: ["#FF0000", "#339933"] }} />);
+    const routeLayer = screen.getByTestId("Layer-transit-bart-routes-line");
     const filter = JSON.parse(routeLayer.getAttribute("data-filter")!);
     expect(filter[0]).toBe("in");
     expect(filter[2]).toEqual(["literal", ["#FF0000", "#339933"]]);
   });
 
+  it("applies filter independently per system", () => {
+    render(
+      <TransitLayer
+        systems={["bart", "caltrain"]}
+        activeColorMap={{ bart: ["#FF0000"], caltrain: null }}
+      />,
+    );
+    // BART should have filter
+    const bartRoute = screen.getByTestId("Layer-transit-bart-routes-line");
+    expect(bartRoute).toHaveAttribute("data-filter");
+
+    // Caltrain should have no filter (null = show all)
+    const caltrainRoute = screen.getByTestId("Layer-transit-caltrain-routes-line");
+    expect(caltrainRoute).not.toHaveAttribute("data-filter");
+  });
+
   // ── Stop filter ──
 
-  it("applies no stop filter when activeRouteColors is null", () => {
-    render(<TransitLayer systems={["bart"]} activeRouteColors={null} />);
-    const stopsLayer = screen.getByTestId("Layer-transit-stops-circle");
-    const labelsLayer = screen.getByTestId("Layer-transit-stops-label");
+  it("applies no stop filter when activeColorMap is empty", () => {
+    render(<TransitLayer systems={["bart"]} activeColorMap={{}} />);
+    const stopsLayer = screen.getByTestId("Layer-transit-bart-stops-circle");
+    const labelsLayer = screen.getByTestId("Layer-transit-bart-stops-label");
     expect(stopsLayer).not.toHaveAttribute("data-filter");
     expect(labelsLayer).not.toHaveAttribute("data-filter");
   });
 
-  it("applies stop filter when activeRouteColors is provided", () => {
-    render(<TransitLayer systems={["bart"]} activeRouteColors={["#FF0000"]} />);
-    const stopsLayer = screen.getByTestId("Layer-transit-stops-circle");
+  it("applies stop filter when activeColorMap has colors", () => {
+    render(<TransitLayer systems={["bart"]} activeColorMap={{ bart: ["#FF0000"] }} />);
+    const stopsLayer = screen.getByTestId("Layer-transit-bart-stops-circle");
     const filter = JSON.parse(stopsLayer.getAttribute("data-filter")!);
     expect(filter[0]).toBe("any");
     expect(filter[1]).toEqual(["in", "#FF0000", ["to-string", ["get", "colors"]]]);
   });
 
   it("stop filter includes all active colors", () => {
-    render(<TransitLayer systems={["bart"]} activeRouteColors={["#FF0000", "#FF9933"]} />);
-    const stopsLayer = screen.getByTestId("Layer-transit-stops-circle");
+    render(<TransitLayer systems={["bart"]} activeColorMap={{ bart: ["#FF0000", "#FF9933"] }} />);
+    const stopsLayer = screen.getByTestId("Layer-transit-bart-stops-circle");
     const filter = JSON.parse(stopsLayer.getAttribute("data-filter")!);
     expect(filter).toHaveLength(3); // ["any", condition1, condition2]
   });
 
   it("highlight layer uses its own filter, not the stop filter", () => {
-    render(<TransitLayer systems={["bart"]} activeRouteColors={["#FF0000"]} />);
-    const highlightLayer = screen.getByTestId("Layer-transit-stops-highlight");
+    render(<TransitLayer systems={["bart"]} activeColorMap={{ bart: ["#FF0000"] }} />);
+    const highlightLayer = screen.getByTestId("Layer-transit-bart-stops-highlight");
     // Highlight has its own filter (for selected stop name), not the color-based stopFilter
     const filter = JSON.parse(highlightLayer.getAttribute("data-filter")!);
     // Should be the highlight filter ["==", ["get", "name"], ""], not ["any", ...]
@@ -319,10 +362,140 @@ describe("TransitLayer", () => {
     );
   });
 
+  // ── Caltrain-specific rendering ──
+
+  it("renders all caltrain layer IDs when caltrain is the system", () => {
+    render(<TransitLayer systems={["caltrain"]} />);
+    expect(screen.getByTestId("Source-transit-caltrain-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-caltrain-stops")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-caltrain-routes-line-casing")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-caltrain-routes-line")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-caltrain-stops-circle")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-caltrain-stops-label")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-caltrain-stops-highlight")).toBeInTheDocument();
+  });
+
+  it("applies caltrain filter via activeColorMap", () => {
+    render(<TransitLayer systems={["caltrain"]} activeColorMap={{ caltrain: ["#CE202F"] }} />);
+    const routeLayer = screen.getByTestId("Layer-transit-caltrain-routes-line");
+    const filter = JSON.parse(routeLayer.getAttribute("data-filter")!);
+    expect(filter).toEqual(["in", ["get", "color"], ["literal", ["#CE202F"]]]);
+  });
+
+  it("applies no filter when system is not in activeColorMap (undefined)", () => {
+    render(<TransitLayer systems={["caltrain"]} activeColorMap={{ bart: ["#FF0000"] }} />);
+    const routeLayer = screen.getByTestId("Layer-transit-caltrain-routes-line");
+    expect(routeLayer).not.toHaveAttribute("data-filter");
+  });
+
+  it("renders both systems with independent filters simultaneously", () => {
+    render(
+      <TransitLayer
+        systems={["bart", "caltrain"]}
+        activeColorMap={{ bart: ["#FF0000"], caltrain: ["#808080", "#CE202F"] }}
+      />,
+    );
+    const bartFilter = JSON.parse(
+      screen.getByTestId("Layer-transit-bart-routes-line").getAttribute("data-filter")!,
+    );
+    expect(bartFilter[2]).toEqual(["literal", ["#FF0000"]]);
+
+    const caltrainFilter = JSON.parse(
+      screen.getByTestId("Layer-transit-caltrain-routes-line").getAttribute("data-filter")!,
+    );
+    expect(caltrainFilter[2]).toEqual(["literal", ["#808080", "#CE202F"]]);
+  });
+
+  // ── Caltrain stop filter ──
+
+  it("applies caltrain stop filter via activeColorMap", () => {
+    render(<TransitLayer systems={["caltrain"]} activeColorMap={{ caltrain: ["#00A5B8"] }} />);
+    const stopsLayer = screen.getByTestId("Layer-transit-caltrain-stops-circle");
+    const filter = JSON.parse(stopsLayer.getAttribute("data-filter")!);
+    expect(filter[0]).toBe("any");
+    expect(filter[1]).toEqual(["in", "#00A5B8", ["to-string", ["get", "colors"]]]);
+  });
+
+  it("caltrain highlight layer uses name filter, not color filter", () => {
+    render(<TransitLayer systems={["caltrain"]} activeColorMap={{ caltrain: ["#CE202F"] }} />);
+    const hl = screen.getByTestId("Layer-transit-caltrain-stops-highlight");
+    const filter = JSON.parse(hl.getAttribute("data-filter")!);
+    expect(filter[0]).toBe("==");
+  });
+
+  // ── Hover interaction with Caltrain ──
+
+  it("shows tooltip with Caltrain label on hover over caltrain stop", () => {
+    render(<TransitLayer systems={["caltrain"]} />);
+
+    const onMouseMove = mockMap.on.mock.calls.find((c: any) => c[0] === "mousemove")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      properties: {
+        name: "Palo Alto Station",
+        colors: JSON.stringify(["#808080", "#00A5B8", "#CE202F"]),
+        system: "caltrain",
+      },
+    }]);
+
+    act(() => {
+      onMouseMove({ target: mockMap, point: { x: 100, y: 100 } });
+    });
+
+    expect(screen.getByText("Palo Alto Station")).toBeInTheDocument();
+    expect(screen.getByText("Caltrain")).toBeInTheDocument();
+  });
+
+  // ── Multi-system hover queries all stop layers ──
+
+  it("queries all stop layers across systems on hover", () => {
+    render(<TransitLayer systems={["bart", "caltrain"]} />);
+
+    const onMouseMove = mockMap.on.mock.calls.find((c: any) => c[0] === "mousemove")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([]);
+    act(() => {
+      onMouseMove({ target: mockMap, point: { x: 100, y: 100 } });
+    });
+
+    expect(mockMap.queryRenderedFeatures).toHaveBeenCalledWith(
+      { x: 100, y: 100 },
+      { layers: ["transit-bart-stops-circle", "transit-caltrain-stops-circle"] },
+    );
+  });
+
+  it("queries all stop layers across systems on click", () => {
+    render(<TransitLayer systems={["bart", "caltrain"]} />);
+
+    const onClick = mockMap.on.mock.calls.find((c: any) => c[0] === "click")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([]);
+    act(() => {
+      onClick({ target: mockMap, point: { x: 50, y: 50 } });
+    });
+
+    expect(mockMap.queryRenderedFeatures).toHaveBeenCalledWith(
+      { x: 50, y: 50 },
+      { layers: ["transit-bart-stops-circle", "transit-caltrain-stops-circle"] },
+    );
+  });
+
   // ── Cleanup ──
 
   it("removes event listeners on unmount", () => {
     const { unmount } = render(<TransitLayer systems={["bart"]} />);
+
+    expect(mockMap.on).toHaveBeenCalledWith("mousemove", expect.any(Function));
+    expect(mockMap.on).toHaveBeenCalledWith("click", expect.any(Function));
+
+    unmount();
+
+    expect(mockMap.off).toHaveBeenCalledWith("mousemove", expect.any(Function));
+    expect(mockMap.off).toHaveBeenCalledWith("click", expect.any(Function));
+  });
+
+  it("removes event listeners on unmount with multiple systems", () => {
+    const { unmount } = render(<TransitLayer systems={["bart", "caltrain"]} />);
 
     expect(mockMap.on).toHaveBeenCalledWith("mousemove", expect.any(Function));
     expect(mockMap.on).toHaveBeenCalledWith("click", expect.any(Function));

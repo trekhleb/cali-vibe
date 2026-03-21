@@ -10,13 +10,14 @@ import { fetchJsonCached } from "@/utils/fetch-json";
 
 // ── Public types ──
 
-export type TransitSystem = "bart";
+export type TransitSystem = "bart" | "caltrain";
 
 export const TRANSIT_SYSTEMS: {
   id: TransitSystem;
   label: string;
 }[] = [
   { id: "bart", label: "BART" },
+  { id: "caltrain", label: "Caltrain" },
 ];
 
 // Line colors + labels for per-line toggle UI
@@ -29,6 +30,16 @@ export const BART_LINES: { color: string; label: string }[] = [
   { color: "#B0BEC7", label: "Gray" },
 ];
 
+export const CALTRAIN_LINES: { color: string; label: string }[] = [
+  { color: "#808080", label: "Local" },
+  { color: "#00A5B8", label: "Limited" },
+  { color: "#CE202F", label: "Express" },
+  { color: "#E8A317", label: "South County" },
+];
+
+// Per-system active colors: null = show all, string[] = show only these
+export type ActiveColorMap = Partial<Record<TransitSystem, string[] | null>>;
+
 // ── Constants ──
 
 function routesUrl(system: TransitSystem) {
@@ -39,81 +50,118 @@ function stopsUrl(system: TransitSystem) {
   return `${import.meta.env.BASE_URL}data/transit/${system}-stops.geojson`;
 }
 
-const ROUTES_SOURCE = "transit-routes";
-const STOPS_SOURCE = "transit-stops";
-const ROUTES_LAYER = "transit-routes-line";
-const STOPS_FILL_LAYER = "transit-stops-circle";
-const STOPS_LABEL_LAYER = "transit-stops-label";
-const STOPS_HIGHLIGHT_LAYER = "transit-stops-highlight";
+// Per-system ID helpers
+function routesSourceId(system: TransitSystem) { return `transit-${system}-routes`; }
+function stopsSourceId(system: TransitSystem) { return `transit-${system}-stops`; }
+function routesCasingLayerId(system: TransitSystem) { return `transit-${system}-routes-line-casing`; }
+function routesLineLayerId(system: TransitSystem) { return `transit-${system}-routes-line`; }
+function stopsCircleLayerId(system: TransitSystem) { return `transit-${system}-stops-circle`; }
+function stopsLabelLayerId(system: TransitSystem) { return `transit-${system}-stops-label`; }
+function stopsHighlightLayerId(system: TransitSystem) { return `transit-${system}-stops-highlight`; }
 
-// ── Layer specs ──
+// ── Layer spec factories ──
 
-// Dark outline underneath each colored line (BART map style)
-const routesCasingLayer: LineLayerSpecification = {
-  id: ROUTES_LAYER + "-casing",
-  type: "line",
-  source: ROUTES_SOURCE,
-  paint: {
-    "line-color": "#1a1a1a",
-    "line-width": ["interpolate", ["linear"], ["zoom"], 8, 4.5, 13, 6] as unknown as number,
-    "line-opacity": 0.8,
-  },
-  layout: {
-    "line-cap": "round",
-    "line-join": "round",
-  },
-};
+function makeRoutesCasingSpec(system: TransitSystem): LineLayerSpecification {
+  return {
+    id: routesCasingLayerId(system),
+    type: "line",
+    source: routesSourceId(system),
+    paint: {
+      "line-color": "#1a1a1a",
+      "line-width": ["interpolate", ["linear"], ["zoom"], 8, 4.5, 13, 6] as unknown as number,
+      "line-opacity": 0.8,
+    },
+    layout: { "line-cap": "round", "line-join": "round" },
+  };
+}
 
-const routesLayer: LineLayerSpecification = {
-  id: ROUTES_LAYER,
-  type: "line",
-  source: ROUTES_SOURCE,
-  paint: {
-    "line-color": ["get", "color"],
-    "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2.5, 13, 4] as unknown as number,
-    "line-opacity": 1,
-  },
-  layout: {
-    "line-cap": "round",
-    "line-join": "round",
-  },
-};
+function makeRoutesLineSpec(system: TransitSystem): LineLayerSpecification {
+  return {
+    id: routesLineLayerId(system),
+    type: "line",
+    source: routesSourceId(system),
+    paint: {
+      "line-color": ["get", "color"],
+      "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2.5, 13, 4] as unknown as number,
+      "line-opacity": 1,
+    },
+    layout: { "line-cap": "round", "line-join": "round" },
+  };
+}
 
-// Station circles — white fill, dark outline, uniform size
-const stopsLayer: CircleLayerSpecification = {
-  id: STOPS_FILL_LAYER,
-  type: "circle",
-  source: STOPS_SOURCE,
-  minzoom: 6,
-  paint: {
-    "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 1, 8, 3, 12, 6, 15, 10] as unknown as number,
-    "circle-color": "#ffffff",
-    "circle-stroke-color": "#333333",
-    "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 6, 0.5, 8, 1.5, 12, 2.5] as unknown as number,
-    "circle-opacity": ["interpolate", ["linear"], ["zoom"], 6, 0, 6.5, 1] as unknown as number,
-    "circle-stroke-opacity": ["interpolate", ["linear"], ["zoom"], 6, 0, 6.5, 1] as unknown as number,
-  },
-};
+function makeStopsCircleSpec(system: TransitSystem): CircleLayerSpecification {
+  return {
+    id: stopsCircleLayerId(system),
+    type: "circle",
+    source: stopsSourceId(system),
+    minzoom: 6,
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 1, 8, 3, 12, 6, 15, 10] as unknown as number,
+      "circle-color": "#ffffff",
+      "circle-stroke-color": "#333333",
+      "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 6, 0.5, 8, 1.5, 12, 2.5] as unknown as number,
+      "circle-opacity": ["interpolate", ["linear"], ["zoom"], 6, 0, 6.5, 1] as unknown as number,
+      "circle-stroke-opacity": ["interpolate", ["linear"], ["zoom"], 6, 0, 6.5, 1] as unknown as number,
+    },
+  };
+}
 
-const stopsLabelLayer: SymbolLayerSpecification = {
-  id: STOPS_LABEL_LAYER,
-  type: "symbol",
-  source: STOPS_SOURCE,
-  minzoom: 6,
-  layout: {
-    "text-field": ["get", "name"],
-    "text-size": ["interpolate", ["linear"], ["zoom"], 10, 10, 14, 13],
-    "text-anchor": "left",
-    "text-offset": [1.2, 0],
-    "text-optional": true,
-    "text-allow-overlap": false,
-  },
-  paint: {
-    "text-color": "#1a1a1a",
-    "text-halo-color": "#ffffff",
-    "text-halo-width": 1.5,
-  },
-};
+function makeStopsLabelSpec(system: TransitSystem): SymbolLayerSpecification {
+  return {
+    id: stopsLabelLayerId(system),
+    type: "symbol",
+    source: stopsSourceId(system),
+    minzoom: 6,
+    layout: {
+      "text-field": ["get", "name"],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 10, 10, 14, 13],
+      "text-anchor": "left",
+      "text-offset": [1.2, 0],
+      "text-optional": true,
+      "text-allow-overlap": false,
+    },
+    paint: {
+      "text-color": "#1a1a1a",
+      "text-halo-color": "#ffffff",
+      "text-halo-width": 1.5,
+    },
+  };
+}
+
+function makeStopsHighlightSpec(
+  system: TransitSystem,
+  filter: LineLayerSpecification["filter"],
+): CircleLayerSpecification {
+  return {
+    id: stopsHighlightLayerId(system),
+    type: "circle",
+    source: stopsSourceId(system),
+    minzoom: 6,
+    filter,
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 1, 8, 3, 12, 6, 15, 10] as unknown as number,
+      "circle-color": "#1a1a1a",
+      "circle-stroke-color": "#ffffff",
+      "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 8, 1.5, 12, 2.5] as unknown as number,
+      "circle-opacity": 1,
+    },
+  };
+}
+
+// ── Filter helpers ──
+
+function makeRouteFilter(colors: string[] | null | undefined): LineLayerSpecification["filter"] | undefined {
+  if (!colors) return undefined;
+  return ["in", ["get", "color"], ["literal", colors]] as LineLayerSpecification["filter"];
+}
+
+function makeStopFilter(colors: string[] | null | undefined): LineLayerSpecification["filter"] | undefined {
+  if (!colors) return undefined;
+  return [
+    "any",
+    ...colors.map((c) => ["in", c, ["to-string", ["get", "colors"]]]),
+  ] as LineLayerSpecification["filter"];
+}
 
 // ── Component ──
 
@@ -124,7 +172,7 @@ interface TransitLayerProps {
   onSelectStop?: (name: string) => void;
   onDeselectStop?: () => void;
   overlayOffset?: number;
-  activeRouteColors?: string[] | null; // null = show all
+  activeColorMap?: ActiveColorMap; // per-system color filter
 }
 
 export default function TransitLayer({
@@ -134,36 +182,17 @@ export default function TransitLayer({
   onSelectStop,
   onDeselectStop,
   overlayOffset = 0,
-  activeRouteColors = null,
+  activeColorMap = {},
 }: TransitLayerProps) {
   const { current: map } = useMap();
   const [hoverStop, setHoverStop] = useState<{ name: string; colors: string[]; system: string } | null>(null);
   const [selectedStopInfo, setSelectedStopInfo] = useState<{ name: string; colors: string[]; system: string } | null>(null);
 
-  // For now, single system — will extend later
-  const system = systems[0] as TransitSystem | undefined;
-
-  const routesData = useMemo(() => (system ? routesUrl(system) : undefined), [system]);
-  const stopsData = useMemo(() => (system ? stopsUrl(system) : undefined), [system]);
-
-  // Route filter: show only lines whose color is in the active set
-  const routeFilter = useMemo(
-    () =>
-      activeRouteColors
-        ? (["in", ["get", "color"], ["literal", activeRouteColors]] as LineLayerSpecification["filter"])
-        : undefined,
-    [activeRouteColors],
+  // All stop circle layer IDs (for querying hover/click across systems)
+  const allStopLayerIds = useMemo(
+    () => systems.map(stopsCircleLayerId),
+    [systems],
   );
-
-  // Stop filter: show only stops served by at least one active line
-  const stopFilter = useMemo(() => {
-    if (!activeRouteColors) return undefined;
-    // colors is stored as a JSON array string; substring match on each active color
-    return [
-      "any",
-      ...activeRouteColors.map((c) => ["in", c, ["to-string", ["get", "colors"]]]),
-    ] as LineLayerSpecification["filter"];
-  }, [activeRouteColors]);
 
   // Fit map bounds to all active transit systems when toggles change
   const systemsKey = systems.join(",");
@@ -210,48 +239,36 @@ export default function TransitLayer({
     [selectedStopName],
   );
 
-  // Selected station: inverted colors (black fill, white border)
-  const highlightLayer: CircleLayerSpecification = useMemo(
-    () => ({
-      id: STOPS_HIGHLIGHT_LAYER,
-      type: "circle",
-      source: STOPS_SOURCE,
-      minzoom: 6,
-      filter: highlightFilter,
-      paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 1, 8, 3, 12, 6, 15, 10] as unknown as number,
-        "circle-color": "#1a1a1a",
-        "circle-stroke-color": "#ffffff",
-        "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 8, 1.5, 12, 2.5] as unknown as number,
-        "circle-opacity": 1,
-      },
-    }),
-    [highlightFilter],
-  );
-
   // Populate tooltip info (always) and fly to stop (only from search)
   useEffect(() => {
-    if (!selectedStopName || !map || !stopsData) return;
-    fetchJsonCached(stopsData).then((geojson: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-      const feature = geojson.features?.find(
-        (f: any) => f.properties?.name === selectedStopName, // eslint-disable-line @typescript-eslint/no-explicit-any
-      );
-      if (!feature || feature.geometry.type !== "Point") return;
-      const colors = feature.properties.colors || [];
-      const sys = feature.properties.system || "";
-      setSelectedStopInfo({ name: selectedStopName, colors, system: sys });
-      if (flyToSelected) {
-        const [lng, lat] = feature.geometry.coordinates;
-        map.flyTo({ center: [lng, lat], zoom: 14, duration: 1000 });
-      }
-    }).catch(() => {});
-  }, [selectedStopName, map, stopsData, flyToSelected]);
+    if (!selectedStopName || !map || systems.length === 0) return;
+    const urls = systems.map((s) => stopsUrl(s));
+    Promise.all(urls.map((url) => fetchJsonCached(url).catch(() => null)))
+      .then((results) => {
+        for (const geojson of results) {
+          const gj = geojson as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+          if (!gj?.features) continue;
+          const feature = gj.features.find(
+            (f: any) => f.properties?.name === selectedStopName, // eslint-disable-line @typescript-eslint/no-explicit-any
+          );
+          if (!feature || feature.geometry.type !== "Point") continue;
+          const colors = feature.properties.colors || [];
+          const sys = feature.properties.system || "";
+          setSelectedStopInfo({ name: selectedStopName, colors, system: sys });
+          if (flyToSelected) {
+            const [lng, lat] = feature.geometry.coordinates;
+            map.flyTo({ center: [lng, lat], zoom: 14, duration: 1000 });
+          }
+          return; // found — stop searching
+        }
+      });
+  }, [selectedStopName, map, systems, flyToSelected]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Hover interaction
   const onMouseMove = useCallback(
     (e: MapMouseEvent) => {
       const features = e.target.queryRenderedFeatures(e.point, {
-        layers: [STOPS_FILL_LAYER],
+        layers: allStopLayerIds,
       });
       if (features.length > 0) {
         e.target.getCanvas().style.cursor = "pointer";
@@ -263,13 +280,13 @@ export default function TransitLayer({
         setHoverStop(null);
       }
     },
-    [],
+    [allStopLayerIds],
   );
 
   const onClick = useCallback(
     (e: MapMouseEvent) => {
       const features = e.target.queryRenderedFeatures(e.point, {
-        layers: [STOPS_FILL_LAYER],
+        layers: allStopLayerIds,
       });
       if (features.length > 0) {
         const props = features[0].properties;
@@ -287,7 +304,7 @@ export default function TransitLayer({
         onDeselectStop?.();
       }
     },
-    [onSelectStop, onDeselectStop, selectedStopName],
+    [onSelectStop, onDeselectStop, selectedStopName, allStopLayerIds],
   );
 
   useEffect(() => {
@@ -301,21 +318,31 @@ export default function TransitLayer({
     };
   }, [map, onMouseMove, onClick]);
 
-  if (!system || !routesData || !stopsData) return null;
+  if (systems.length === 0) return null;
 
   const displayStop = hoverStop || selectedStopInfo;
 
   return (
     <>
-      <Source id={ROUTES_SOURCE} type="geojson" data={routesData}>
-        <Layer {...routesCasingLayer} {...(routeFilter ? { filter: routeFilter } : {})} />
-        <Layer {...routesLayer} {...(routeFilter ? { filter: routeFilter } : {})} />
-      </Source>
-      <Source id={STOPS_SOURCE} type="geojson" data={stopsData}>
-        <Layer {...stopsLayer} {...(stopFilter ? { filter: stopFilter } : {})} />
-        <Layer {...highlightLayer} />
-        <Layer {...stopsLabelLayer} {...(stopFilter ? { filter: stopFilter } : {})} />
-      </Source>
+      {systems.map((sys) => {
+        const activeColors = activeColorMap[sys] ?? null;
+        const routeFilter = makeRouteFilter(activeColors);
+        const stopFilter = makeStopFilter(activeColors);
+
+        return (
+          <span key={sys}>
+            <Source id={routesSourceId(sys)} type="geojson" data={routesUrl(sys)}>
+              <Layer {...makeRoutesCasingSpec(sys)} {...(routeFilter ? { filter: routeFilter } : {})} />
+              <Layer {...makeRoutesLineSpec(sys)} {...(routeFilter ? { filter: routeFilter } : {})} />
+            </Source>
+            <Source id={stopsSourceId(sys)} type="geojson" data={stopsUrl(sys)}>
+              <Layer {...makeStopsCircleSpec(sys)} {...(stopFilter ? { filter: stopFilter } : {})} />
+              <Layer {...makeStopsHighlightSpec(sys, highlightFilter)} />
+              <Layer {...makeStopsLabelSpec(sys)} {...(stopFilter ? { filter: stopFilter } : {})} />
+            </Source>
+          </span>
+        );
+      })}
 
       {displayStop && (
         <div

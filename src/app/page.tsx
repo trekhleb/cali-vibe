@@ -21,7 +21,7 @@ import PopulationTableModal from "@/components/population-table-modal";
 import TemperatureTableModal from "@/components/temperature-table-modal";
 import SunshineTableModal from "@/components/sunshine-table-modal";
 import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution, type SunshineDataSource } from "@/components/map/layers/sunshine-layer";
-import { TRANSIT_SYSTEMS, BART_LINES, type TransitSystem } from "@/components/map/layers/transit-layer";
+import { TRANSIT_SYSTEMS, BART_LINES, CALTRAIN_LINES, type TransitSystem, type ActiveColorMap } from "@/components/map/layers/transit-layer";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useGeoJsonFeatureCount } from "@/hooks/use-geojson-feature-count";
@@ -187,12 +187,13 @@ export default function Home() {
   const [selectedSunshineH3, setSelectedSunshineH3] = useState<string | null>(null);
   const [showTransit, setShowTransit] = useState(init.transit);
   const [transitSystems, setTransitSystems] = useState<TransitSystem[]>(
-    init.transit ? ["bart"] : ["bart"],
+    ["bart", "caltrain"],
   );
   const [selectedTransitStopName, setSelectedTransitStopName] = useState<string | null>(null);
   const [flyToTransitStop, setFlyToTransitStop] = useState(false);
   // null = all lines visible; string[] = only these colors visible
   const [bartActiveColors, setBartActiveColors] = useState<string[] | null>(null);
+  const [caltrainActiveColors, setCaltrainActiveColors] = useState<string[] | null>(null);
   const [mapStyleId, setMapStyleId] = useState<MapStyleId>(init.style);
   const [showRelief, setShowRelief] = useState(init.relief);
   const [showPeaks, setShowPeaks] = useState(init.peaks);
@@ -340,8 +341,9 @@ export default function Home() {
     setSunshineResolution(DEFAULTS.sres);
     setSunshineDataSource(DEFAULTS.ssrc);
     setShowTransit(false);
-    setTransitSystems(["bart"]);
+    setTransitSystems(["bart", "caltrain"]);
     setBartActiveColors(null);
+    setCaltrainActiveColors(null);
     setSelectedTransitStopName(null);
     setFlyToTransitStop(false);
     setMapStyleId(DEFAULTS.style);
@@ -474,7 +476,7 @@ export default function Home() {
                 onDeselectSunshineHex={() => setSelectedSunshineH3(null)}
                 showTransit={showTransit}
                 transitSystems={transitSystems}
-                activeRouteColors={bartActiveColors}
+                activeColorMap={{ bart: bartActiveColors, caltrain: caltrainActiveColors }}
                 selectedTransitStopName={selectedTransitStopName}
                 flyToTransitStop={flyToTransitStop}
                 onSelectTransitStop={(name) => { setFlyToTransitStop(false); setSelectedTransitStopName(name); }}
@@ -1035,48 +1037,69 @@ export default function Home() {
                                   </a>
                                 </InfoTooltip>
                               )}
+                              {sys.id === "caltrain" && (
+                                <InfoTooltip>
+                                  <a href="https://www.caltrain.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    Caltrain
+                                  </a>
+                                  <br />
+                                  SF to San Jose/Gilroy. 4 services, 30 stations.
+                                  <br />
+                                  Data:{" "}
+                                  <a href="https://www.caltrain.com/developer-resources" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    Caltrain GTFS
+                                  </a>
+                                </InfoTooltip>
+                              )}
                             </label>
                             {enabled && (
                               <div className="mt-1.5 ml-9 flex flex-col gap-1.5">
-                                {sys.id === "bart" && (
-                                  <div className="flex items-center gap-1.5">
-                                    {BART_LINES.map((line) => {
-                                      const isActive = !bartActiveColors || bartActiveColors.includes(line.color);
-                                      return (
+                                {(() => {
+                                  const lines = sys.id === "bart" ? BART_LINES : sys.id === "caltrain" ? CALTRAIN_LINES : [];
+                                  const activeColors = sys.id === "bart" ? bartActiveColors : sys.id === "caltrain" ? caltrainActiveColors : null;
+                                  const setActiveColors = sys.id === "bart" ? setBartActiveColors : sys.id === "caltrain" ? setCaltrainActiveColors : null;
+                                  if (lines.length === 0 || !setActiveColors) return null;
+                                  return (
+                                    <div className="flex items-center gap-1.5">
+                                      {lines.map((line) => {
+                                        const isActive = !activeColors || activeColors.includes(line.color);
+                                        return (
+                                          <span key={line.color} className="group relative">
+                                            <button
+                                              type="button"
+                                              className="h-5 w-5 rounded-full border-2 transition-all hover:scale-110"
+                                              style={{
+                                                backgroundColor: isActive ? line.color : "transparent",
+                                                borderColor: line.color,
+                                                opacity: isActive ? 1 : 0.5,
+                                              }}
+                                              onClick={() => {
+                                                setActiveColors((prev: string[] | null) => {
+                                                  if (prev && prev.length === 1 && prev[0] === line.color) {
+                                                    return null;
+                                                  }
+                                                  return [line.color];
+                                                });
+                                              }}
+                                            />
+                                            <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                                              {line.label}
+                                            </span>
+                                          </span>
+                                        );
+                                      })}
+                                      {activeColors && (
                                         <button
-                                          key={line.color}
                                           type="button"
-                                          title={line.label}
-                                          className="h-5 w-5 rounded-full border-2 transition-all hover:scale-110"
-                                          style={{
-                                            backgroundColor: isActive ? line.color : "transparent",
-                                            borderColor: line.color,
-                                            opacity: isActive ? 1 : 0.5,
-                                          }}
-                                          onClick={() => {
-                                            setBartActiveColors((prev) => {
-                                              // Already solo on this color → restore all
-                                              if (prev && prev.length === 1 && prev[0] === line.color) {
-                                                return null;
-                                              }
-                                              // Otherwise → solo this color
-                                              return [line.color];
-                                            });
-                                          }}
-                                        />
-                                      );
-                                    })}
-                                    {bartActiveColors && (
-                                      <button
-                                        type="button"
-                                        className="ml-1 rounded px-1.5 py-0.5 text-xs font-medium text-gray-500 hover:bg-gray-200 hover:text-gray-700"
-                                        onClick={() => setBartActiveColors(null)}
-                                      >
-                                        All
-                                      </button>
-                                    )}
-                                  </div>
-                                )}
+                                          className="ml-1 rounded px-1.5 py-0.5 text-xs font-medium text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                                          onClick={() => setActiveColors(null)}
+                                        >
+                                          All
+                                        </button>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                                 <TransitStopSearch
                                   dataUrl={`${import.meta.env.BASE_URL}data/transit/${sys.id}-stops.geojson`}
                                   placeholder={`Search ${sys.label} stations...`}
