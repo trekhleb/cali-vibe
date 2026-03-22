@@ -20,7 +20,7 @@ const SYSTEM_ID = "sdtrolley";
 const SYSTEM_LABEL = "San Diego Trolley";
 const OUT_DIR = new URL("../public/data/transit/", import.meta.url).pathname;
 const TMP_DIR = join(OUT_DIR, `.${SYSTEM_ID}-gtfs-tmp`);
-const GTFS_URL = "https://www.sdmts.com/google_transit.zip";
+const GTFS_URL = "https://www.sdmts.com/google_transit_files/google_transit.zip";
 
 // Trolley is route_type=0 (light rail) in the MTS feed
 const LIGHT_RAIL_ROUTE_TYPE = "0";

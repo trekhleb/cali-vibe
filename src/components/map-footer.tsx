@@ -177,7 +177,7 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <br />
             <a href="https://www.sdmts.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">MTS GTFS</a>
             <br />
-            <span className="text-gray-500">San Diego light rail. 3 lines, 55 stations.</span>
+            <span className="text-gray-500">San Diego light rail. 5 lines, 65 stations.</span>
           </li>
           <li>
             <strong>Transit Data (Metrolink)</strong>

@@ -1158,10 +1158,10 @@ describe("TransitLayer", () => {
 
   // ── SD Trolley exports ──
 
-  it("exports SDTROLLEY_LINES with 3 lines and correct colors", () => {
-    expect(SDTROLLEY_LINES).toHaveLength(3);
-    expect(SDTROLLEY_LINES.map(l => l.color)).toEqual(["#0000FF", "#FF6600", "#009900"]);
-    expect(SDTROLLEY_LINES.map(l => l.label)).toEqual(["Blue", "Orange", "Green"]);
+  it("exports SDTROLLEY_LINES with 5 lines and correct colors", () => {
+    expect(SDTROLLEY_LINES).toHaveLength(5);
+    expect(SDTROLLEY_LINES.map(l => l.color)).toEqual(["#0000FF", "#FF6600", "#009900", "#B87333", "#B4BCC2"]);
+    expect(SDTROLLEY_LINES.map(l => l.label)).toEqual(["Blue", "Orange", "Green", "Copper", "Silver"]);
   });
 
   it("renders all sdtrolley layer IDs when sdtrolley is the system", () => {

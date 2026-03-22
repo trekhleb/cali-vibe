@@ -1160,7 +1160,7 @@ export default function Home() {
                                     San Diego Trolley
                                   </a>
                                   <br />
-                                  3 light rail lines, 55 stations.
+                                  5 light rail lines, 65 stations.
                                   <br />
                                   Data:{" "}
                                   <a href="https://www.sdmts.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">

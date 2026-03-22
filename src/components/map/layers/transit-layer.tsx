@@ -91,6 +91,8 @@ export const SDTROLLEY_LINES: { color: string; label: string }[] = [
   { color: "#0000FF", label: "Blue" },
   { color: "#FF6600", label: "Orange" },
   { color: "#009900", label: "Green" },
+  { color: "#B87333", label: "Copper" },
+  { color: "#B4BCC2", label: "Silver" },
 ];
 
 export const METROLINK_LINES: { color: string; label: string }[] = [
