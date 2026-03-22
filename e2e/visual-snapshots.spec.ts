@@ -213,32 +213,23 @@ test.describe("Desktop - layer toggles", () => {
     await assertScreenshot(page, "3d-vibe-meters.png", 0.15);
   });
 
-  // ── Transit: BART only (others toggled off) ──
+  // ── Transit: BART only (via tsys URL param) ──
 
   test("transit - BART default (all lines)", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("Caltrain", { exact: true }).click();
-    await page.getByText("LA Metro", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=bart`);
     await expect(page.getByPlaceholder("Search BART stations...")).toBeVisible();
     await assertScreenshot(page, "transit-bart-default.png");
   });
 
   test("transit - BART solo red line", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("Caltrain", { exact: true }).click();
-    await page.getByText("LA Metro", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=bart`);
     await page.getByRole("button", { name: "Red" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await assertScreenshot(page, "transit-bart-solo-red.png");
   });
 
   test("transit - BART solo red then restore all", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("Caltrain", { exact: true }).click();
-    await page.getByText("LA Metro", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=bart`);
     await page.getByRole("button", { name: "Red" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await page.getByRole("button", { name: "All" }).click();
@@ -247,42 +238,30 @@ test.describe("Desktop - layer toggles", () => {
   });
 
   test("transit - BART station search", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("Caltrain", { exact: true }).click();
-    await page.getByText("LA Metro", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=bart`);
     const searchInput = page.getByPlaceholder("Search BART stations...");
     await searchInput.fill("Embarcadero");
     await expect(page.locator("text=Embarcadero")).toBeVisible();
     await assertScreenshot(page, "transit-bart-search.png");
   });
 
-  // ── Transit: Caltrain only (others toggled off) ──
+  // ── Transit: Caltrain only ──
 
   test("transit - Caltrain default (all lines)", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("BART", { exact: true }).click();
-    await page.getByText("LA Metro", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=caltrain`);
     await expect(page.getByPlaceholder("Search Caltrain stations...")).toBeVisible();
     await assertScreenshot(page, "transit-caltrain-default.png");
   });
 
   test("transit - Caltrain solo express line", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("BART", { exact: true }).click();
-    await page.getByText("LA Metro", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=caltrain`);
     await page.getByRole("button", { name: "Express" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await assertScreenshot(page, "transit-caltrain-solo-express.png");
   });
 
   test("transit - Caltrain solo express then restore all", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("BART", { exact: true }).click();
-    await page.getByText("LA Metro", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=caltrain`);
     await page.getByRole("button", { name: "Express" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await page.getByRole("button", { name: "All" }).click();
@@ -291,42 +270,53 @@ test.describe("Desktop - layer toggles", () => {
   });
 
   test("transit - Caltrain station search", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("BART", { exact: true }).click();
-    await page.getByText("LA Metro", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=caltrain`);
     const searchInput = page.getByPlaceholder("Search Caltrain stations...");
     await searchInput.fill("Palo Alto");
     await expect(page.locator("text=Palo Alto Station")).toBeVisible();
     await assertScreenshot(page, "transit-caltrain-search.png");
   });
 
-  // ── Transit: LA Metro only (others toggled off) ──
+  // ── Transit: SMART only ──
+
+  test("transit - SMART default (all lines)", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=smart`);
+    await expect(page.getByPlaceholder("Search SMART stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-smart-default.png");
+  });
+
+  test("transit - SMART solo main line", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=smart`);
+    await page.getByRole("button", { name: "Main Line" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "transit-smart-solo-main-line.png");
+  });
+
+  test("transit - SMART station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=smart`);
+    const searchInput = page.getByPlaceholder("Search SMART stations...");
+    await searchInput.fill("San Rafael");
+    await expect(page.locator("text=San Rafael")).toBeVisible();
+    await assertScreenshot(page, "transit-smart-search.png");
+  });
+
+  // ── Transit: LA Metro only ──
 
   test("transit - LA Metro default (all lines)", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("BART", { exact: true }).click();
-    await page.getByText("Caltrain", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=lametro`);
     await expect(page.getByPlaceholder("Search LA Metro stations...")).toBeVisible();
     await assertScreenshot(page, "transit-lametro-default.png");
   });
 
   test("transit - LA Metro solo A Line", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("BART", { exact: true }).click();
-    await page.getByText("Caltrain", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=lametro`);
     await page.getByRole("button", { name: "A Line" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await assertScreenshot(page, "transit-lametro-solo-a-line.png");
   });
 
   test("transit - LA Metro solo A Line then restore all", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("BART", { exact: true }).click();
-    await page.getByText("Caltrain", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=lametro`);
     await page.getByRole("button", { name: "A Line" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await page.getByRole("button", { name: "All" }).click();
@@ -335,10 +325,7 @@ test.describe("Desktop - layer toggles", () => {
   });
 
   test("transit - LA Metro station search", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByText("BART", { exact: true }).click();
-    await page.getByText("Caltrain", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=lametro`);
     const searchInput = page.getByPlaceholder("Search LA Metro stations...");
     await searchInput.fill("Union Station");
     await expect(page.locator("text=Union Station")).toBeVisible();
@@ -351,6 +338,7 @@ test.describe("Desktop - layer toggles", () => {
     await waitForApp(page, `${MAP_2D}&transit=1`);
     await expect(page.getByPlaceholder("Search BART stations...")).toBeVisible();
     await expect(page.getByPlaceholder("Search Caltrain stations...")).toBeVisible();
+    await expect(page.getByPlaceholder("Search SMART stations...")).toBeVisible();
     await expect(page.getByPlaceholder("Search LA Metro stations...")).toBeVisible();
     await assertScreenshot(page, "transit-all-default.png");
   });
@@ -360,6 +348,8 @@ test.describe("Desktop - layer toggles", () => {
     await page.getByRole("button", { name: "Red" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await page.getByRole("button", { name: "Express" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await page.getByRole("button", { name: "Main Line" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await page.getByRole("button", { name: "A Line" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
@@ -569,38 +559,31 @@ test.describe("Mobile views", () => {
   });
 
   test("mobile - transit BART only", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1`);
-    await page.getByText("Caltrain", { exact: true }).click();
-    await page.getByText("LA Metro", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=bart`);
     await assertScreenshot(page, "mobile-transit-bart.png");
   });
 
   test("mobile - transit BART solo line", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1`);
-    await page.getByText("Caltrain", { exact: true }).click();
-    await page.getByText("LA Metro", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=bart`);
     await page.getByRole("button", { name: "Blue" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await assertScreenshot(page, "mobile-transit-bart-solo.png");
   });
 
   test("mobile - transit Caltrain solo line", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1`);
-    await page.getByText("BART", { exact: true }).click();
-    await page.getByText("LA Metro", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=caltrain`);
     await page.getByRole("button", { name: "Limited" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await assertScreenshot(page, "mobile-transit-caltrain-solo.png");
   });
 
+  test("mobile - transit SMART only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=smart`);
+    await assertScreenshot(page, "mobile-transit-smart.png");
+  });
+
   test("mobile - transit LA Metro solo line", async ({ page }) => {
-    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1`);
-    await page.getByText("BART", { exact: true }).click();
-    await page.getByText("Caltrain", { exact: true }).click();
-    await page.waitForTimeout(TOGGLE_SETTLE);
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=lametro`);
     await page.getByRole("button", { name: "A Line" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await assertScreenshot(page, "mobile-transit-lametro-solo.png");
@@ -619,7 +602,7 @@ test.describe("Mobile views", () => {
   test("mobile - favorites with items", async ({ page }) => {
     await seedFavorites(page);
     await waitForApp(page, `${MAP_2D}&drawer=1&tab=favorites`);
-    await expect(page.locator("text=Los Angeles")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Los Angeles" })).toBeVisible();
     await assertScreenshot(page, "mobile-favorites-with-items.png");
   });
 
