@@ -27,8 +27,8 @@ export const TRANSIT_SYSTEMS: {
   { id: "lametro", label: "LA Metro" },
 ];
 
-// Systems enabled by default (Muni Metro is opt-in due to dense overlapping stops)
-export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "vta", "capitolcorridor", "surfliner", "coaster", "lametro"];
+// Systems enabled by default
+export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "munimetro", "vta", "capitolcorridor", "surfliner", "coaster", "lametro"];
 
 // Line colors + labels for per-line toggle UI
 export const BART_LINES: { color: string; label: string }[] = [
