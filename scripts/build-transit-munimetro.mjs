@@ -258,10 +258,11 @@ function buildStops() {
 
 // ── Offset overlapping routes ──
 
-const OFFSET_SPACING_M = 150;
-const OFFSET_GRID_DEG = 0.001;
-const OFFSET_SMOOTH_WINDOW = 10;
-const OFFSET_SMOOTH_PASSES = 3;
+// Muni Metro is a dense urban network — use tight offsets to avoid distortion
+const OFFSET_SPACING_M = 40;
+const OFFSET_GRID_DEG = 0.0003;
+const OFFSET_SMOOTH_WINDOW = 25;
+const OFFSET_SMOOTH_PASSES = 6;
 const M_PER_DEG = 111_320;
 
 function offsetRoutes(routesGeoJSON) {
