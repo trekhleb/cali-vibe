@@ -152,6 +152,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">Auburn/Sacramento to San Jose. 1 line, 20 stations.</span>
           </li>
           <li>
+            <strong>Transit Data (Pacific Surfliner)</strong>
+            <br />
+            <a href="https://www.amtrak.com/pacific-surfliner-train" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">Amtrak GTFS</a>
+            <br />
+            <span className="text-gray-500">San Luis Obispo to San Diego. 1 line, 28 stations.</span>
+          </li>
+          <li>
             <strong>Elevation Data</strong>
             <br />
             <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">AWS Terrain Tiles</a>

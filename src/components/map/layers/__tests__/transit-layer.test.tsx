@@ -7,6 +7,7 @@ import TransitLayer, {
   SMART_LINES,
   VTA_LINES,
   CAPITOLCORRIDOR_LINES,
+  SURFLINER_LINES,
   MUNIMETRO_LINES,
   type TransitSystem,
 } from "@/components/map/layers/transit-layer";
@@ -102,6 +103,7 @@ describe("TransitLayer", () => {
       { id: "munimetro", label: "Muni Metro" },
       { id: "vta", label: "VTA" },
       { id: "capitolcorridor", label: "Capitol Corridor" },
+      { id: "surfliner", label: "Pacific Surfliner" },
       { id: "lametro", label: "LA Metro" },
     ]);
   });
@@ -922,6 +924,69 @@ describe("TransitLayer", () => {
     expect(onSelectStop).toHaveBeenCalledWith("Davis");
   });
 
+  // ── Pacific Surfliner exports ──
+
+  it("exports SURFLINER_LINES with 1 line and correct color", () => {
+    expect(SURFLINER_LINES).toHaveLength(1);
+    expect(SURFLINER_LINES[0].color).toBe("#1B5BA3");
+    expect(SURFLINER_LINES[0].label).toBe("Main Line");
+  });
+
+  // ── Pacific Surfliner rendering ──
+
+  it("renders all surfliner layer IDs when surfliner is the system", () => {
+    render(<TransitLayer systems={["surfliner"]} />);
+    expect(screen.getByTestId("Source-transit-surfliner-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-surfliner-stops")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-surfliner-routes-line-casing")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-surfliner-routes-line")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-surfliner-stops-circle")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-surfliner-stops-label")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-surfliner-stops-highlight")).toBeInTheDocument();
+  });
+
+  it("shows tooltip with Pacific Surfliner label on hover over surfliner stop", () => {
+    render(<TransitLayer systems={["surfliner"]} />);
+
+    const onMouseMove = mockMap.on.mock.calls.find((c: any) => c[0] === "mousemove")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      properties: {
+        name: "Santa Barbara",
+        colors: JSON.stringify(["#1B5BA3"]),
+        system: "surfliner",
+      },
+    }]);
+
+    act(() => {
+      onMouseMove({ target: mockMap, point: { x: 100, y: 100 } });
+    });
+
+    expect(screen.getByText("Santa Barbara")).toBeInTheDocument();
+    expect(screen.getByText("Pacific Surfliner")).toBeInTheDocument();
+  });
+
+  it("calls onSelectStop when clicking a surfliner stop", () => {
+    const onSelectStop = vi.fn();
+    render(<TransitLayer systems={["surfliner"]} onSelectStop={onSelectStop} />);
+
+    const onClick = mockMap.on.mock.calls.find((c: any) => c[0] === "click")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      properties: {
+        name: "San Diego",
+        colors: JSON.stringify(["#1B5BA3"]),
+        system: "surfliner",
+      },
+    }]);
+
+    act(() => {
+      onClick({ target: mockMap, point: { x: 50, y: 50 } });
+    });
+
+    expect(onSelectStop).toHaveBeenCalledWith("San Diego");
+  });
+
   // ── Muni Metro exports ──
 
   it("exports MUNIMETRO_LINES with 7 lines and correct colors", () => {
@@ -1025,29 +1090,31 @@ describe("TransitLayer", () => {
     expect(onSelectStop).toHaveBeenCalledWith("Embarcadero Station");
   });
 
-  // ── All seven systems ──
+  // ── All eight systems ──
 
-  it("renders layers for all seven systems simultaneously", () => {
-    render(<TransitLayer systems={["bart", "caltrain", "smart", "vta", "capitolcorridor", "munimetro", "lametro"]} />);
+  it("renders layers for all eight systems simultaneously", () => {
+    render(<TransitLayer systems={["bart", "caltrain", "smart", "vta", "capitolcorridor", "surfliner", "munimetro", "lametro"]} />);
     expect(screen.getByTestId("Source-transit-bart-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-caltrain-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-smart-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-vta-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-capitolcorridor-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-surfliner-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-munimetro-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-lametro-routes")).toBeInTheDocument();
   });
 
-  it("applies independent filters across all seven systems", () => {
+  it("applies independent filters across all eight systems", () => {
     render(
       <TransitLayer
-        systems={["bart", "caltrain", "smart", "vta", "capitolcorridor", "munimetro", "lametro"]}
+        systems={["bart", "caltrain", "smart", "vta", "capitolcorridor", "surfliner", "munimetro", "lametro"]}
         activeColorMap={{
           bart: ["#FF0000"],
           caltrain: null,
           smart: ["#2E8B57"],
           vta: ["#007ACC"],
           capitolcorridor: ["#1C4E8A"],
+          surfliner: ["#1B5BA3"],
           munimetro: ["#005B95"],
           lametro: ["#0072BC", "#EB131B"],
         }}
@@ -1058,6 +1125,7 @@ describe("TransitLayer", () => {
     expect(screen.getByTestId("Layer-transit-smart-routes-line")).toHaveAttribute("data-filter");
     expect(screen.getByTestId("Layer-transit-vta-routes-line")).toHaveAttribute("data-filter");
     expect(screen.getByTestId("Layer-transit-capitolcorridor-routes-line")).toHaveAttribute("data-filter");
+    expect(screen.getByTestId("Layer-transit-surfliner-routes-line")).toHaveAttribute("data-filter");
     expect(screen.getByTestId("Layer-transit-munimetro-routes-line")).toHaveAttribute("data-filter");
     const lametroFilter = JSON.parse(
       screen.getByTestId("Layer-transit-lametro-routes-line").getAttribute("data-filter")!,
