@@ -21,7 +21,7 @@ import PopulationTableModal from "@/components/population-table-modal";
 import TemperatureTableModal from "@/components/temperature-table-modal";
 import SunshineTableModal from "@/components/sunshine-table-modal";
 import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution, type SunshineDataSource } from "@/components/map/layers/sunshine-layer";
-import { TRANSIT_SYSTEMS, DEFAULT_TRANSIT_SYSTEMS, BART_LINES, CALTRAIN_LINES, LAMETRO_LINES, SMART_LINES, VTA_LINES, CAPITOLCORRIDOR_LINES, SURFLINER_LINES, COASTER_LINES, SPRINTER_LINES, SDTROLLEY_LINES, MUNIMETRO_LINES, type TransitSystem, type ActiveColorMap } from "@/components/map/layers/transit-layer";
+import { TRANSIT_SYSTEMS, DEFAULT_TRANSIT_SYSTEMS, BART_LINES, CALTRAIN_LINES, LAMETRO_LINES, SMART_LINES, VTA_LINES, CAPITOLCORRIDOR_LINES, SURFLINER_LINES, COASTER_LINES, SPRINTER_LINES, SDTROLLEY_LINES, METROLINK_LINES, MUNIMETRO_LINES, type TransitSystem, type ActiveColorMap } from "@/components/map/layers/transit-layer";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useGeoJsonFeatureCount } from "@/hooks/use-geojson-feature-count";
@@ -50,6 +50,7 @@ import {
   LuMountain,
   LuTrainFront,
 } from "react-icons/lu";
+import { RiFocus3Line, RiFocus3Fill } from "react-icons/ri";
 import { FaGithub } from "react-icons/fa";
 import type { California3DTerrainRef } from "@/components/map/terrain-3d/california-3d-terrain";
 
@@ -207,6 +208,7 @@ export default function Home() {
   const [coasterActiveColors, setCoasterActiveColors] = useState<string[] | null>(null);
   const [sprinterActiveColors, setSprinterActiveColors] = useState<string[] | null>(null);
   const [sdtrolleyActiveColors, setSdtrolleyActiveColors] = useState<string[] | null>(null);
+  const [metrolinkActiveColors, setMetrolinkActiveColors] = useState<string[] | null>(null);
   const [munimetroActiveColors, setMunimetroActiveColors] = useState<string[] | null>(null);
   const [mapStyleId, setMapStyleId] = useState<MapStyleId>(init.style);
   const [showRelief, setShowRelief] = useState(init.relief);
@@ -368,6 +370,7 @@ export default function Home() {
     setCoasterActiveColors(null);
     setSprinterActiveColors(null);
     setSdtrolleyActiveColors(null);
+    setMetrolinkActiveColors(null);
     setMunimetroActiveColors(null);
     setSelectedTransitStopName(null);
     setFlyToTransitStop(false);
@@ -501,7 +504,7 @@ export default function Home() {
                 onDeselectSunshineHex={() => setSelectedSunshineH3(null)}
                 showTransit={showTransit}
                 transitSystems={transitSystems}
-                activeColorMap={{ bart: bartActiveColors, caltrain: caltrainActiveColors, lametro: lametroActiveColors, smart: smartActiveColors, vta: vtaActiveColors, capitolcorridor: capitolcorridorActiveColors, surfliner: surflinerActiveColors, coaster: coasterActiveColors, sprinter: sprinterActiveColors, sdtrolley: sdtrolleyActiveColors, munimetro: munimetroActiveColors }}
+                activeColorMap={{ bart: bartActiveColors, caltrain: caltrainActiveColors, lametro: lametroActiveColors, smart: smartActiveColors, vta: vtaActiveColors, capitolcorridor: capitolcorridorActiveColors, surfliner: surflinerActiveColors, coaster: coasterActiveColors, sprinter: sprinterActiveColors, sdtrolley: sdtrolleyActiveColors, metrolink: metrolinkActiveColors, munimetro: munimetroActiveColors }}
                 selectedTransitStopName={selectedTransitStopName}
                 flyToTransitStop={flyToTransitStop}
                 onSelectTransitStop={(name) => { setFlyToTransitStop(false); setSelectedTransitStopName(name); }}
@@ -1033,6 +1036,7 @@ export default function Home() {
                     <div className="mt-2 ml-14 flex flex-col gap-2">
                       {TRANSIT_SYSTEMS.map((sys) => {
                         const enabled = transitSystems.includes(sys.id);
+                        const isFocused = transitSystems.length === 1 && transitSystems[0] === sys.id;
                         return (
                           <div key={sys.id}>
                             <label className="flex cursor-pointer items-center gap-2">
@@ -1160,6 +1164,20 @@ export default function Home() {
                                   </a>
                                 </InfoTooltip>
                               )}
+                              {sys.id === "metrolink" && (
+                                <InfoTooltip>
+                                  <a href="https://metrolinktrains.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    Metrolink
+                                  </a>
+                                  <br />
+                                  Southern California commuter rail. 7 lines, 67 stations.
+                                  <br />
+                                  Data:{" "}
+                                  <a href="https://metrolinktrains.com/about/agency/open-data/gtfs/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    Metrolink GTFS
+                                  </a>
+                                </InfoTooltip>
+                              )}
                               {sys.id === "surfliner" && (
                                 <InfoTooltip>
                                   <a href="https://www.pacificsurfliner.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
@@ -1202,13 +1220,37 @@ export default function Home() {
                                   </a>
                                 </InfoTooltip>
                               )}
+                              <span className="group/focus relative ml-auto shrink-0 self-center">
+                                <button
+                                  type="button"
+                                  aria-label={isFocused ? "Unfocus" : "Focus"}
+                                  className={`flex cursor-pointer items-center rounded p-0.5 transition-colors ${
+                                    isFocused
+                                      ? "text-gray-900 hover:text-black"
+                                      : "text-gray-400 hover:text-gray-600"
+                                  }`}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    if (isFocused) {
+                                      setTransitSystems([...DEFAULT_TRANSIT_SYSTEMS]);
+                                    } else {
+                                      setTransitSystems([sys.id]);
+                                    }
+                                  }}
+                                >
+                                  {isFocused ? <RiFocus3Fill className="h-4 w-4" /> : <RiFocus3Line className="h-4 w-4" />}
+                                </button>
+                                <span className="pointer-events-none absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition-opacity group-hover/focus:opacity-100">
+                                  {isFocused ? "Unfocus" : "Focus"}
+                                </span>
+                              </span>
                             </label>
                             {enabled && (
                               <div className="mt-1.5 ml-9 flex flex-col gap-1.5">
                                 {(() => {
-                                  const lines = sys.id === "bart" ? BART_LINES : sys.id === "caltrain" ? CALTRAIN_LINES : sys.id === "lametro" ? LAMETRO_LINES : sys.id === "smart" ? SMART_LINES : sys.id === "vta" ? VTA_LINES : sys.id === "capitolcorridor" ? CAPITOLCORRIDOR_LINES : sys.id === "surfliner" ? SURFLINER_LINES : sys.id === "coaster" ? COASTER_LINES : sys.id === "sprinter" ? SPRINTER_LINES : sys.id === "sdtrolley" ? SDTROLLEY_LINES : sys.id === "munimetro" ? MUNIMETRO_LINES : [];
-                                  const activeColors = sys.id === "bart" ? bartActiveColors : sys.id === "caltrain" ? caltrainActiveColors : sys.id === "lametro" ? lametroActiveColors : sys.id === "smart" ? smartActiveColors : sys.id === "vta" ? vtaActiveColors : sys.id === "capitolcorridor" ? capitolcorridorActiveColors : sys.id === "surfliner" ? surflinerActiveColors : sys.id === "coaster" ? coasterActiveColors : sys.id === "sprinter" ? sprinterActiveColors : sys.id === "sdtrolley" ? sdtrolleyActiveColors : sys.id === "munimetro" ? munimetroActiveColors : null;
-                                  const setActiveColors = sys.id === "bart" ? setBartActiveColors : sys.id === "caltrain" ? setCaltrainActiveColors : sys.id === "lametro" ? setLametroActiveColors : sys.id === "smart" ? setSmartActiveColors : sys.id === "vta" ? setVtaActiveColors : sys.id === "capitolcorridor" ? setCapitolcorridorActiveColors : sys.id === "surfliner" ? setSurflinerActiveColors : sys.id === "coaster" ? setCoasterActiveColors : sys.id === "sprinter" ? setSprinterActiveColors : sys.id === "sdtrolley" ? setSdtrolleyActiveColors : sys.id === "munimetro" ? setMunimetroActiveColors : null;
+                                  const lines = sys.id === "bart" ? BART_LINES : sys.id === "caltrain" ? CALTRAIN_LINES : sys.id === "lametro" ? LAMETRO_LINES : sys.id === "smart" ? SMART_LINES : sys.id === "vta" ? VTA_LINES : sys.id === "capitolcorridor" ? CAPITOLCORRIDOR_LINES : sys.id === "surfliner" ? SURFLINER_LINES : sys.id === "coaster" ? COASTER_LINES : sys.id === "sprinter" ? SPRINTER_LINES : sys.id === "sdtrolley" ? SDTROLLEY_LINES : sys.id === "metrolink" ? METROLINK_LINES : sys.id === "munimetro" ? MUNIMETRO_LINES : [];
+                                  const activeColors = sys.id === "bart" ? bartActiveColors : sys.id === "caltrain" ? caltrainActiveColors : sys.id === "lametro" ? lametroActiveColors : sys.id === "smart" ? smartActiveColors : sys.id === "vta" ? vtaActiveColors : sys.id === "capitolcorridor" ? capitolcorridorActiveColors : sys.id === "surfliner" ? surflinerActiveColors : sys.id === "coaster" ? coasterActiveColors : sys.id === "sprinter" ? sprinterActiveColors : sys.id === "sdtrolley" ? sdtrolleyActiveColors : sys.id === "metrolink" ? metrolinkActiveColors : sys.id === "munimetro" ? munimetroActiveColors : null;
+                                  const setActiveColors = sys.id === "bart" ? setBartActiveColors : sys.id === "caltrain" ? setCaltrainActiveColors : sys.id === "lametro" ? setLametroActiveColors : sys.id === "smart" ? setSmartActiveColors : sys.id === "vta" ? setVtaActiveColors : sys.id === "capitolcorridor" ? setCapitolcorridorActiveColors : sys.id === "surfliner" ? setSurflinerActiveColors : sys.id === "coaster" ? setCoasterActiveColors : sys.id === "sprinter" ? setSprinterActiveColors : sys.id === "sdtrolley" ? setSdtrolleyActiveColors : sys.id === "metrolink" ? setMetrolinkActiveColors : sys.id === "munimetro" ? setMunimetroActiveColors : null;
                                   if (lines.length === 0 || !setActiveColors) return null;
                                   return (
                                     <div className="flex items-center gap-1.5">

@@ -10,7 +10,7 @@ import { fetchJsonCached } from "@/utils/fetch-json";
 
 // ── Public types ──
 
-export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart" | "munimetro" | "vta" | "capitolcorridor" | "surfliner" | "coaster" | "sprinter" | "sdtrolley";
+export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart" | "munimetro" | "vta" | "capitolcorridor" | "surfliner" | "coaster" | "sprinter" | "sdtrolley" | "metrolink";
 
 export const TRANSIT_SYSTEMS: {
   id: TransitSystem;
@@ -26,11 +26,12 @@ export const TRANSIT_SYSTEMS: {
   { id: "coaster", label: "Coaster" },
   { id: "sprinter", label: "Sprinter" },
   { id: "sdtrolley", label: "SD Trolley" },
+  { id: "metrolink", label: "Metrolink" },
   { id: "lametro", label: "LA Metro" },
 ];
 
 // Systems enabled by default
-export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "munimetro", "vta", "capitolcorridor", "surfliner", "coaster", "sprinter", "sdtrolley", "lametro"];
+export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "munimetro", "vta", "capitolcorridor", "surfliner", "coaster", "sprinter", "sdtrolley", "metrolink", "lametro"];
 
 // Line colors + labels for per-line toggle UI
 export const BART_LINES: { color: string; label: string }[] = [
@@ -88,6 +89,16 @@ export const SDTROLLEY_LINES: { color: string; label: string }[] = [
   { color: "#0000FF", label: "Blue" },
   { color: "#FF6600", label: "Orange" },
   { color: "#009900", label: "Green" },
+];
+
+export const METROLINK_LINES: { color: string; label: string }[] = [
+  { color: "#00AF43", label: "Antelope Valley" },
+  { color: "#E92076", label: "IE-OC" },
+  { color: "#FF8400", label: "Orange County" },
+  { color: "#682E86", label: "Riverside" },
+  { color: "#A32136", label: "San Bernardino" },
+  { color: "#FFB81D", label: "Ventura County" },
+  { color: "#0071CE", label: "91/Perris Valley" },
 ];
 
 export const MUNIMETRO_LINES: { color: string; label: string }[] = [
