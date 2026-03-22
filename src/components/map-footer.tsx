@@ -173,6 +173,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">Oceanside to Escondido light rail. 1 line, 15 stations.</span>
           </li>
           <li>
+            <strong>Transit Data (San Diego Trolley)</strong>
+            <br />
+            <a href="https://www.sdmts.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">MTS GTFS</a>
+            <br />
+            <span className="text-gray-500">San Diego light rail. 3 lines, 55 stations.</span>
+          </li>
+          <li>
             <strong>Elevation Data</strong>
             <br />
             <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">AWS Terrain Tiles</a>
