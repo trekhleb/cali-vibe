@@ -10,7 +10,7 @@ import { fetchJsonCached } from "@/utils/fetch-json";
 
 // ── Public types ──
 
-export type TransitSystem = "bart" | "caltrain";
+export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart";
 
 export const TRANSIT_SYSTEMS: {
   id: TransitSystem;
@@ -18,6 +18,8 @@ export const TRANSIT_SYSTEMS: {
 }[] = [
   { id: "bart", label: "BART" },
   { id: "caltrain", label: "Caltrain" },
+  { id: "smart", label: "SMART" },
+  { id: "lametro", label: "LA Metro" },
 ];
 
 // Line colors + labels for per-line toggle UI
@@ -35,6 +37,19 @@ export const CALTRAIN_LINES: { color: string; label: string }[] = [
   { color: "#00A5B8", label: "Limited" },
   { color: "#CE202F", label: "Express" },
   { color: "#E8A317", label: "South County" },
+];
+
+export const LAMETRO_LINES: { color: string; label: string }[] = [
+  { color: "#0072BC", label: "A Line" },
+  { color: "#EB131B", label: "B Line" },
+  { color: "#58A738", label: "C Line" },
+  { color: "#A05DA5", label: "D Line" },
+  { color: "#FDB913", label: "E Line" },
+  { color: "#E56DB1", label: "K Line" },
+];
+
+export const SMART_LINES: { color: string; label: string }[] = [
+  { color: "#2E8B57", label: "Main Line" },
 ];
 
 // Per-system active colors: null = show all, string[] = show only these

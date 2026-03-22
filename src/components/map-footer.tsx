@@ -117,6 +117,20 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">Routes and stations. San Francisco to San Jose/Gilroy.</span>
           </li>
           <li>
+            <strong>Transit Data (LA Metro Rail)</strong>
+            <br />
+            <a href="https://developer.metro.net/gtfs-schedule-data/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">LA Metro GTFS</a>
+            <br />
+            <span className="text-gray-500">6 rail lines, 108 stations. Los Angeles Metro Rail.</span>
+          </li>
+          <li>
+            <strong>Transit Data (SMART)</strong>
+            <br />
+            <a href="https://www.transit.land/feeds/f-smart~ca~us/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">SMART GTFS</a>
+            <br />
+            <span className="text-gray-500">Sonoma-Marin Area Rail Transit. 1 line, 14 stations.</span>
+          </li>
+          <li>
             <strong>Elevation Data</strong>
             <br />
             <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">AWS Terrain Tiles</a>
