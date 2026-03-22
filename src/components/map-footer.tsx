@@ -187,6 +187,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">Southern California commuter rail. 7 lines, 67 stations.</span>
           </li>
           <li>
+            <strong>Transit Data (Sacramento RT)</strong>
+            <br />
+            <a href="https://www.sacrt.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">SacRT GTFS</a>
+            <br />
+            <span className="text-gray-500">Sacramento light rail. 3 lines, 55 stations.</span>
+          </li>
+          <li>
             <strong>Elevation Data</strong>
             <br />
             <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">AWS Terrain Tiles</a>
