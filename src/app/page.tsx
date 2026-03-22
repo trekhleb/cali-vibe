@@ -21,7 +21,7 @@ import PopulationTableModal from "@/components/population-table-modal";
 import TemperatureTableModal from "@/components/temperature-table-modal";
 import SunshineTableModal from "@/components/sunshine-table-modal";
 import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution, type SunshineDataSource } from "@/components/map/layers/sunshine-layer";
-import { TRANSIT_SYSTEMS, DEFAULT_TRANSIT_SYSTEMS, BART_LINES, CALTRAIN_LINES, LAMETRO_LINES, SMART_LINES, VTA_LINES, CAPITOLCORRIDOR_LINES, SURFLINER_LINES, MUNIMETRO_LINES, type TransitSystem, type ActiveColorMap } from "@/components/map/layers/transit-layer";
+import { TRANSIT_SYSTEMS, DEFAULT_TRANSIT_SYSTEMS, BART_LINES, CALTRAIN_LINES, LAMETRO_LINES, SMART_LINES, VTA_LINES, CAPITOLCORRIDOR_LINES, SURFLINER_LINES, COASTER_LINES, MUNIMETRO_LINES, type TransitSystem, type ActiveColorMap } from "@/components/map/layers/transit-layer";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useGeoJsonFeatureCount } from "@/hooks/use-geojson-feature-count";
@@ -204,6 +204,7 @@ export default function Home() {
   const [vtaActiveColors, setVtaActiveColors] = useState<string[] | null>(null);
   const [capitolcorridorActiveColors, setCapitolcorridorActiveColors] = useState<string[] | null>(null);
   const [surflinerActiveColors, setSurflinerActiveColors] = useState<string[] | null>(null);
+  const [coasterActiveColors, setCoasterActiveColors] = useState<string[] | null>(null);
   const [munimetroActiveColors, setMunimetroActiveColors] = useState<string[] | null>(null);
   const [mapStyleId, setMapStyleId] = useState<MapStyleId>(init.style);
   const [showRelief, setShowRelief] = useState(init.relief);
@@ -362,6 +363,7 @@ export default function Home() {
     setVtaActiveColors(null);
     setCapitolcorridorActiveColors(null);
     setSurflinerActiveColors(null);
+    setCoasterActiveColors(null);
     setMunimetroActiveColors(null);
     setSelectedTransitStopName(null);
     setFlyToTransitStop(false);
@@ -495,7 +497,7 @@ export default function Home() {
                 onDeselectSunshineHex={() => setSelectedSunshineH3(null)}
                 showTransit={showTransit}
                 transitSystems={transitSystems}
-                activeColorMap={{ bart: bartActiveColors, caltrain: caltrainActiveColors, lametro: lametroActiveColors, smart: smartActiveColors, vta: vtaActiveColors, capitolcorridor: capitolcorridorActiveColors, surfliner: surflinerActiveColors, munimetro: munimetroActiveColors }}
+                activeColorMap={{ bart: bartActiveColors, caltrain: caltrainActiveColors, lametro: lametroActiveColors, smart: smartActiveColors, vta: vtaActiveColors, capitolcorridor: capitolcorridorActiveColors, surfliner: surflinerActiveColors, coaster: coasterActiveColors, munimetro: munimetroActiveColors }}
                 selectedTransitStopName={selectedTransitStopName}
                 flyToTransitStop={flyToTransitStop}
                 onSelectTransitStop={(name) => { setFlyToTransitStop(false); setSelectedTransitStopName(name); }}
@@ -1112,6 +1114,20 @@ export default function Home() {
                                   </a>
                                 </InfoTooltip>
                               )}
+                              {sys.id === "coaster" && (
+                                <InfoTooltip>
+                                  <a href="https://gonctd.com/services/coaster-commuter-rail/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    COASTER
+                                  </a>
+                                  <br />
+                                  Oceanside to San Diego. 1 line, 8 stations.
+                                  <br />
+                                  Data:{" "}
+                                  <a href="https://gonctd.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    NCTD GTFS
+                                  </a>
+                                </InfoTooltip>
+                              )}
                               {sys.id === "surfliner" && (
                                 <InfoTooltip>
                                   <a href="https://www.pacificsurfliner.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
@@ -1158,9 +1174,9 @@ export default function Home() {
                             {enabled && (
                               <div className="mt-1.5 ml-9 flex flex-col gap-1.5">
                                 {(() => {
-                                  const lines = sys.id === "bart" ? BART_LINES : sys.id === "caltrain" ? CALTRAIN_LINES : sys.id === "lametro" ? LAMETRO_LINES : sys.id === "smart" ? SMART_LINES : sys.id === "vta" ? VTA_LINES : sys.id === "capitolcorridor" ? CAPITOLCORRIDOR_LINES : sys.id === "surfliner" ? SURFLINER_LINES : sys.id === "munimetro" ? MUNIMETRO_LINES : [];
-                                  const activeColors = sys.id === "bart" ? bartActiveColors : sys.id === "caltrain" ? caltrainActiveColors : sys.id === "lametro" ? lametroActiveColors : sys.id === "smart" ? smartActiveColors : sys.id === "vta" ? vtaActiveColors : sys.id === "capitolcorridor" ? capitolcorridorActiveColors : sys.id === "surfliner" ? surflinerActiveColors : sys.id === "munimetro" ? munimetroActiveColors : null;
-                                  const setActiveColors = sys.id === "bart" ? setBartActiveColors : sys.id === "caltrain" ? setCaltrainActiveColors : sys.id === "lametro" ? setLametroActiveColors : sys.id === "smart" ? setSmartActiveColors : sys.id === "vta" ? setVtaActiveColors : sys.id === "capitolcorridor" ? setCapitolcorridorActiveColors : sys.id === "surfliner" ? setSurflinerActiveColors : sys.id === "munimetro" ? setMunimetroActiveColors : null;
+                                  const lines = sys.id === "bart" ? BART_LINES : sys.id === "caltrain" ? CALTRAIN_LINES : sys.id === "lametro" ? LAMETRO_LINES : sys.id === "smart" ? SMART_LINES : sys.id === "vta" ? VTA_LINES : sys.id === "capitolcorridor" ? CAPITOLCORRIDOR_LINES : sys.id === "surfliner" ? SURFLINER_LINES : sys.id === "coaster" ? COASTER_LINES : sys.id === "munimetro" ? MUNIMETRO_LINES : [];
+                                  const activeColors = sys.id === "bart" ? bartActiveColors : sys.id === "caltrain" ? caltrainActiveColors : sys.id === "lametro" ? lametroActiveColors : sys.id === "smart" ? smartActiveColors : sys.id === "vta" ? vtaActiveColors : sys.id === "capitolcorridor" ? capitolcorridorActiveColors : sys.id === "surfliner" ? surflinerActiveColors : sys.id === "coaster" ? coasterActiveColors : sys.id === "munimetro" ? munimetroActiveColors : null;
+                                  const setActiveColors = sys.id === "bart" ? setBartActiveColors : sys.id === "caltrain" ? setCaltrainActiveColors : sys.id === "lametro" ? setLametroActiveColors : sys.id === "smart" ? setSmartActiveColors : sys.id === "vta" ? setVtaActiveColors : sys.id === "capitolcorridor" ? setCapitolcorridorActiveColors : sys.id === "surfliner" ? setSurflinerActiveColors : sys.id === "coaster" ? setCoasterActiveColors : sys.id === "munimetro" ? setMunimetroActiveColors : null;
                                   if (lines.length === 0 || !setActiveColors) return null;
                                   return (
                                     <div className="flex items-center gap-1.5">
