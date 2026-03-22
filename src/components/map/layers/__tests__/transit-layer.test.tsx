@@ -5,6 +5,7 @@ import TransitLayer, {
   CALTRAIN_LINES,
   LAMETRO_LINES,
   SMART_LINES,
+  VTA_LINES,
   MUNIMETRO_LINES,
   type TransitSystem,
 } from "@/components/map/layers/transit-layer";
@@ -98,6 +99,7 @@ describe("TransitLayer", () => {
       { id: "caltrain", label: "Caltrain" },
       { id: "smart", label: "SMART" },
       { id: "munimetro", label: "Muni Metro" },
+      { id: "vta", label: "VTA" },
       { id: "lametro", label: "LA Metro" },
     ]);
   });
@@ -734,6 +736,105 @@ describe("TransitLayer", () => {
     expect(onSelectStop).toHaveBeenCalledWith("Larkspur");
   });
 
+  // ── VTA exports ──
+
+  it("exports VTA_LINES with 3 lines and correct colors", () => {
+    expect(VTA_LINES).toHaveLength(3);
+    const colors = VTA_LINES.map((l) => l.color);
+    expect(colors).toContain("#007ACC");
+    expect(colors).toContain("#379400");
+    expect(colors).toContain("#CC6600");
+  });
+
+  it("every VTA_LINES entry has a non-empty label", () => {
+    for (const line of VTA_LINES) {
+      expect(line.label.length).toBeGreaterThan(0);
+    }
+  });
+
+  // ── VTA rendering ──
+
+  it("renders all vta layer IDs when vta is the system", () => {
+    render(<TransitLayer systems={["vta"]} />);
+    expect(screen.getByTestId("Source-transit-vta-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-vta-stops")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-vta-routes-line-casing")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-vta-routes-line")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-vta-stops-circle")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-vta-stops-label")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-vta-stops-highlight")).toBeInTheDocument();
+  });
+
+  it("applies vta route filter via activeColorMap", () => {
+    render(<TransitLayer systems={["vta"]} activeColorMap={{ vta: ["#007ACC"] }} />);
+    const routeLayer = screen.getByTestId("Layer-transit-vta-routes-line");
+    const filter = JSON.parse(routeLayer.getAttribute("data-filter")!);
+    expect(filter).toEqual(["in", ["get", "color"], ["literal", ["#007ACC"]]]);
+  });
+
+  it("applies vta stop filter via activeColorMap", () => {
+    render(<TransitLayer systems={["vta"]} activeColorMap={{ vta: ["#379400"] }} />);
+    const stopsLayer = screen.getByTestId("Layer-transit-vta-stops-circle");
+    const filter = JSON.parse(stopsLayer.getAttribute("data-filter")!);
+    expect(filter[0]).toBe("any");
+    expect(filter[1]).toEqual(["in", "#379400", ["to-string", ["get", "colors"]]]);
+  });
+
+  it("vta highlight layer uses name filter, not color filter", () => {
+    render(<TransitLayer systems={["vta"]} activeColorMap={{ vta: ["#007ACC"] }} />);
+    const hl = screen.getByTestId("Layer-transit-vta-stops-highlight");
+    const filter = JSON.parse(hl.getAttribute("data-filter")!);
+    expect(filter[0]).toBe("==");
+  });
+
+  it("applies no filter when vta is not in activeColorMap (undefined)", () => {
+    render(<TransitLayer systems={["vta"]} activeColorMap={{ bart: ["#FF0000"] }} />);
+    const routeLayer = screen.getByTestId("Layer-transit-vta-routes-line");
+    expect(routeLayer).not.toHaveAttribute("data-filter");
+  });
+
+  it("shows tooltip with VTA label on hover over vta stop", () => {
+    render(<TransitLayer systems={["vta"]} />);
+
+    const onMouseMove = mockMap.on.mock.calls.find((c: any) => c[0] === "mousemove")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      properties: {
+        name: "Diridon",
+        colors: JSON.stringify(["#007ACC", "#379400"]),
+        system: "vta",
+      },
+    }]);
+
+    act(() => {
+      onMouseMove({ target: mockMap, point: { x: 100, y: 100 } });
+    });
+
+    expect(screen.getByText("Diridon")).toBeInTheDocument();
+    expect(screen.getByText("VTA")).toBeInTheDocument();
+  });
+
+  it("calls onSelectStop when clicking a vta stop", () => {
+    const onSelectStop = vi.fn();
+    render(<TransitLayer systems={["vta"]} onSelectStop={onSelectStop} />);
+
+    const onClick = mockMap.on.mock.calls.find((c: any) => c[0] === "click")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      properties: {
+        name: "Mountain View",
+        colors: JSON.stringify(["#007ACC", "#CC6600"]),
+        system: "vta",
+      },
+    }]);
+
+    act(() => {
+      onClick({ target: mockMap, point: { x: 50, y: 50 } });
+    });
+
+    expect(onSelectStop).toHaveBeenCalledWith("Mountain View");
+  });
+
   // ── Muni Metro exports ──
 
   it("exports MUNIMETRO_LINES with 7 lines and correct colors", () => {
@@ -837,25 +938,27 @@ describe("TransitLayer", () => {
     expect(onSelectStop).toHaveBeenCalledWith("Embarcadero Station");
   });
 
-  // ── All five systems ──
+  // ── All six systems ──
 
-  it("renders layers for all five systems simultaneously", () => {
-    render(<TransitLayer systems={["bart", "caltrain", "smart", "munimetro", "lametro"]} />);
+  it("renders layers for all six systems simultaneously", () => {
+    render(<TransitLayer systems={["bart", "caltrain", "smart", "vta", "munimetro", "lametro"]} />);
     expect(screen.getByTestId("Source-transit-bart-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-caltrain-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-smart-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-vta-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-munimetro-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-lametro-routes")).toBeInTheDocument();
   });
 
-  it("applies independent filters across all five systems", () => {
+  it("applies independent filters across all six systems", () => {
     render(
       <TransitLayer
-        systems={["bart", "caltrain", "smart", "munimetro", "lametro"]}
+        systems={["bart", "caltrain", "smart", "vta", "munimetro", "lametro"]}
         activeColorMap={{
           bart: ["#FF0000"],
           caltrain: null,
           smart: ["#2E8B57"],
+          vta: ["#007ACC"],
           munimetro: ["#005B95"],
           lametro: ["#0072BC", "#EB131B"],
         }}
@@ -864,6 +967,7 @@ describe("TransitLayer", () => {
     expect(screen.getByTestId("Layer-transit-bart-routes-line")).toHaveAttribute("data-filter");
     expect(screen.getByTestId("Layer-transit-caltrain-routes-line")).not.toHaveAttribute("data-filter");
     expect(screen.getByTestId("Layer-transit-smart-routes-line")).toHaveAttribute("data-filter");
+    expect(screen.getByTestId("Layer-transit-vta-routes-line")).toHaveAttribute("data-filter");
     expect(screen.getByTestId("Layer-transit-munimetro-routes-line")).toHaveAttribute("data-filter");
     const lametroFilter = JSON.parse(
       screen.getByTestId("Layer-transit-lametro-routes-line").getAttribute("data-filter")!,

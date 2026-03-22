@@ -138,6 +138,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">Sonoma-Marin Area Rail Transit. 1 line, 14 stations.</span>
           </li>
           <li>
+            <strong>Transit Data (VTA)</strong>
+            <br />
+            <a href="https://www.vta.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">VTA GTFS</a>
+            <br />
+            <span className="text-gray-500">Santa Clara Valley Light Rail. 3 lines, 56 stations.</span>
+          </li>
+          <li>
             <strong>Elevation Data</strong>
             <br />
             <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">AWS Terrain Tiles</a>
