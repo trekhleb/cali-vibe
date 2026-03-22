@@ -1,33 +1,41 @@
 #!/usr/bin/env node
 /**
- * Build LA Metro Rail transit data as GeoJSON files (routes + stops).
+ * Build Muni Metro (SFMTA) transit data as GeoJSON files.
  *
- * Data source: LA Metro GTFS (rail-only feed)
- * License: Public, free for developer use
+ * Data source: SFMTA GTFS
+ * License: SFMTA Transit Data License
  *
  * Outputs:
- *   public/data/transit/lametro-routes.geojson   (LineString per route)
- *   public/data/transit/lametro-stops.geojson    (Point per station)
+ *   public/data/transit/munimetro-routes.geojson   (LineString per route)
+ *   public/data/transit/munimetro-stops.geojson    (Point per station)
  *
- * Usage: node scripts/build-transit-lametro.mjs
+ * Usage: node scripts/build-transit-munimetro.mjs
  */
 
 import { writeFileSync, mkdirSync, existsSync, readFileSync, rmSync } from "fs";
 import { join } from "path";
 import { execSync } from "child_process";
 
+const SYSTEM_ID = "munimetro";
+const SYSTEM_LABEL = "Muni Metro";
 const OUT_DIR = new URL("../public/data/transit/", import.meta.url).pathname;
-const TMP_DIR = join(OUT_DIR, ".lametro-gtfs-tmp");
-const GTFS_URL = "https://gitlab.com/LACMTA/gtfs_rail/raw/master/gtfs_rail.zip";
-const SYSTEM_ID = "lametro";
-const DEFAULT_COLOR = "#000000";
+const TMP_DIR = join(OUT_DIR, `.${SYSTEM_ID}-gtfs-tmp`);
+const GTFS_URL = "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip";
+
+const DEFAULT_COLOR = "#BA0C2F";
+
+// Only include light rail routes (route_type=0), skip bus replacements
+const VALID_ROUTE_IDS = new Set(["J", "K", "L", "M", "N", "T", "F"]);
+
+const COLOR_OVERRIDES = {};
 
 // ── Download & extract GTFS ──
 
 function downloadGTFS() {
-  console.log("Downloading LA Metro Rail GTFS...");
+  console.log(`Downloading ${SYSTEM_LABEL} GTFS...`);
   if (!existsSync(TMP_DIR)) mkdirSync(TMP_DIR, { recursive: true });
-  const zipFile = join(TMP_DIR, "lametro.zip");
+
+  const zipFile = join(TMP_DIR, `${SYSTEM_ID}.zip`);
   execSync(`curl -sL "${GTFS_URL}" -o "${zipFile}"`);
   execSync(`unzip -o "${zipFile}" -d "${TMP_DIR}"`, { stdio: "pipe" });
   console.log("  Extracted GTFS files");
@@ -85,23 +93,28 @@ function buildRoutes() {
   const routes = parseCSV("routes.txt");
   const trips = parseCSV("trips.txt");
 
+  // Map route_id → route info (only light rail)
   const routeMap = {};
   for (const r of routes) {
+    if (!VALID_ROUTE_IDS.has(r.route_id)) continue;
+    const rawColor = r.route_color ? `#${r.route_color.trim()}` : DEFAULT_COLOR;
     routeMap[r.route_id] = {
-      name: r.route_long_name || r.route_short_name || r.route_id,
+      name: `${r.route_short_name}-${r.route_long_name}` || r.route_id,
       shortName: r.route_short_name || "",
-      color: r.route_color ? `#${r.route_color}` : DEFAULT_COLOR,
-      textColor: r.route_text_color ? `#${r.route_text_color}` : "#ffffff",
+      color: COLOR_OVERRIDES[rawColor] || rawColor,
+      textColor: r.route_text_color ? `#${r.route_text_color.trim()}` : "#ffffff",
     };
   }
 
+  // Map shape_id → route_id (pick first trip per shape, only valid routes)
   const shapeToRoute = {};
   for (const t of trips) {
-    if (t.shape_id && t.route_id && !shapeToRoute[t.shape_id]) {
+    if (t.shape_id && t.route_id && VALID_ROUTE_IDS.has(t.route_id) && !shapeToRoute[t.shape_id]) {
       shapeToRoute[t.shape_id] = t.route_id;
     }
   }
 
+  // Group shape points by shape_id
   const shapePoints = {};
   for (const s of shapes) {
     if (!shapePoints[s.shape_id]) shapePoints[s.shape_id] = [];
@@ -112,7 +125,7 @@ function buildRoutes() {
     });
   }
 
-  // Deduplicate by color — keep longest shape per color
+  // Deduplicate by color — keep the longest shape per color
   const features = [];
   const seenColors = {};
 
@@ -148,10 +161,10 @@ function buildRoutes() {
     });
   }
 
-  console.log(`  ${features.length} routes`);
   for (const f of features) {
     console.log(`    ${f.properties.name} → ${f.properties.color}`);
   }
+  console.log(`  ${features.length} routes`);
   return { type: "FeatureCollection", features };
 }
 
@@ -164,9 +177,12 @@ function buildStops() {
   const trips = parseCSV("trips.txt");
   const stopTimes = parseCSV("stop_times.txt");
 
+  // Only include trips for valid rail routes
   const tripToRoute = {};
   for (const t of trips) {
-    tripToRoute[t.trip_id] = t.route_id;
+    if (VALID_ROUTE_IDS.has(t.route_id)) {
+      tripToRoute[t.trip_id] = t.route_id;
+    }
   }
 
   const stopRoutes = {};
@@ -177,11 +193,14 @@ function buildStops() {
     stopRoutes[st.stop_id].add(routeId);
   }
 
-  const routeColorMap = {};
+  const routeColors = {};
   for (const r of routes) {
-    routeColorMap[r.route_id] = r.route_color ? `#${r.route_color}` : DEFAULT_COLOR;
+    if (!VALID_ROUTE_IDS.has(r.route_id)) continue;
+    const rawColor = r.route_color ? `#${r.route_color.trim()}` : DEFAULT_COLOR;
+    routeColors[r.route_id] = COLOR_OVERRIDES[rawColor] || rawColor;
   }
 
+  // Parent → children mapping
   const parentChildren = {};
   for (const s of stops) {
     if (s.parent_station) {
@@ -202,9 +221,8 @@ function buildStops() {
     if (locationType >= 2) continue;
     if (locationType === 0 && s.parent_station) continue;
 
-    const name = (s.stop_name || s.stop_id).replace(/\s+Station$/i, "");
+    const name = s.stop_name || s.stop_id;
     if (seenNames.has(name)) continue;
-    seenNames.add(name);
 
     const allStopIds = [s.stop_id, ...(parentChildren[s.stop_id] || [])];
     const routeIds = new Set();
@@ -212,9 +230,11 @@ function buildStops() {
       const sr = stopRoutes[sid];
       if (sr) sr.forEach(r => routeIds.add(r));
     }
-    const colors = [...new Set([...routeIds].map(rid => routeColorMap[rid] || DEFAULT_COLOR))];
 
-    if (routeIds.size === 0) continue;
+    if (routeIds.size === 0) continue; // skip stops with no rail route associations
+    seenNames.add(name);
+
+    const colors = [...new Set([...routeIds].map(rid => routeColors[rid] || DEFAULT_COLOR))];
 
     features.push({
       type: "Feature",
@@ -250,7 +270,9 @@ function offsetRoutes(routesGeoJSON) {
 
   console.log("Offsetting overlapping routes...");
 
-  const normCoords = features.map((f) => normalizeDirection(f.geometry.coordinates));
+  const normCoords = features.map((f) =>
+    normalizeDirection(f.geometry.coordinates),
+  );
 
   const grid = {};
   for (let ri = 0; ri < features.length; ri++) {
@@ -314,6 +336,7 @@ function offsetRoutes(routesGeoJSON) {
         const dot = perps[p].px * refPx + perps[p].py * refPy;
         if (dot < 0) offset = -offset;
       }
+
       return offset;
     });
 
@@ -334,14 +357,15 @@ function offsetRoutes(routesGeoJSON) {
       ];
     });
 
-    return { ...feature, geometry: { ...feature.geometry, coordinates: newCoords } };
+    return {
+      ...feature,
+      geometry: { ...feature.geometry, coordinates: newCoords },
+    };
   });
 
   console.log(`  Offset ${features.length} routes (spacing ${OFFSET_SPACING_M} m)`);
   return { ...routesGeoJSON, features: offsetFeatures };
 }
-
-// ── Offset utility functions ──
 
 function normalizeDirection(coords) {
   const start = coords[0];
@@ -364,18 +388,22 @@ function computePerps(coords) {
     const tx = (next[0] - prev[0]) * cosLat;
     const ty = next[1] - prev[1];
     const len = Math.sqrt(tx * tx + ty * ty);
+
     if (len < 1e-10) {
       perps.push(p > 0 ? perps[p - 1] : { px: 0, py: 1 });
       continue;
     }
+
     let px = -ty / len;
     let py = tx / len;
+
     if (p > 0) {
       const dot = px * perps[p - 1].px + py * perps[p - 1].py;
       if (dot < 0) { px = -px; py = -py; }
     } else {
       if (py < -0.01 || (Math.abs(py) <= 0.01 && px < 0)) { px = -px; py = -py; }
     }
+
     perps.push({ px, py });
   }
   return perps;
@@ -418,10 +446,14 @@ function smoothOffsets(arr, windowSize) {
   const result = new Array(arr.length);
   const half = Math.floor(windowSize / 2);
   for (let i = 0; i < arr.length; i++) {
-    let sum = 0, count = 0;
+    let sum = 0;
+    let count = 0;
     const lo = Math.max(0, i - half);
     const hi = Math.min(arr.length - 1, i + half);
-    for (let j = lo; j <= hi; j++) { sum += arr[j]; count++; }
+    for (let j = lo; j <= hi; j++) {
+      sum += arr[j];
+      count++;
+    }
     result[i] = sum / count;
   }
   return result;
@@ -430,7 +462,7 @@ function smoothOffsets(arr, windowSize) {
 // ── Main ──
 
 function main() {
-  console.log("Building LA Metro Rail transit data\n");
+  console.log(`Building ${SYSTEM_LABEL} transit data\n`);
 
   downloadGTFS();
 

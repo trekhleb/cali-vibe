@@ -124,6 +124,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">6 rail lines, 108 stations. Los Angeles Metro Rail.</span>
           </li>
           <li>
+            <strong>Transit Data (Muni Metro)</strong>
+            <br />
+            <a href="https://www.sfmta.com/reports/gtfs-transit-data" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">SFMTA GTFS</a>
+            <br />
+            <span className="text-gray-500">San Francisco light rail. 7 lines, 193 stops.</span>
+          </li>
+          <li>
             <strong>Transit Data (SMART)</strong>
             <br />
             <a href="https://www.transit.land/feeds/f-smart~ca~us/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">SMART GTFS</a>

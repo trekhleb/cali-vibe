@@ -21,7 +21,7 @@ import PopulationTableModal from "@/components/population-table-modal";
 import TemperatureTableModal from "@/components/temperature-table-modal";
 import SunshineTableModal from "@/components/sunshine-table-modal";
 import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution, type SunshineDataSource } from "@/components/map/layers/sunshine-layer";
-import { TRANSIT_SYSTEMS, BART_LINES, CALTRAIN_LINES, LAMETRO_LINES, SMART_LINES, type TransitSystem, type ActiveColorMap } from "@/components/map/layers/transit-layer";
+import { TRANSIT_SYSTEMS, DEFAULT_TRANSIT_SYSTEMS, BART_LINES, CALTRAIN_LINES, LAMETRO_LINES, SMART_LINES, MUNIMETRO_LINES, type TransitSystem, type ActiveColorMap } from "@/components/map/layers/transit-layer";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useGeoJsonFeatureCount } from "@/hooks/use-geojson-feature-count";
@@ -152,10 +152,10 @@ function readParams() {
     transit: bool("transit", DEFAULTS.transit),
     tsys: (() => {
       const v = p.get("tsys");
-      if (v === null) return TRANSIT_SYSTEMS.map((s) => s.id);
+      if (v === null) return [...DEFAULT_TRANSIT_SYSTEMS];
       const allIds = TRANSIT_SYSTEMS.map((s) => s.id) as string[];
       const parsed = v.split(",").filter((id) => allIds.includes(id)) as TransitSystem[];
-      return parsed.length > 0 ? parsed : TRANSIT_SYSTEMS.map((s) => s.id);
+      return parsed.length > 0 ? parsed : [...DEFAULT_TRANSIT_SYSTEMS];
     })(),
     style: str("style", DEFAULTS.style, styleIds),
     relief: bool("relief", DEFAULTS.relief),
@@ -201,6 +201,7 @@ export default function Home() {
   const [caltrainActiveColors, setCaltrainActiveColors] = useState<string[] | null>(null);
   const [lametroActiveColors, setLametroActiveColors] = useState<string[] | null>(null);
   const [smartActiveColors, setSmartActiveColors] = useState<string[] | null>(null);
+  const [munimetroActiveColors, setMunimetroActiveColors] = useState<string[] | null>(null);
   const [mapStyleId, setMapStyleId] = useState<MapStyleId>(init.style);
   const [showRelief, setShowRelief] = useState(init.relief);
   const [showPeaks, setShowPeaks] = useState(init.peaks);
@@ -255,9 +256,8 @@ export default function Home() {
     if (sunshineResolution !== DEFAULTS.sres) p.set("sres", String(sunshineResolution));
     if (sunshineDataSource !== DEFAULTS.ssrc) p.set("ssrc", sunshineDataSource);
     setBool("transit", showTransit, DEFAULTS.transit);
-    const allSysIds = TRANSIT_SYSTEMS.map((s) => s.id);
-    const isAllSystems = allSysIds.length === transitSystems.length && allSysIds.every((id) => transitSystems.includes(id));
-    if (!isAllSystems) p.set("tsys", transitSystems.join(","));
+    const isDefaultSystems = DEFAULT_TRANSIT_SYSTEMS.length === transitSystems.length && DEFAULT_TRANSIT_SYSTEMS.every((id) => transitSystems.includes(id));
+    if (!isDefaultSystems) p.set("tsys", transitSystems.join(","));
     setStr("style", mapStyleId, DEFAULTS.style);
     setBool("relief", showRelief, DEFAULTS.relief);
     setBool("peaks", showPeaks, DEFAULTS.peaks);
@@ -351,11 +351,12 @@ export default function Home() {
     setSunshineResolution(DEFAULTS.sres);
     setSunshineDataSource(DEFAULTS.ssrc);
     setShowTransit(false);
-    setTransitSystems(["bart", "caltrain", "lametro", "smart"]);
+    setTransitSystems([...DEFAULT_TRANSIT_SYSTEMS]);
     setBartActiveColors(null);
     setCaltrainActiveColors(null);
     setLametroActiveColors(null);
     setSmartActiveColors(null);
+    setMunimetroActiveColors(null);
     setSelectedTransitStopName(null);
     setFlyToTransitStop(false);
     setMapStyleId(DEFAULTS.style);
@@ -488,7 +489,7 @@ export default function Home() {
                 onDeselectSunshineHex={() => setSelectedSunshineH3(null)}
                 showTransit={showTransit}
                 transitSystems={transitSystems}
-                activeColorMap={{ bart: bartActiveColors, caltrain: caltrainActiveColors, lametro: lametroActiveColors, smart: smartActiveColors }}
+                activeColorMap={{ bart: bartActiveColors, caltrain: caltrainActiveColors, lametro: lametroActiveColors, smart: smartActiveColors, munimetro: munimetroActiveColors }}
                 selectedTransitStopName={selectedTransitStopName}
                 flyToTransitStop={flyToTransitStop}
                 onSelectTransitStop={(name) => { setFlyToTransitStop(false); setSelectedTransitStopName(name); }}
@@ -1091,13 +1092,27 @@ export default function Home() {
                                   </a>
                                 </InfoTooltip>
                               )}
+                              {sys.id === "munimetro" && (
+                                <InfoTooltip>
+                                  <a href="https://www.sfmta.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    Muni Metro
+                                  </a>
+                                  <br />
+                                  San Francisco light rail. 7 lines, 193 stops.
+                                  <br />
+                                  Data:{" "}
+                                  <a href="https://www.sfmta.com/reports/gtfs-transit-data" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    SFMTA GTFS
+                                  </a>
+                                </InfoTooltip>
+                              )}
                             </label>
                             {enabled && (
                               <div className="mt-1.5 ml-9 flex flex-col gap-1.5">
                                 {(() => {
-                                  const lines = sys.id === "bart" ? BART_LINES : sys.id === "caltrain" ? CALTRAIN_LINES : sys.id === "lametro" ? LAMETRO_LINES : sys.id === "smart" ? SMART_LINES : [];
-                                  const activeColors = sys.id === "bart" ? bartActiveColors : sys.id === "caltrain" ? caltrainActiveColors : sys.id === "lametro" ? lametroActiveColors : sys.id === "smart" ? smartActiveColors : null;
-                                  const setActiveColors = sys.id === "bart" ? setBartActiveColors : sys.id === "caltrain" ? setCaltrainActiveColors : sys.id === "lametro" ? setLametroActiveColors : sys.id === "smart" ? setSmartActiveColors : null;
+                                  const lines = sys.id === "bart" ? BART_LINES : sys.id === "caltrain" ? CALTRAIN_LINES : sys.id === "lametro" ? LAMETRO_LINES : sys.id === "smart" ? SMART_LINES : sys.id === "munimetro" ? MUNIMETRO_LINES : [];
+                                  const activeColors = sys.id === "bart" ? bartActiveColors : sys.id === "caltrain" ? caltrainActiveColors : sys.id === "lametro" ? lametroActiveColors : sys.id === "smart" ? smartActiveColors : sys.id === "munimetro" ? munimetroActiveColors : null;
+                                  const setActiveColors = sys.id === "bart" ? setBartActiveColors : sys.id === "caltrain" ? setCaltrainActiveColors : sys.id === "lametro" ? setLametroActiveColors : sys.id === "smart" ? setSmartActiveColors : sys.id === "munimetro" ? setMunimetroActiveColors : null;
                                   if (lines.length === 0 || !setActiveColors) return null;
                                   return (
                                     <div className="flex items-center gap-1.5">

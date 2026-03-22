@@ -5,6 +5,7 @@ import TransitLayer, {
   CALTRAIN_LINES,
   LAMETRO_LINES,
   SMART_LINES,
+  MUNIMETRO_LINES,
   type TransitSystem,
 } from "@/components/map/layers/transit-layer";
 import { useMap } from "react-map-gl/maplibre";
@@ -96,6 +97,7 @@ describe("TransitLayer", () => {
       { id: "bart", label: "BART" },
       { id: "caltrain", label: "Caltrain" },
       { id: "smart", label: "SMART" },
+      { id: "munimetro", label: "Muni Metro" },
       { id: "lametro", label: "LA Metro" },
     ]);
   });
@@ -732,77 +734,137 @@ describe("TransitLayer", () => {
     expect(onSelectStop).toHaveBeenCalledWith("Larkspur");
   });
 
-  // ── All four systems ──
+  // ── Muni Metro exports ──
 
-  it("renders layers for all four systems simultaneously", () => {
-    render(<TransitLayer systems={["bart", "caltrain", "lametro", "smart"]} />);
-    expect(screen.getByTestId("Source-transit-bart-routes")).toBeInTheDocument();
-    expect(screen.getByTestId("Source-transit-caltrain-routes")).toBeInTheDocument();
-    expect(screen.getByTestId("Source-transit-lametro-routes")).toBeInTheDocument();
-    expect(screen.getByTestId("Source-transit-smart-routes")).toBeInTheDocument();
+  it("exports MUNIMETRO_LINES with 7 lines and correct colors", () => {
+    expect(MUNIMETRO_LINES).toHaveLength(7);
+    const colors = MUNIMETRO_LINES.map((l) => l.color);
+    expect(colors).toContain("#A96614");
+    expect(colors).toContain("#437C93");
+    expect(colors).toContain("#942D83");
+    expect(colors).toContain("#008547");
+    expect(colors).toContain("#005B95");
+    expect(colors).toContain("#BF2B45");
+    expect(colors).toContain("#B49A36");
   });
 
-  it("queries all four stop layers on hover", () => {
-    render(<TransitLayer systems={["bart", "caltrain", "smart", "lametro"]} />);
+  it("every MUNIMETRO_LINES entry has a non-empty label", () => {
+    for (const line of MUNIMETRO_LINES) {
+      expect(line.label.length).toBeGreaterThan(0);
+    }
+  });
+
+  // ── Muni Metro rendering ──
+
+  it("renders all munimetro layer IDs when munimetro is the system", () => {
+    render(<TransitLayer systems={["munimetro"]} />);
+    expect(screen.getByTestId("Source-transit-munimetro-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-munimetro-stops")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-munimetro-routes-line-casing")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-munimetro-routes-line")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-munimetro-stops-circle")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-munimetro-stops-label")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-transit-munimetro-stops-highlight")).toBeInTheDocument();
+  });
+
+  it("applies munimetro route filter via activeColorMap", () => {
+    render(<TransitLayer systems={["munimetro"]} activeColorMap={{ munimetro: ["#005B95"] }} />);
+    const routeLayer = screen.getByTestId("Layer-transit-munimetro-routes-line");
+    const filter = JSON.parse(routeLayer.getAttribute("data-filter")!);
+    expect(filter).toEqual(["in", ["get", "color"], ["literal", ["#005B95"]]]);
+  });
+
+  it("applies munimetro stop filter via activeColorMap", () => {
+    render(<TransitLayer systems={["munimetro"]} activeColorMap={{ munimetro: ["#BF2B45"] }} />);
+    const stopsLayer = screen.getByTestId("Layer-transit-munimetro-stops-circle");
+    const filter = JSON.parse(stopsLayer.getAttribute("data-filter")!);
+    expect(filter[0]).toBe("any");
+    expect(filter[1]).toEqual(["in", "#BF2B45", ["to-string", ["get", "colors"]]]);
+  });
+
+  it("munimetro highlight layer uses name filter, not color filter", () => {
+    render(<TransitLayer systems={["munimetro"]} activeColorMap={{ munimetro: ["#005B95"] }} />);
+    const hl = screen.getByTestId("Layer-transit-munimetro-stops-highlight");
+    const filter = JSON.parse(hl.getAttribute("data-filter")!);
+    expect(filter[0]).toBe("==");
+  });
+
+  it("applies no filter when munimetro is not in activeColorMap (undefined)", () => {
+    render(<TransitLayer systems={["munimetro"]} activeColorMap={{ bart: ["#FF0000"] }} />);
+    const routeLayer = screen.getByTestId("Layer-transit-munimetro-routes-line");
+    expect(routeLayer).not.toHaveAttribute("data-filter");
+  });
+
+  it("shows tooltip with Muni Metro label on hover over munimetro stop", () => {
+    render(<TransitLayer systems={["munimetro"]} />);
 
     const onMouseMove = mockMap.on.mock.calls.find((c: any) => c[0] === "mousemove")[1];
 
-    mockMap.queryRenderedFeatures.mockReturnValue([]);
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      properties: {
+        name: "Church Station",
+        colors: JSON.stringify(["#A96614"]),
+        system: "munimetro",
+      },
+    }]);
+
     act(() => {
       onMouseMove({ target: mockMap, point: { x: 100, y: 100 } });
     });
 
-    expect(mockMap.queryRenderedFeatures).toHaveBeenCalledWith(
-      { x: 100, y: 100 },
-      { layers: [
-        "transit-bart-stops-circle",
-        "transit-caltrain-stops-circle",
-        "transit-smart-stops-circle",
-        "transit-lametro-stops-circle",
-      ] },
-    );
+    expect(screen.getByText("Church Station")).toBeInTheDocument();
+    expect(screen.getByText("Muni Metro")).toBeInTheDocument();
   });
 
-  it("queries all four stop layers on click", () => {
-    render(<TransitLayer systems={["bart", "caltrain", "smart", "lametro"]} />);
+  it("calls onSelectStop when clicking a munimetro stop", () => {
+    const onSelectStop = vi.fn();
+    render(<TransitLayer systems={["munimetro"]} onSelectStop={onSelectStop} />);
 
     const onClick = mockMap.on.mock.calls.find((c: any) => c[0] === "click")[1];
 
-    mockMap.queryRenderedFeatures.mockReturnValue([]);
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      properties: {
+        name: "Embarcadero Station",
+        colors: JSON.stringify(["#A96614", "#437C93", "#005B95"]),
+        system: "munimetro",
+      },
+    }]);
+
     act(() => {
       onClick({ target: mockMap, point: { x: 50, y: 50 } });
     });
 
-    expect(mockMap.queryRenderedFeatures).toHaveBeenCalledWith(
-      { x: 50, y: 50 },
-      { layers: [
-        "transit-bart-stops-circle",
-        "transit-caltrain-stops-circle",
-        "transit-smart-stops-circle",
-        "transit-lametro-stops-circle",
-      ] },
-    );
+    expect(onSelectStop).toHaveBeenCalledWith("Embarcadero Station");
   });
 
-  it("applies independent filters across all four systems", () => {
+  // ── All five systems ──
+
+  it("renders layers for all five systems simultaneously", () => {
+    render(<TransitLayer systems={["bart", "caltrain", "smart", "munimetro", "lametro"]} />);
+    expect(screen.getByTestId("Source-transit-bart-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-caltrain-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-smart-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-munimetro-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-lametro-routes")).toBeInTheDocument();
+  });
+
+  it("applies independent filters across all five systems", () => {
     render(
       <TransitLayer
-        systems={["bart", "caltrain", "smart", "lametro"]}
+        systems={["bart", "caltrain", "smart", "munimetro", "lametro"]}
         activeColorMap={{
           bart: ["#FF0000"],
           caltrain: null,
           smart: ["#2E8B57"],
+          munimetro: ["#005B95"],
           lametro: ["#0072BC", "#EB131B"],
         }}
       />,
     );
-    // BART filtered
     expect(screen.getByTestId("Layer-transit-bart-routes-line")).toHaveAttribute("data-filter");
-    // Caltrain unfiltered (null = show all)
     expect(screen.getByTestId("Layer-transit-caltrain-routes-line")).not.toHaveAttribute("data-filter");
-    // SMART filtered
     expect(screen.getByTestId("Layer-transit-smart-routes-line")).toHaveAttribute("data-filter");
-    // LA Metro filtered
+    expect(screen.getByTestId("Layer-transit-munimetro-routes-line")).toHaveAttribute("data-filter");
     const lametroFilter = JSON.parse(
       screen.getByTestId("Layer-transit-lametro-routes-line").getAttribute("data-filter")!,
     );

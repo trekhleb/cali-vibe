@@ -10,7 +10,7 @@ import { fetchJsonCached } from "@/utils/fetch-json";
 
 // ── Public types ──
 
-export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart";
+export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart" | "munimetro";
 
 export const TRANSIT_SYSTEMS: {
   id: TransitSystem;
@@ -19,8 +19,12 @@ export const TRANSIT_SYSTEMS: {
   { id: "bart", label: "BART" },
   { id: "caltrain", label: "Caltrain" },
   { id: "smart", label: "SMART" },
+  { id: "munimetro", label: "Muni Metro" },
   { id: "lametro", label: "LA Metro" },
 ];
+
+// Systems enabled by default (Muni Metro is opt-in due to dense overlapping stops)
+export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "lametro"];
 
 // Line colors + labels for per-line toggle UI
 export const BART_LINES: { color: string; label: string }[] = [
@@ -50,6 +54,16 @@ export const LAMETRO_LINES: { color: string; label: string }[] = [
 
 export const SMART_LINES: { color: string; label: string }[] = [
   { color: "#2E8B57", label: "Main Line" },
+];
+
+export const MUNIMETRO_LINES: { color: string; label: string }[] = [
+  { color: "#A96614", label: "J-Church" },
+  { color: "#437C93", label: "K-Ingleside" },
+  { color: "#942D83", label: "L-Taraval" },
+  { color: "#008547", label: "M-Ocean View" },
+  { color: "#005B95", label: "N-Judah" },
+  { color: "#BF2B45", label: "T-Third" },
+  { color: "#B49A36", label: "F-Market" },
 ];
 
 // Per-system active colors: null = show all, string[] = show only these
