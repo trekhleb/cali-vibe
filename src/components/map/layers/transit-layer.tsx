@@ -10,7 +10,7 @@ import { fetchJsonCached } from "@/utils/fetch-json";
 
 // ── Public types ──
 
-export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart" | "munimetro" | "vta";
+export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart" | "munimetro" | "vta" | "capitolcorridor";
 
 export const TRANSIT_SYSTEMS: {
   id: TransitSystem;
@@ -21,11 +21,12 @@ export const TRANSIT_SYSTEMS: {
   { id: "smart", label: "SMART" },
   { id: "munimetro", label: "Muni Metro" },
   { id: "vta", label: "VTA" },
+  { id: "capitolcorridor", label: "Capitol Corridor" },
   { id: "lametro", label: "LA Metro" },
 ];
 
 // Systems enabled by default (Muni Metro is opt-in due to dense overlapping stops)
-export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "vta", "lametro"];
+export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "vta", "capitolcorridor", "lametro"];
 
 // Line colors + labels for per-line toggle UI
 export const BART_LINES: { color: string; label: string }[] = [
@@ -61,6 +62,10 @@ export const VTA_LINES: { color: string; label: string }[] = [
   { color: "#007ACC", label: "Blue" },
   { color: "#379400", label: "Green" },
   { color: "#CC6600", label: "Orange" },
+];
+
+export const CAPITOLCORRIDOR_LINES: { color: string; label: string }[] = [
+  { color: "#1C4E8A", label: "Main Line" },
 ];
 
 export const MUNIMETRO_LINES: { color: string; label: string }[] = [
