@@ -82,7 +82,7 @@ Both `test` and `test-e2e` must pass before `build` and `deploy` run.
 If e2e tests are failing and you need to deploy urgently, add `[skip-e2e]` to your commit message:
 
 ```bash
-git commit -m "[skip-e2e] Urgent hotfix"
+git commit -m "[skip-e2e] urgent hotfix"
 ```
 
 This skips the e2e job while still running unit tests and lint. Use sparingly -- e2e tests exist to catch visual regressions.
