@@ -19,17 +19,31 @@ Researching California neighborhoods usually means jumping between Census tables
 - **Favorites** — Save and reorder locations; drag-and-drop list persisted in local storage
 - **Shareable state** — Every setting is encoded in the URL, so you can bookmark or share exact views
 
+**3D Terrain**
+
 ![3D Vibe](./public/demo/01-framed.png)
+
+**Temperature**
 
 ![Temperature](./public/demo/02-framed.png)
 
+**Counties map**
+
 ![Counties map](./public/demo/03-framed.png)
+
+**Crime map**
 
 ![Crime map](./public/demo/05-framed.png)
 
-![Crime map](./public/demo/06-framed.png)
+**Crime table**
+
+![Crime table](./public/demo/06-framed.png)
+
+**Transit map**
 
 ![Transit map](./public/demo/09-framed.png)
+
+And more...
 
 ## Data sources
 
