@@ -29,6 +29,8 @@ Researching California neighborhoods usually means jumping between Census tables
 
 ![Crime map](./public/demo/06-framed.png)
 
+![Transit map](./public/demo/09-framed.png)
+
 ## Data sources
 
 | Layer | Source |

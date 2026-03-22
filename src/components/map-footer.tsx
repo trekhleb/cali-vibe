@@ -166,6 +166,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">Oceanside to San Diego commuter rail. 1 line, 8 stations.</span>
           </li>
           <li>
+            <strong>Transit Data (SPRINTER)</strong>
+            <br />
+            <a href="https://gonctd.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">NCTD GTFS</a>
+            <br />
+            <span className="text-gray-500">Oceanside to Escondido light rail. 1 line, 15 stations.</span>
+          </li>
+          <li>
             <strong>Elevation Data</strong>
             <br />
             <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">AWS Terrain Tiles</a>

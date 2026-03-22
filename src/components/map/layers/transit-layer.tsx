@@ -10,7 +10,7 @@ import { fetchJsonCached } from "@/utils/fetch-json";
 
 // ── Public types ──
 
-export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart" | "munimetro" | "vta" | "capitolcorridor" | "surfliner" | "coaster";
+export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart" | "munimetro" | "vta" | "capitolcorridor" | "surfliner" | "coaster" | "sprinter";
 
 export const TRANSIT_SYSTEMS: {
   id: TransitSystem;
@@ -24,11 +24,12 @@ export const TRANSIT_SYSTEMS: {
   { id: "capitolcorridor", label: "Capitol Corridor" },
   { id: "surfliner", label: "Pacific Surfliner" },
   { id: "coaster", label: "Coaster" },
+  { id: "sprinter", label: "Sprinter" },
   { id: "lametro", label: "LA Metro" },
 ];
 
 // Systems enabled by default
-export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "munimetro", "vta", "capitolcorridor", "surfliner", "coaster", "lametro"];
+export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "munimetro", "vta", "capitolcorridor", "surfliner", "coaster", "sprinter", "lametro"];
 
 // Line colors + labels for per-line toggle UI
 export const BART_LINES: { color: string; label: string }[] = [
@@ -76,6 +77,10 @@ export const SURFLINER_LINES: { color: string; label: string }[] = [
 
 export const COASTER_LINES: { color: string; label: string }[] = [
   { color: "#00459D", label: "Main Line" },
+];
+
+export const SPRINTER_LINES: { color: string; label: string }[] = [
+  { color: "#00AB9B", label: "Main Line" },
 ];
 
 export const MUNIMETRO_LINES: { color: string; label: string }[] = [
