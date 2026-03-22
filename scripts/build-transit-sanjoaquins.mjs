@@ -104,11 +104,11 @@ function buildRoutes() {
     };
   }
 
-  // Map shape_id → route_id
+  // Map shape_id → { route_id, direction_id }
   const shapeToRoute = {};
   for (const t of trips) {
     if (t.shape_id && t.route_id && !shapeToRoute[t.shape_id]) {
-      shapeToRoute[t.shape_id] = t.route_id;
+      shapeToRoute[t.shape_id] = { routeId: t.route_id, directionId: t.direction_id || "0" };
     }
   }
 
@@ -123,47 +123,69 @@ function buildRoutes() {
     });
   }
 
-  // Deduplicate by color — keep the longest shape per color
-  const features = [];
-  const seenColors = {};
-
+  // San Joaquins has two branches (Oakland and Sacramento) sharing the same
+  // route/color. Group shapes by direction, keep the longest per direction,
+  // then label each branch by its northern terminus.
+  const directionShapes = {}; // directionId → [{ shapeId, points, routeId }]
   for (const [shapeId, points] of Object.entries(shapePoints)) {
-    const routeId = shapeToRoute[shapeId];
-    if (!routeId) continue;
-
-    const route = routeMap[routeId] || { name: routeId, color: DEFAULT_COLOR };
-    const colorKey = route.color;
-
-    if (seenColors[colorKey]) {
-      const existing = features.find(f => f.properties.color === colorKey);
-      if (existing && existing.geometry.coordinates.length >= points.length) continue;
-      const idx = features.findIndex(f => f.properties.color === colorKey);
-      if (idx >= 0) features.splice(idx, 1);
-    }
-    seenColors[colorKey] = routeId;
-
-    points.sort((a, b) => a.seq - b.seq);
-    const coords = points.map(p => [+p.lng.toFixed(5), +p.lat.toFixed(5)]);
-
-    features.push({
-      type: "Feature",
-      geometry: { type: "LineString", coordinates: coords },
-      properties: {
-        routeId,
-        name: route.name,
-        shortName: route.shortName,
-        color: route.color,
-        textColor: route.textColor,
-        system: SYSTEM_ID,
-      },
-    });
+    const info = shapeToRoute[shapeId];
+    if (!info) continue;
+    const dir = info.directionId;
+    if (!directionShapes[dir]) directionShapes[dir] = [];
+    directionShapes[dir].push({ shapeId, points, routeId: info.routeId });
   }
 
+  // Within each direction, find distinct branches by northern terminus
+  const features = [];
+  for (const entries of Object.values(directionShapes)) {
+    // Group by northernmost latitude (rounded to 0.1° to cluster same-branch shapes)
+    const byNorth = {};
+    for (const e of entries) {
+      const northLat = Math.max(...e.points.map(p => p.lat));
+      const key = northLat.toFixed(1);
+      if (!byNorth[key] || e.points.length > byNorth[key].points.length) {
+        byNorth[key] = e;
+      }
+    }
+
+    for (const e of Object.values(byNorth)) {
+      const route = routeMap[e.routeId] || { name: e.routeId, color: DEFAULT_COLOR };
+      e.points.sort((a, b) => a.seq - b.seq);
+      const coords = e.points.map(p => [+p.lng.toFixed(5), +p.lat.toFixed(5)]);
+      const northLat = Math.max(...e.points.map(p => p.lat));
+      const branchLabel = northLat > 38.5 ? "Sacramento" : "Oakland";
+
+      features.push({
+        type: "Feature",
+        geometry: { type: "LineString", coordinates: coords },
+        properties: {
+          routeId: e.routeId,
+          name: `${route.name} (${branchLabel})`,
+          shortName: route.shortName,
+          color: route.color,
+          textColor: route.textColor,
+          system: SYSTEM_ID,
+        },
+      });
+    }
+  }
+
+  // Deduplicate — keep only the longest shape per branch label
+  const seen = {};
+  const dedupedFeatures = [];
   for (const f of features) {
+    const key = f.properties.name;
+    if (!seen[key] || f.geometry.coordinates.length > seen[key].geometry.coordinates.length) {
+      seen[key] = f;
+    }
+  }
+  dedupedFeatures.push(...Object.values(seen));
+
+  for (const f of dedupedFeatures) {
     console.log(`    ${f.properties.name} → ${f.properties.color}`);
   }
-  console.log(`  ${features.length} routes`);
-  return { type: "FeatureCollection", features };
+  console.log(`  ${dedupedFeatures.length} routes`);
+  return { type: "FeatureCollection", features: dedupedFeatures };
 }
 
 // ── Build stops GeoJSON from stops.txt ──

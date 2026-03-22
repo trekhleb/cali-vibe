@@ -1202,7 +1202,7 @@ export default function Home() {
                                     San Joaquins (Gold Runner)
                                   </a>
                                   <br />
-                                  Bay Area/Sacramento to Bakersfield. 1 line, 17 stations.
+                                  Oakland &amp; Sacramento to Bakersfield. 2 branches, 17 stations.
                                   <br />
                                   Data:{" "}
                                   <a href="https://data.trilliumtransit.com/gtfs/sanjoaquins-ca-us/sanjoaquins-ca-us.zip" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
