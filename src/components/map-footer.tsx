@@ -187,6 +187,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">Southern California commuter rail. 7 lines, 67 stations.</span>
           </li>
           <li>
+            <strong>Transit Data (San Joaquins)</strong>
+            <br />
+            <a href="https://data.trilliumtransit.com/gtfs/sanjoaquins-ca-us/sanjoaquins-ca-us.zip" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">Trillium GTFS</a>
+            <br />
+            <span className="text-gray-500">San Joaquins (Gold Runner). Bay Area/Sacramento to Bakersfield. 1 line, 17 stations.</span>
+          </li>
+          <li>
             <strong>Transit Data (Sacramento RT)</strong>
             <br />
             <a href="https://www.sacrt.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">SacRT GTFS</a>
