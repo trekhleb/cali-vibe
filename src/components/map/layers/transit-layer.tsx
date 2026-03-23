@@ -10,31 +10,35 @@ import { fetchJsonCached } from "@/utils/fetch-json";
 
 // ── Public types ──
 
-export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart" | "munimetro" | "vta" | "capitolcorridor" | "surfliner" | "coaster" | "sprinter" | "sdtrolley" | "metrolink" | "sacrt" | "sanjoaquins" | "ace";
+export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart" | "munimetro" | "vta" | "capitolcorridor" | "surfliner" | "coaster" | "sprinter" | "sdtrolley" | "metrolink" | "sacrt" | "sanjoaquins" | "ace" | "coaststarlight" | "calzephyr" | "swchief";
 
 export const TRANSIT_SYSTEMS: {
   id: TransitSystem;
   label: string;
+  tag?: string;
 }[] = [
   { id: "bart", label: "BART" },
   { id: "caltrain", label: "Caltrain" },
   { id: "smart", label: "SMART" },
   { id: "munimetro", label: "Muni Metro" },
   { id: "vta", label: "VTA" },
-  { id: "capitolcorridor", label: "Capitol Corridor" },
-  { id: "surfliner", label: "Pacific Surfliner" },
+  { id: "capitolcorridor", label: "Capitol Corridor", tag: "Amtrak" },
+  { id: "surfliner", label: "Pacific Surfliner", tag: "Amtrak" },
+  { id: "sanjoaquins", label: "San Joaquins", tag: "Amtrak" },
+  { id: "coaststarlight", label: "Coast Starlight", tag: "Amtrak" },
+  { id: "calzephyr", label: "CA Zephyr", tag: "Amtrak" },
+  { id: "swchief", label: "SW Chief", tag: "Amtrak" },
   { id: "coaster", label: "Coaster" },
   { id: "sprinter", label: "Sprinter" },
   { id: "sdtrolley", label: "SD Trolley" },
   { id: "metrolink", label: "Metrolink" },
   { id: "sacrt", label: "SacRT" },
-  { id: "sanjoaquins", label: "San Joaquins" },
   { id: "ace", label: "ACE" },
   { id: "lametro", label: "LA Metro" },
 ];
 
 // Systems enabled by default
-export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "munimetro", "vta", "capitolcorridor", "surfliner", "coaster", "sprinter", "sdtrolley", "metrolink", "sacrt", "sanjoaquins", "ace", "lametro"];
+export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "munimetro", "vta", "capitolcorridor", "surfliner", "coaster", "sprinter", "sdtrolley", "metrolink", "sacrt", "sanjoaquins", "ace", "coaststarlight", "calzephyr", "swchief", "lametro"];
 
 // Line colors + labels for per-line toggle UI
 export const BART_LINES: { color: string; label: string }[] = [
@@ -110,6 +114,18 @@ export const SACRT_LINES: { color: string; label: string }[] = [
   { color: "#C4A600", label: "Gold" },
   { color: "#008040", label: "Green" },
   { color: "#0000FF", label: "Blue" },
+];
+
+export const COASTSTARLIGHT_LINES: { color: string; label: string }[] = [
+  { color: "#1C3F6E", label: "Main Line" },
+];
+
+export const CALZEPHYR_LINES: { color: string; label: string }[] = [
+  { color: "#6B3A2A", label: "Main Line" },
+];
+
+export const SWCHIEF_LINES: { color: string; label: string }[] = [
+  { color: "#B5451B", label: "Main Line" },
 ];
 
 export const ACE_LINES: { color: string; label: string }[] = [

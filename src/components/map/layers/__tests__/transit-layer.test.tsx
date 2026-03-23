@@ -15,6 +15,9 @@ import TransitLayer, {
   SACRT_LINES,
   SANJOAQUINS_LINES,
   ACE_LINES,
+  COASTSTARLIGHT_LINES,
+  CALZEPHYR_LINES,
+  SWCHIEF_LINES,
   MUNIMETRO_LINES,
   type TransitSystem,
 } from "@/components/map/layers/transit-layer";
@@ -109,14 +112,17 @@ describe("TransitLayer", () => {
       { id: "smart", label: "SMART" },
       { id: "munimetro", label: "Muni Metro" },
       { id: "vta", label: "VTA" },
-      { id: "capitolcorridor", label: "Capitol Corridor" },
-      { id: "surfliner", label: "Pacific Surfliner" },
+      { id: "capitolcorridor", label: "Capitol Corridor", tag: "Amtrak" },
+      { id: "surfliner", label: "Pacific Surfliner", tag: "Amtrak" },
+      { id: "sanjoaquins", label: "San Joaquins", tag: "Amtrak" },
+      { id: "coaststarlight", label: "Coast Starlight", tag: "Amtrak" },
+      { id: "calzephyr", label: "CA Zephyr", tag: "Amtrak" },
+      { id: "swchief", label: "SW Chief", tag: "Amtrak" },
       { id: "coaster", label: "Coaster" },
       { id: "sprinter", label: "Sprinter" },
       { id: "sdtrolley", label: "SD Trolley" },
       { id: "metrolink", label: "Metrolink" },
       { id: "sacrt", label: "SacRT" },
-      { id: "sanjoaquins", label: "San Joaquins" },
       { id: "ace", label: "ACE" },
       { id: "lametro", label: "LA Metro" },
     ]);
@@ -1293,10 +1299,49 @@ describe("TransitLayer", () => {
     expect(screen.getByText("ACE")).toBeInTheDocument();
   });
 
-  // ── All fifteen systems ──
+  // ── Coast Starlight exports ──
 
-  it("renders layers for all fifteen systems simultaneously", () => {
-    render(<TransitLayer systems={["bart", "caltrain", "smart", "vta", "capitolcorridor", "surfliner", "coaster", "sprinter", "sdtrolley", "metrolink", "sacrt", "sanjoaquins", "ace", "munimetro", "lametro"]} />);
+  it("exports COASTSTARLIGHT_LINES with 1 line and correct color", () => {
+    expect(COASTSTARLIGHT_LINES).toHaveLength(1);
+    expect(COASTSTARLIGHT_LINES.map(l => l.color)).toEqual(["#1C3F6E"]);
+  });
+
+  it("renders all coaststarlight layer IDs", () => {
+    render(<TransitLayer systems={["coaststarlight"]} />);
+    expect(screen.getByTestId("Source-transit-coaststarlight-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-coaststarlight-stops")).toBeInTheDocument();
+  });
+
+  // ── California Zephyr exports ──
+
+  it("exports CALZEPHYR_LINES with 1 line and correct color", () => {
+    expect(CALZEPHYR_LINES).toHaveLength(1);
+    expect(CALZEPHYR_LINES.map(l => l.color)).toEqual(["#6B3A2A"]);
+  });
+
+  it("renders all calzephyr layer IDs", () => {
+    render(<TransitLayer systems={["calzephyr"]} />);
+    expect(screen.getByTestId("Source-transit-calzephyr-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-calzephyr-stops")).toBeInTheDocument();
+  });
+
+  // ── Southwest Chief exports ──
+
+  it("exports SWCHIEF_LINES with 1 line and correct color", () => {
+    expect(SWCHIEF_LINES).toHaveLength(1);
+    expect(SWCHIEF_LINES.map(l => l.color)).toEqual(["#B5451B"]);
+  });
+
+  it("renders all swchief layer IDs", () => {
+    render(<TransitLayer systems={["swchief"]} />);
+    expect(screen.getByTestId("Source-transit-swchief-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-swchief-stops")).toBeInTheDocument();
+  });
+
+  // ── All eighteen systems ──
+
+  it("renders layers for all eighteen systems simultaneously", () => {
+    render(<TransitLayer systems={["bart", "caltrain", "smart", "vta", "capitolcorridor", "surfliner", "coaster", "sprinter", "sdtrolley", "metrolink", "sacrt", "sanjoaquins", "ace", "coaststarlight", "calzephyr", "swchief", "munimetro", "lametro"]} />);
     expect(screen.getByTestId("Source-transit-bart-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-caltrain-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-smart-routes")).toBeInTheDocument();
@@ -1310,14 +1355,17 @@ describe("TransitLayer", () => {
     expect(screen.getByTestId("Source-transit-sacrt-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-sanjoaquins-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-ace-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-coaststarlight-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-calzephyr-routes")).toBeInTheDocument();
+    expect(screen.getByTestId("Source-transit-swchief-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-munimetro-routes")).toBeInTheDocument();
     expect(screen.getByTestId("Source-transit-lametro-routes")).toBeInTheDocument();
   });
 
-  it("applies independent filters across all fifteen systems", () => {
+  it("applies independent filters across all eighteen systems", () => {
     render(
       <TransitLayer
-        systems={["bart", "caltrain", "smart", "vta", "capitolcorridor", "surfliner", "coaster", "sprinter", "sdtrolley", "metrolink", "sacrt", "sanjoaquins", "ace", "munimetro", "lametro"]}
+        systems={["bart", "caltrain", "smart", "vta", "capitolcorridor", "surfliner", "coaster", "sprinter", "sdtrolley", "metrolink", "sacrt", "sanjoaquins", "ace", "coaststarlight", "calzephyr", "swchief", "munimetro", "lametro"]}
         activeColorMap={{
           bart: ["#FF0000"],
           caltrain: null,
@@ -1332,6 +1380,9 @@ describe("TransitLayer", () => {
           sacrt: ["#C4A600"],
           sanjoaquins: ["#1A6B8A"],
           ace: ["#77297D"],
+          coaststarlight: ["#1C3F6E"],
+          calzephyr: ["#6B3A2A"],
+          swchief: ["#B5451B"],
           munimetro: ["#005B95"],
           lametro: ["#0072BC", "#EB131B"],
         }}
@@ -1350,6 +1401,9 @@ describe("TransitLayer", () => {
     expect(screen.getByTestId("Layer-transit-sacrt-routes-line")).toHaveAttribute("data-filter");
     expect(screen.getByTestId("Layer-transit-sanjoaquins-routes-line")).toHaveAttribute("data-filter");
     expect(screen.getByTestId("Layer-transit-ace-routes-line")).toHaveAttribute("data-filter");
+    expect(screen.getByTestId("Layer-transit-coaststarlight-routes-line")).toHaveAttribute("data-filter");
+    expect(screen.getByTestId("Layer-transit-calzephyr-routes-line")).toHaveAttribute("data-filter");
+    expect(screen.getByTestId("Layer-transit-swchief-routes-line")).toHaveAttribute("data-filter");
     expect(screen.getByTestId("Layer-transit-munimetro-routes-line")).toHaveAttribute("data-filter");
     const lametroFilter = JSON.parse(
       screen.getByTestId("Layer-transit-lametro-routes-line").getAttribute("data-filter")!,

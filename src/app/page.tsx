@@ -21,7 +21,7 @@ import PopulationTableModal from "@/components/population-table-modal";
 import TemperatureTableModal from "@/components/temperature-table-modal";
 import SunshineTableModal from "@/components/sunshine-table-modal";
 import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution, type SunshineDataSource } from "@/components/map/layers/sunshine-layer";
-import { TRANSIT_SYSTEMS, DEFAULT_TRANSIT_SYSTEMS, BART_LINES, CALTRAIN_LINES, LAMETRO_LINES, SMART_LINES, VTA_LINES, CAPITOLCORRIDOR_LINES, SURFLINER_LINES, COASTER_LINES, SPRINTER_LINES, SDTROLLEY_LINES, METROLINK_LINES, SACRT_LINES, SANJOAQUINS_LINES, ACE_LINES, MUNIMETRO_LINES, type TransitSystem, type ActiveColorMap } from "@/components/map/layers/transit-layer";
+import { TRANSIT_SYSTEMS, DEFAULT_TRANSIT_SYSTEMS, BART_LINES, CALTRAIN_LINES, LAMETRO_LINES, SMART_LINES, VTA_LINES, CAPITOLCORRIDOR_LINES, SURFLINER_LINES, COASTER_LINES, SPRINTER_LINES, SDTROLLEY_LINES, METROLINK_LINES, SACRT_LINES, SANJOAQUINS_LINES, ACE_LINES, COASTSTARLIGHT_LINES, CALZEPHYR_LINES, SWCHIEF_LINES, MUNIMETRO_LINES, type TransitSystem, type ActiveColorMap } from "@/components/map/layers/transit-layer";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useGeoJsonFeatureCount } from "@/hooks/use-geojson-feature-count";
@@ -212,6 +212,9 @@ export default function Home() {
   const [sacrtActiveColors, setSacrtActiveColors] = useState<string[] | null>(null);
   const [sanjoaquinsActiveColors, setSanjoaquinsActiveColors] = useState<string[] | null>(null);
   const [aceActiveColors, setAceActiveColors] = useState<string[] | null>(null);
+  const [coaststarlightActiveColors, setCoaststarlightActiveColors] = useState<string[] | null>(null);
+  const [calzephyrActiveColors, setCalzephyrActiveColors] = useState<string[] | null>(null);
+  const [swchiefActiveColors, setSwchiefActiveColors] = useState<string[] | null>(null);
   const [munimetroActiveColors, setMunimetroActiveColors] = useState<string[] | null>(null);
   const [mapStyleId, setMapStyleId] = useState<MapStyleId>(init.style);
   const [showRelief, setShowRelief] = useState(init.relief);
@@ -377,6 +380,9 @@ export default function Home() {
     setSacrtActiveColors(null);
     setSanjoaquinsActiveColors(null);
     setAceActiveColors(null);
+    setCoaststarlightActiveColors(null);
+    setCalzephyrActiveColors(null);
+    setSwchiefActiveColors(null);
     setMunimetroActiveColors(null);
     setSelectedTransitStopName(null);
     setFlyToTransitStop(false);
@@ -510,7 +516,7 @@ export default function Home() {
                 onDeselectSunshineHex={() => setSelectedSunshineH3(null)}
                 showTransit={showTransit}
                 transitSystems={transitSystems}
-                activeColorMap={{ bart: bartActiveColors, caltrain: caltrainActiveColors, lametro: lametroActiveColors, smart: smartActiveColors, vta: vtaActiveColors, capitolcorridor: capitolcorridorActiveColors, surfliner: surflinerActiveColors, coaster: coasterActiveColors, sprinter: sprinterActiveColors, sdtrolley: sdtrolleyActiveColors, metrolink: metrolinkActiveColors, sacrt: sacrtActiveColors, sanjoaquins: sanjoaquinsActiveColors, ace: aceActiveColors, munimetro: munimetroActiveColors }}
+                activeColorMap={{ bart: bartActiveColors, caltrain: caltrainActiveColors, lametro: lametroActiveColors, smart: smartActiveColors, vta: vtaActiveColors, capitolcorridor: capitolcorridorActiveColors, surfliner: surflinerActiveColors, coaster: coasterActiveColors, sprinter: sprinterActiveColors, sdtrolley: sdtrolleyActiveColors, metrolink: metrolinkActiveColors, sacrt: sacrtActiveColors, sanjoaquins: sanjoaquinsActiveColors, ace: aceActiveColors, coaststarlight: coaststarlightActiveColors, calzephyr: calzephyrActiveColors, swchief: swchiefActiveColors, munimetro: munimetroActiveColors }}
                 selectedTransitStopName={selectedTransitStopName}
                 flyToTransitStop={flyToTransitStop}
                 onSelectTransitStop={(name) => { setFlyToTransitStop(false); setSelectedTransitStopName(name); }}
@@ -1057,7 +1063,7 @@ export default function Home() {
                                 }}
                                 size="sm"
                               />
-                              <span className="text-sm font-medium text-gray-700">{sys.label}</span>
+                              <span className="text-sm font-medium text-gray-700">{sys.label}{sys.tag && <span className="ml-1 text-[10px] font-normal text-gray-400">{sys.tag}</span>}</span>
                               {sys.id === "bart" && (
                                 <InfoTooltip>
                                   <a href="https://www.bart.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
@@ -1226,6 +1232,48 @@ export default function Home() {
                                   </a>
                                 </InfoTooltip>
                               )}
+                              {sys.id === "coaststarlight" && (
+                                <InfoTooltip>
+                                  <a href="https://www.amtrak.com/coast-starlight-train" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    Coast Starlight
+                                  </a>
+                                  <br />
+                                  LA to Seattle (CA segment). 19 stations.
+                                  <br />
+                                  Data:{" "}
+                                  <a href="https://content.amtrak.com/content/gtfs/GTFS.zip" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    Amtrak GTFS
+                                  </a>
+                                </InfoTooltip>
+                              )}
+                              {sys.id === "calzephyr" && (
+                                <InfoTooltip>
+                                  <a href="https://www.amtrak.com/california-zephyr-train" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    California Zephyr
+                                  </a>
+                                  <br />
+                                  Emeryville to Chicago (CA segment). 9 stations.
+                                  <br />
+                                  Data:{" "}
+                                  <a href="https://content.amtrak.com/content/gtfs/GTFS.zip" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    Amtrak GTFS
+                                  </a>
+                                </InfoTooltip>
+                              )}
+                              {sys.id === "swchief" && (
+                                <InfoTooltip>
+                                  <a href="https://www.amtrak.com/southwest-chief-train" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    Southwest Chief
+                                  </a>
+                                  <br />
+                                  LA to Chicago (CA segment). 9 stations.
+                                  <br />
+                                  Data:{" "}
+                                  <a href="https://content.amtrak.com/content/gtfs/GTFS.zip" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                                    Amtrak GTFS
+                                  </a>
+                                </InfoTooltip>
+                              )}
                               {sys.id === "surfliner" && (
                                 <InfoTooltip>
                                   <a href="https://www.pacificsurfliner.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
@@ -1296,9 +1344,9 @@ export default function Home() {
                             {enabled && (
                               <div className="mt-1.5 ml-9 flex flex-col gap-1.5">
                                 {(() => {
-                                  const lines = sys.id === "bart" ? BART_LINES : sys.id === "caltrain" ? CALTRAIN_LINES : sys.id === "lametro" ? LAMETRO_LINES : sys.id === "smart" ? SMART_LINES : sys.id === "vta" ? VTA_LINES : sys.id === "capitolcorridor" ? CAPITOLCORRIDOR_LINES : sys.id === "surfliner" ? SURFLINER_LINES : sys.id === "coaster" ? COASTER_LINES : sys.id === "sprinter" ? SPRINTER_LINES : sys.id === "sdtrolley" ? SDTROLLEY_LINES : sys.id === "metrolink" ? METROLINK_LINES : sys.id === "sacrt" ? SACRT_LINES : sys.id === "sanjoaquins" ? SANJOAQUINS_LINES : sys.id === "ace" ? ACE_LINES : sys.id === "munimetro" ? MUNIMETRO_LINES : [];
-                                  const activeColors = sys.id === "bart" ? bartActiveColors : sys.id === "caltrain" ? caltrainActiveColors : sys.id === "lametro" ? lametroActiveColors : sys.id === "smart" ? smartActiveColors : sys.id === "vta" ? vtaActiveColors : sys.id === "capitolcorridor" ? capitolcorridorActiveColors : sys.id === "surfliner" ? surflinerActiveColors : sys.id === "coaster" ? coasterActiveColors : sys.id === "sprinter" ? sprinterActiveColors : sys.id === "sdtrolley" ? sdtrolleyActiveColors : sys.id === "metrolink" ? metrolinkActiveColors : sys.id === "sacrt" ? sacrtActiveColors : sys.id === "sanjoaquins" ? sanjoaquinsActiveColors : sys.id === "ace" ? aceActiveColors : sys.id === "munimetro" ? munimetroActiveColors : null;
-                                  const setActiveColors = sys.id === "bart" ? setBartActiveColors : sys.id === "caltrain" ? setCaltrainActiveColors : sys.id === "lametro" ? setLametroActiveColors : sys.id === "smart" ? setSmartActiveColors : sys.id === "vta" ? setVtaActiveColors : sys.id === "capitolcorridor" ? setCapitolcorridorActiveColors : sys.id === "surfliner" ? setSurflinerActiveColors : sys.id === "coaster" ? setCoasterActiveColors : sys.id === "sprinter" ? setSprinterActiveColors : sys.id === "sdtrolley" ? setSdtrolleyActiveColors : sys.id === "metrolink" ? setMetrolinkActiveColors : sys.id === "sacrt" ? setSacrtActiveColors : sys.id === "sanjoaquins" ? setSanjoaquinsActiveColors : sys.id === "ace" ? setAceActiveColors : sys.id === "munimetro" ? setMunimetroActiveColors : null;
+                                  const lines = sys.id === "bart" ? BART_LINES : sys.id === "caltrain" ? CALTRAIN_LINES : sys.id === "lametro" ? LAMETRO_LINES : sys.id === "smart" ? SMART_LINES : sys.id === "vta" ? VTA_LINES : sys.id === "capitolcorridor" ? CAPITOLCORRIDOR_LINES : sys.id === "surfliner" ? SURFLINER_LINES : sys.id === "coaster" ? COASTER_LINES : sys.id === "sprinter" ? SPRINTER_LINES : sys.id === "sdtrolley" ? SDTROLLEY_LINES : sys.id === "metrolink" ? METROLINK_LINES : sys.id === "sacrt" ? SACRT_LINES : sys.id === "sanjoaquins" ? SANJOAQUINS_LINES : sys.id === "ace" ? ACE_LINES : sys.id === "coaststarlight" ? COASTSTARLIGHT_LINES : sys.id === "calzephyr" ? CALZEPHYR_LINES : sys.id === "swchief" ? SWCHIEF_LINES : sys.id === "munimetro" ? MUNIMETRO_LINES : [];
+                                  const activeColors = sys.id === "bart" ? bartActiveColors : sys.id === "caltrain" ? caltrainActiveColors : sys.id === "lametro" ? lametroActiveColors : sys.id === "smart" ? smartActiveColors : sys.id === "vta" ? vtaActiveColors : sys.id === "capitolcorridor" ? capitolcorridorActiveColors : sys.id === "surfliner" ? surflinerActiveColors : sys.id === "coaster" ? coasterActiveColors : sys.id === "sprinter" ? sprinterActiveColors : sys.id === "sdtrolley" ? sdtrolleyActiveColors : sys.id === "metrolink" ? metrolinkActiveColors : sys.id === "sacrt" ? sacrtActiveColors : sys.id === "sanjoaquins" ? sanjoaquinsActiveColors : sys.id === "ace" ? aceActiveColors : sys.id === "coaststarlight" ? coaststarlightActiveColors : sys.id === "calzephyr" ? calzephyrActiveColors : sys.id === "swchief" ? swchiefActiveColors : sys.id === "munimetro" ? munimetroActiveColors : null;
+                                  const setActiveColors = sys.id === "bart" ? setBartActiveColors : sys.id === "caltrain" ? setCaltrainActiveColors : sys.id === "lametro" ? setLametroActiveColors : sys.id === "smart" ? setSmartActiveColors : sys.id === "vta" ? setVtaActiveColors : sys.id === "capitolcorridor" ? setCapitolcorridorActiveColors : sys.id === "surfliner" ? setSurflinerActiveColors : sys.id === "coaster" ? setCoasterActiveColors : sys.id === "sprinter" ? setSprinterActiveColors : sys.id === "sdtrolley" ? setSdtrolleyActiveColors : sys.id === "metrolink" ? setMetrolinkActiveColors : sys.id === "sacrt" ? setSacrtActiveColors : sys.id === "sanjoaquins" ? setSanjoaquinsActiveColors : sys.id === "ace" ? setAceActiveColors : sys.id === "coaststarlight" ? setCoaststarlightActiveColors : sys.id === "calzephyr" ? setCalzephyrActiveColors : sys.id === "swchief" ? setSwchiefActiveColors : sys.id === "munimetro" ? setMunimetroActiveColors : null;
                                   if (lines.length === 0 || !setActiveColors) return null;
                                   return (
                                     <div className="flex items-center gap-1.5">

@@ -159,6 +159,27 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">San Luis Obispo to San Diego. 1 line, 28 stations.</span>
           </li>
           <li>
+            <strong>Transit Data (Coast Starlight)</strong>
+            <br />
+            <a href="https://content.amtrak.com/content/gtfs/GTFS.zip" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">Amtrak GTFS</a>
+            <br />
+            <span className="text-gray-500">LA to Seattle (CA segment). 19 stations.</span>
+          </li>
+          <li>
+            <strong>Transit Data (California Zephyr)</strong>
+            <br />
+            <a href="https://content.amtrak.com/content/gtfs/GTFS.zip" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">Amtrak GTFS</a>
+            <br />
+            <span className="text-gray-500">Emeryville to Chicago (CA segment). 9 stations.</span>
+          </li>
+          <li>
+            <strong>Transit Data (Southwest Chief)</strong>
+            <br />
+            <a href="https://content.amtrak.com/content/gtfs/GTFS.zip" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">Amtrak GTFS</a>
+            <br />
+            <span className="text-gray-500">LA to Chicago (CA segment). 9 stations.</span>
+          </li>
+          <li>
             <strong>Transit Data (COASTER)</strong>
             <br />
             <a href="https://gonctd.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">NCTD GTFS</a>
