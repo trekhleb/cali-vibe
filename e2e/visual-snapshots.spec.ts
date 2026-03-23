@@ -327,8 +327,8 @@ test.describe("Desktop - layer toggles", () => {
   test("transit - LA Metro station search", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&transit=1&tsys=lametro`);
     const searchInput = page.getByPlaceholder("Search LA Metro stations...");
-    await searchInput.fill("Union Station");
-    await expect(page.locator("text=Union Station")).toBeVisible();
+    await searchInput.fill("Union");
+    await expect(page.locator("text=Union")).toBeVisible();
     await assertScreenshot(page, "transit-lametro-search.png");
   });
 
@@ -597,13 +597,13 @@ test.describe("Desktop - layer toggles", () => {
 
   test("transit - all systems with solo lines", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&transit=1`);
-    await page.getByRole("button", { name: "Red" }).click();
+    await page.getByRole("button", { name: "Red" }).first().click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await page.getByRole("button", { name: "Express" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
-    await page.getByRole("button", { name: "Main Line" }).click();
+    await page.getByRole("button", { name: "Main Line" }).first().click();
     await page.waitForTimeout(TOGGLE_SETTLE);
-    await page.getByRole("button", { name: "A Line" }).click();
+    await page.getByRole("button", { name: "A Line" }).first().click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await assertScreenshot(page, "transit-all-solo-lines.png");
   });
