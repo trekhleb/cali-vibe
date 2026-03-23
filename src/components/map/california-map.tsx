@@ -21,6 +21,10 @@ import CountyCrimeLayer, {
   CrimeLegend,
   type CrimeType,
 } from "./layers/county-crime-layer";
+import CountyHousingLayer, {
+  HousingLegend,
+  type HousingMetric,
+} from "./layers/county-housing-layer";
 import CityBordersLayer, { type CityDisplayMode } from "./layers/city-borders-layer";
 import CityCrimeLayer, { CityCrimeLegend } from "./layers/city-crime-layer";
 import TemperatureLayer, {
@@ -60,6 +64,9 @@ interface CaliforniaMapProps {
   showCrime?: boolean;
   crimeType?: CrimeType;
   selectedCrimeCountyName?: string | null;
+  showHousing?: boolean;
+  housingMetric?: HousingMetric;
+  selectedHousingCountyName?: string | null;
   showCityCrime?: boolean;
   cityCrimeType?: CrimeType;
   selectedCrimeCityName?: string | null;
@@ -106,6 +113,9 @@ export default function CaliforniaMap({
   showCrime = false,
   crimeType = "total",
   selectedCrimeCountyName = null,
+  showHousing = false,
+  housingMetric = "homeValue",
+  selectedHousingCountyName = null,
   showCityCrime = false,
   cityCrimeType = "total",
   selectedCrimeCityName = null,
@@ -144,7 +154,7 @@ export default function CaliforniaMap({
   // Smart zoom for "locate me": city layers → street level, county → county level
   const locateZoom =
     showCities || showCityCrime ? 11 :
-    showCounties || showPopulation || showCrime ? 8 :
+    showCounties || showPopulation || showCrime || showHousing ? 8 :
     showTemperature || showSunshine ? 9 : 10;
 
   return (
@@ -161,7 +171,7 @@ export default function CaliforniaMap({
           <Layer {...hillshadeLayer} />
         </Source>
       )}
-      {showCounties && !showPopulation && !showCrime && (
+      {showCounties && !showPopulation && !showCrime && !showHousing && (
         <CountyBordersLayer
           displayMode={countyDisplayMode}
           onToggleFavorite={onToggleCountyFavorite}
@@ -170,8 +180,10 @@ export default function CaliforniaMap({
           selectName={selectedCountyName}
         />
       )}
-      {showPopulation && !showCrime && <CountyPopulationLayer overlayOffset={overlayOffset} selectName={selectedPopulationCountyName} />}
-      {showPopulation && !showCrime && <PopulationLegend overlayOffset={overlayOffset} />}
+      {showPopulation && !showCrime && !showHousing && <CountyPopulationLayer overlayOffset={overlayOffset} selectName={selectedPopulationCountyName} />}
+      {showPopulation && !showCrime && !showHousing && <PopulationLegend overlayOffset={overlayOffset} />}
+      {showHousing && <CountyHousingLayer housingMetric={housingMetric} overlayOffset={overlayOffset} selectName={selectedHousingCountyName} />}
+      {showHousing && <HousingLegend housingMetric={housingMetric} overlayOffset={overlayOffset} />}
       {showCities && (
         <CityBordersLayer
           displayMode={cityDisplayMode}

@@ -18,6 +18,8 @@ import ErrorBoundary from "@/components/error-boundary";
 import MapFooter from "@/components/map-footer";
 import CrimeTableModal from "@/components/crime-table-modal";
 import PopulationTableModal from "@/components/population-table-modal";
+import HousingTableModal from "@/components/housing-table-modal";
+import { HOUSING_LABELS, type HousingMetric } from "@/components/map/layers/county-housing-layer";
 import TemperatureTableModal from "@/components/temperature-table-modal";
 import SunshineTableModal from "@/components/sunshine-table-modal";
 import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution, type SunshineDataSource } from "@/components/map/layers/sunshine-layer";
@@ -49,6 +51,7 @@ import {
   LuSiren,
   LuMountain,
   LuTrainFront,
+  LuHouse,
 } from "react-icons/lu";
 import { RiFocus3Line, RiFocus3Fill } from "react-icons/ri";
 import { FaGithub } from "react-icons/fa";
@@ -56,6 +59,7 @@ import type { California3DTerrainRef } from "@/components/map/terrain-3d/califor
 
 const crimeTypeIds = Object.keys(CRIME_LABELS) as CrimeType[];
 const tempMetricIds = Object.keys(METRIC_LABELS) as TempMetric[];
+const housingMetricIds = Object.keys(HOUSING_LABELS) as HousingMetric[];
 
 const CaliforniaMap = lazy(() => import("@/components/map/california-map"));
 const California3DTerrain = lazy(() => import("@/components/map/terrain-3d/california-3d-terrain"));
@@ -82,6 +86,8 @@ const DEFAULTS = {
   cimode: "colored" as CityDisplayMode,
   crime: false,
   ctype: "total" as CrimeType,
+  housing: false,
+  hmetric: "homeValue" as HousingMetric,
   cityCrime: false,
   cictype: "total" as CrimeType,
   style: "light" as MapStyleId,
@@ -121,6 +127,8 @@ function readParams() {
     cimode: str("cimode", DEFAULTS.cimode, ["borders", "colored"] as const),
     crime: bool("crime", DEFAULTS.crime),
     ctype: str("ctype", DEFAULTS.ctype, crimeTypeIds),
+    housing: bool("housing", DEFAULTS.housing),
+    hmetric: str("hmetric", DEFAULTS.hmetric, housingMetricIds),
     cityCrime: bool("cityCrime", DEFAULTS.cityCrime),
     cictype: str("cictype", DEFAULTS.cictype, crimeTypeIds),
     temp: bool("temp", DEFAULTS.temp),
@@ -178,6 +186,8 @@ export default function Home() {
   const [cityDisplayMode, setCityDisplayMode] = useState<CityDisplayMode>(init.cimode);
   const [showCrime, setShowCrime] = useState(init.crime);
   const [crimeType, setCrimeType] = useState<CrimeType>(init.ctype);
+  const [showHousing, setShowHousing] = useState(init.housing);
+  const [housingMetric, setHousingMetric] = useState<HousingMetric>(init.hmetric);
   const [showCityCrime, setShowCityCrime] = useState(init.cityCrime);
   const [cityCrimeType, setCityCrimeType] = useState<CrimeType>(init.cictype);
   const [showTemperature, setShowTemperature] = useState(init.temp);
@@ -232,6 +242,8 @@ export default function Home() {
   const [showPopulationTable, setShowPopulationTable] = useState(false);
   const [showCountyCrimeTable, setShowCountyCrimeTable] = useState(false);
   const [showCityCrimeTable, setShowCityCrimeTable] = useState(false);
+  const [showHousingTable, setShowHousingTable] = useState(false);
+  const [selectedHousingCountyName, setSelectedHousingCountyName] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const tempHexUrl = `${import.meta.env.BASE_URL}data/california-temperature-h3-res${tempResolution}.geojson`;
@@ -258,6 +270,8 @@ export default function Home() {
     setStr("cimode", cityDisplayMode, DEFAULTS.cimode);
     setBool("crime", showCrime, DEFAULTS.crime);
     setStr("ctype", crimeType, DEFAULTS.ctype);
+    setBool("housing", showHousing, DEFAULTS.housing);
+    setStr("hmetric", housingMetric, DEFAULTS.hmetric);
     setBool("cityCrime", showCityCrime, DEFAULTS.cityCrime);
     setStr("cictype", cityCrimeType, DEFAULTS.cictype);
     setBool("temp", showTemperature, DEFAULTS.temp);
@@ -281,7 +295,7 @@ export default function Home() {
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -305,27 +319,31 @@ export default function Home() {
   // --- Mutually exclusive toggle helpers ---
   const toggleCounties = (on: boolean) => {
     setShowCounties(on);
-    if (on) { setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const togglePopulation = (on: boolean) => {
     setShowPopulation(on);
-    if (on) { setShowCounties(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleCrime = (on: boolean) => {
     setShowCrime(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowHousing(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+  };
+  const toggleHousing = (on: boolean) => {
+    setShowHousing(on);
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleCityCrime = (on: boolean) => {
     setShowCityCrime(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCities(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCities(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleTemperature = (on: boolean) => {
     setShowTemperature(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowCities(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowCities(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleSunshine = (on: boolean) => {
     setShowSunshine(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowCities(false); setShowTemperature(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowCities(false); setShowTemperature(false); setShowRelief(false); }
   };
   const toggleCities = (on: boolean) => {
     setShowCities(on);
@@ -341,7 +359,7 @@ export default function Home() {
   };
   const toggleRelief = (on: boolean) => {
     setShowRelief(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
   };
 
   const resetAll = useCallback(() => {
@@ -353,6 +371,8 @@ export default function Home() {
     setCityDisplayMode("colored");
     setShowCrime(false);
     setCrimeType("total");
+    setShowHousing(false);
+    setHousingMetric("homeValue");
     setShowCityCrime(false);
     setCityCrimeType("total");
     setShowTemperature(false);
@@ -395,6 +415,7 @@ export default function Home() {
     setSelectedCityName(null);
     setSelectedPopulationCountyName(null);
     setSelectedCrimeCountyName(null);
+    setSelectedHousingCountyName(null);
     setSelectedCrimeCityName(null);
   }, []);
 
@@ -430,6 +451,10 @@ export default function Home() {
 
   const goToCrimeCity = useCallback((name: string) => {
     setSelectedCrimeCityName(name);
+  }, []);
+
+  const goToHousingCounty = useCallback((name: string) => {
+    setSelectedHousingCountyName(name);
   }, []);
 
   const hasAnyFavorites = favorites.length > 0;
@@ -496,6 +521,9 @@ export default function Home() {
                 showCrime={showCrime}
                 crimeType={crimeType}
                 selectedCrimeCountyName={selectedCrimeCountyName}
+                showHousing={showHousing}
+                housingMetric={housingMetric}
+                selectedHousingCountyName={selectedHousingCountyName}
                 showCityCrime={showCityCrime}
                 cityCrimeType={cityCrimeType}
                 selectedCrimeCityName={selectedCrimeCityName}
@@ -729,6 +757,52 @@ export default function Home() {
                       </div>
                       <button
                         onClick={() => setShowCountyCrimeTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* County housing toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showHousing ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showHousing} onChange={toggleHousing} />
+                    <LuHouse className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">Housing Cost</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Median Home Value &amp; Median Gross Rent by county.
+                    </InfoTooltip>
+                  </label>
+                  {showHousing && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={housingMetric}
+                          onChange={(e) => setHousingMetric(e.target.value as HousingMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {housingMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {HOUSING_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowHousingTable(true)}
                         className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
                       >
                         <LuTable className="h-4 w-4 text-gray-900" />
@@ -1564,6 +1638,15 @@ export default function Home() {
         nameLabel="City"
         activeCrimeType={cityCrimeType}
         onSelectName={goToCrimeCity}
+      />
+      <HousingTableModal
+        open={showHousingTable}
+        onClose={() => setShowHousingTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-county-labels.geojson`}
+        title="County Housing Cost (ACS 2019–2023)"
+        nameLabel="County"
+        activeHousingMetric={housingMetric}
+        onSelectName={goToHousingCounty}
       />
       <TemperatureTableModal
         open={showTempTable}
