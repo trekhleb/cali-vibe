@@ -1,6 +1,7 @@
 import { render, screen, act } from "@testing-library/react";
 import TransitLayer, {
   TRANSIT_SYSTEMS,
+  DEFAULT_TRANSIT_SYSTEMS,
   BART_LINES,
   CALTRAIN_LINES,
   LAMETRO_LINES,
@@ -1409,5 +1410,172 @@ describe("TransitLayer", () => {
       screen.getByTestId("Layer-transit-lametro-routes-line").getAttribute("data-filter")!,
     );
     expect(lametroFilter[2]).toEqual(["literal", ["#0072BC", "#EB131B"]]);
+  });
+
+  // ── DEFAULT_TRANSIT_SYSTEMS ──
+
+  it("exports DEFAULT_TRANSIT_SYSTEMS with all 18 system ids", () => {
+    expect(DEFAULT_TRANSIT_SYSTEMS).toHaveLength(18);
+    const systemIds = TRANSIT_SYSTEMS.map(s => s.id);
+    for (const id of DEFAULT_TRANSIT_SYSTEMS) {
+      expect(systemIds).toContain(id);
+    }
+  });
+
+  it("DEFAULT_TRANSIT_SYSTEMS contains no duplicates", () => {
+    expect(new Set(DEFAULT_TRANSIT_SYSTEMS).size).toBe(DEFAULT_TRANSIT_SYSTEMS.length);
+  });
+
+  // ── Amtrak tag ──
+
+  it("marks exactly the 6 Amtrak systems with tag", () => {
+    const amtrakIds = ["capitolcorridor", "surfliner", "sanjoaquins", "coaststarlight", "calzephyr", "swchief"];
+    const tagged = TRANSIT_SYSTEMS.filter(s => s.tag);
+    expect(tagged).toHaveLength(6);
+    for (const sys of tagged) {
+      expect(sys.tag).toBe("Amtrak");
+      expect(amtrakIds).toContain(sys.id);
+    }
+  });
+
+  it("non-Amtrak systems have no tag", () => {
+    const nonAmtrak = TRANSIT_SYSTEMS.filter(s => !["capitolcorridor", "surfliner", "sanjoaquins", "coaststarlight", "calzephyr", "swchief"].includes(s.id));
+    for (const sys of nonAmtrak) {
+      expect(sys.tag).toBeUndefined();
+    }
+  });
+
+  // ── Amtrak systems are grouped together ──
+
+  it("renders all 6 Amtrak systems consecutively in TRANSIT_SYSTEMS", () => {
+    const amtrakIds = new Set(["capitolcorridor", "surfliner", "sanjoaquins", "coaststarlight", "calzephyr", "swchief"]);
+    const indices = TRANSIT_SYSTEMS.map((s, i) => amtrakIds.has(s.id) ? i : -1).filter(i => i >= 0);
+    // All indices should be consecutive
+    for (let i = 1; i < indices.length; i++) {
+      expect(indices[i]).toBe(indices[i - 1] + 1);
+    }
+  });
+
+  // ── Parameterized tests for systems missing full coverage ──
+
+  const systemsNeedingCoverage: { id: TransitSystem; label: string; color: string; stopName: string }[] = [
+    { id: "coaster", label: "Coaster", color: "#00459D", stopName: "Oceanside" },
+    { id: "sprinter", label: "Sprinter", color: "#00AB9B", stopName: "Escondido" },
+    { id: "sdtrolley", label: "SD Trolley", color: "#0000FF", stopName: "Old Town" },
+    { id: "metrolink", label: "Metrolink", color: "#00AF43", stopName: "L.A. Union" },
+    { id: "sacrt", label: "SacRT", color: "#C4A600", stopName: "7th & Capitol" },
+    { id: "sanjoaquins", label: "San Joaquins", color: "#1A6B8A", stopName: "Fresno" },
+    { id: "ace", label: "ACE", color: "#77297D", stopName: "Stockton" },
+    { id: "coaststarlight", label: "Coast Starlight", color: "#1C3F6E", stopName: "Emeryville" },
+    { id: "calzephyr", label: "CA Zephyr", color: "#6B3A2A", stopName: "Sacramento" },
+    { id: "swchief", label: "SW Chief", color: "#B5451B", stopName: "Barstow" },
+  ];
+
+  describe.each(systemsNeedingCoverage)("$label ($id)", ({ id, label, color, stopName }) => {
+    it("renders all 7 layer IDs", () => {
+      render(<TransitLayer systems={[id]} />);
+      expect(screen.getByTestId(`Source-transit-${id}-routes`)).toBeInTheDocument();
+      expect(screen.getByTestId(`Source-transit-${id}-stops`)).toBeInTheDocument();
+      expect(screen.getByTestId(`Layer-transit-${id}-routes-line-casing`)).toBeInTheDocument();
+      expect(screen.getByTestId(`Layer-transit-${id}-routes-line`)).toBeInTheDocument();
+      expect(screen.getByTestId(`Layer-transit-${id}-stops-circle`)).toBeInTheDocument();
+      expect(screen.getByTestId(`Layer-transit-${id}-stops-label`)).toBeInTheDocument();
+      expect(screen.getByTestId(`Layer-transit-${id}-stops-highlight`)).toBeInTheDocument();
+    });
+
+    it("applies route filter via activeColorMap", () => {
+      render(<TransitLayer systems={[id]} activeColorMap={{ [id]: [color] }} />);
+      const routeLayer = screen.getByTestId(`Layer-transit-${id}-routes-line`);
+      const filter = JSON.parse(routeLayer.getAttribute("data-filter")!);
+      expect(filter).toEqual(["in", ["get", "color"], ["literal", [color]]]);
+    });
+
+    it("applies stop filter via activeColorMap", () => {
+      render(<TransitLayer systems={[id]} activeColorMap={{ [id]: [color] }} />);
+      const stopsLayer = screen.getByTestId(`Layer-transit-${id}-stops-circle`);
+      const filter = JSON.parse(stopsLayer.getAttribute("data-filter")!);
+      expect(filter[0]).toBe("any");
+      expect(filter[1]).toEqual(["in", color, ["to-string", ["get", "colors"]]]);
+    });
+
+    it("highlight layer uses name filter, not color filter", () => {
+      render(<TransitLayer systems={[id]} activeColorMap={{ [id]: [color] }} />);
+      const hl = screen.getByTestId(`Layer-transit-${id}-stops-highlight`);
+      const filter = JSON.parse(hl.getAttribute("data-filter")!);
+      expect(filter[0]).toBe("==");
+    });
+
+    it("applies no filter when system is not in activeColorMap", () => {
+      render(<TransitLayer systems={[id]} activeColorMap={{ bart: ["#FF0000"] }} />);
+      const routeLayer = screen.getByTestId(`Layer-transit-${id}-routes-line`);
+      expect(routeLayer).not.toHaveAttribute("data-filter");
+    });
+
+    it(`shows tooltip with ${label} label on hover`, () => {
+      render(<TransitLayer systems={[id]} />);
+      const onMouseMove = mockMap.on.mock.calls.find((c: any) => c[0] === "mousemove")[1];
+      mockMap.queryRenderedFeatures.mockReturnValue([{
+        properties: { name: stopName, colors: JSON.stringify([color]), system: id },
+      }]);
+      act(() => { onMouseMove({ target: mockMap, point: { x: 100, y: 100 } }); });
+      expect(screen.getByText(stopName)).toBeInTheDocument();
+      expect(screen.getByText(label)).toBeInTheDocument();
+    });
+
+    it("calls onSelectStop when clicking a stop", () => {
+      const onSelectStop = vi.fn();
+      render(<TransitLayer systems={[id]} onSelectStop={onSelectStop} />);
+      const onClick = mockMap.on.mock.calls.find((c: any) => c[0] === "click")[1];
+      mockMap.queryRenderedFeatures.mockReturnValue([{
+        properties: { name: stopName, colors: JSON.stringify([color]), system: id },
+      }]);
+      act(() => { onClick({ target: mockMap, point: { x: 50, y: 50 } }); });
+      expect(onSelectStop).toHaveBeenCalledWith(stopName);
+    });
+  });
+
+  // ── Cursor change on hover ──
+
+  it("changes cursor to pointer on stop hover", () => {
+    const canvasStyle = { cursor: "" };
+    mockMap.getCanvas.mockReturnValue({ style: canvasStyle });
+    render(<TransitLayer systems={["bart"]} />);
+
+    const onMouseMove = mockMap.on.mock.calls.find((c: any) => c[0] === "mousemove")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([{
+      properties: { name: "Embarcadero", colors: JSON.stringify(["#FF0000"]), system: "bart" },
+    }]);
+    act(() => { onMouseMove({ target: mockMap, point: { x: 100, y: 100 } }); });
+    expect(canvasStyle.cursor).toBe("pointer");
+  });
+
+  it("resets cursor when hovering away from stops", () => {
+    const canvasStyle = { cursor: "pointer" };
+    mockMap.getCanvas.mockReturnValue({ style: canvasStyle });
+    render(<TransitLayer systems={["bart"]} />);
+
+    const onMouseMove = mockMap.on.mock.calls.find((c: any) => c[0] === "mousemove")[1];
+
+    mockMap.queryRenderedFeatures.mockReturnValue([]);
+    act(() => { onMouseMove({ target: mockMap, point: { x: 200, y: 200 } }); });
+    expect(canvasStyle.cursor).toBe("");
+  });
+
+  // ── Data fetching ──
+
+  it("fetches routes GeoJSON for each system", () => {
+    render(<TransitLayer systems={["bart", "caltrain"]} />);
+    expect(fetchJsonCached).toHaveBeenCalledWith(expect.stringContaining("bart-routes.geojson"));
+    expect(fetchJsonCached).toHaveBeenCalledWith(expect.stringContaining("caltrain-routes.geojson"));
+  });
+
+  it("fetches stops GeoJSON for each system", () => {
+    (fetchJsonCached as ReturnType<typeof vi.fn>).mockImplementation((url: string) => {
+      if (url.includes("stops")) return Promise.resolve(mockStopsGeoJSON);
+      return Promise.resolve(mockRoutesGeoJSON);
+    });
+    render(<TransitLayer systems={["bart"]} selectedStopName="Embarcadero" flyToSelected={true} />);
+    expect(fetchJsonCached).toHaveBeenCalledWith(expect.stringContaining("bart-stops.geojson"));
   });
 });
