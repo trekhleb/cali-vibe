@@ -332,6 +332,258 @@ test.describe("Desktop - layer toggles", () => {
     await assertScreenshot(page, "transit-lametro-search.png");
   });
 
+  // ── Transit: Muni Metro only ──
+
+  test("transit - Muni Metro default (all lines)", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=munimetro`);
+    await expect(page.getByPlaceholder("Search Muni Metro stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-munimetro-default.png");
+  });
+
+  test("transit - Muni Metro solo N Judah line", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=munimetro`);
+    await page.getByRole("button", { name: "N Judah" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "transit-munimetro-solo-n-judah.png");
+  });
+
+  test("transit - Muni Metro station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=munimetro`);
+    const searchInput = page.getByPlaceholder("Search Muni Metro stations...");
+    await searchInput.fill("Carl");
+    await expect(page.locator("text=Carl")).toBeVisible();
+    await assertScreenshot(page, "transit-munimetro-search.png");
+  });
+
+  // ── Transit: VTA only ──
+
+  test("transit - VTA default (all lines)", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=vta`);
+    await expect(page.getByPlaceholder("Search VTA stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-vta-default.png");
+  });
+
+  test("transit - VTA solo Blue line", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=vta`);
+    await page.getByRole("button", { name: "Blue" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "transit-vta-solo-blue.png");
+  });
+
+  test("transit - VTA station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=vta`);
+    const searchInput = page.getByPlaceholder("Search VTA stations...");
+    await searchInput.fill("Alder");
+    await expect(page.locator("text=Alder")).toBeVisible();
+    await assertScreenshot(page, "transit-vta-search.png");
+  });
+
+  // ── Transit: Capitol Corridor only ──
+
+  test("transit - Capitol Corridor default", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=capitolcorridor`);
+    await expect(page.getByPlaceholder("Search Capitol Corridor stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-capitolcorridor-default.png");
+  });
+
+  test("transit - Capitol Corridor station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=capitolcorridor`);
+    const searchInput = page.getByPlaceholder("Search Capitol Corridor stations...");
+    await searchInput.fill("Auburn");
+    await expect(page.locator("text=Auburn")).toBeVisible();
+    await assertScreenshot(page, "transit-capitolcorridor-search.png");
+  });
+
+  // ── Transit: Pacific Surfliner only ──
+
+  test("transit - Pacific Surfliner default", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=surfliner`);
+    await expect(page.getByPlaceholder("Search Pacific Surfliner stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-surfliner-default.png");
+  });
+
+  test("transit - Pacific Surfliner station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=surfliner`);
+    const searchInput = page.getByPlaceholder("Search Pacific Surfliner stations...");
+    await searchInput.fill("Anaheim");
+    await expect(page.locator("text=Anaheim")).toBeVisible();
+    await assertScreenshot(page, "transit-surfliner-search.png");
+  });
+
+  // ── Transit: San Joaquins only ──
+
+  test("transit - San Joaquins default", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=sanjoaquins`);
+    await expect(page.getByPlaceholder("Search San Joaquins stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-sanjoaquins-default.png");
+  });
+
+  test("transit - San Joaquins station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=sanjoaquins`);
+    const searchInput = page.getByPlaceholder("Search San Joaquins stations...");
+    await searchInput.fill("Stockton");
+    await expect(page.locator("text=Stockton")).toBeVisible();
+    await assertScreenshot(page, "transit-sanjoaquins-search.png");
+  });
+
+  // ── Transit: Coast Starlight only ──
+
+  test("transit - Coast Starlight default", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=coaststarlight`);
+    await expect(page.getByPlaceholder("Search Coast Starlight stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-coaststarlight-default.png");
+  });
+
+  test("transit - Coast Starlight station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=coaststarlight`);
+    const searchInput = page.getByPlaceholder("Search Coast Starlight stations...");
+    await searchInput.fill("Emeryville");
+    await expect(page.locator("text=Emeryville")).toBeVisible();
+    await assertScreenshot(page, "transit-coaststarlight-search.png");
+  });
+
+  // ── Transit: CA Zephyr only ──
+
+  test("transit - CA Zephyr default", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=calzephyr`);
+    await expect(page.getByPlaceholder("Search CA Zephyr stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-calzephyr-default.png");
+  });
+
+  test("transit - CA Zephyr station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=calzephyr`);
+    const searchInput = page.getByPlaceholder("Search CA Zephyr stations...");
+    await searchInput.fill("Sacramento");
+    await expect(page.locator("text=Sacramento")).toBeVisible();
+    await assertScreenshot(page, "transit-calzephyr-search.png");
+  });
+
+  // ── Transit: SW Chief only ──
+
+  test("transit - SW Chief default", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=swchief`);
+    await expect(page.getByPlaceholder("Search SW Chief stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-swchief-default.png");
+  });
+
+  test("transit - SW Chief station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=swchief`);
+    const searchInput = page.getByPlaceholder("Search SW Chief stations...");
+    await searchInput.fill("Barstow");
+    await expect(page.locator("text=Barstow")).toBeVisible();
+    await assertScreenshot(page, "transit-swchief-search.png");
+  });
+
+  // ── Transit: Coaster only ──
+
+  test("transit - Coaster default", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=coaster`);
+    await expect(page.getByPlaceholder("Search Coaster stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-coaster-default.png");
+  });
+
+  test("transit - Coaster station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=coaster`);
+    const searchInput = page.getByPlaceholder("Search Coaster stations...");
+    await searchInput.fill("Oceanside");
+    await expect(page.locator("text=Oceanside")).toBeVisible();
+    await assertScreenshot(page, "transit-coaster-search.png");
+  });
+
+  // ── Transit: Sprinter only ──
+
+  test("transit - Sprinter default", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=sprinter`);
+    await expect(page.getByPlaceholder("Search Sprinter stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-sprinter-default.png");
+  });
+
+  test("transit - Sprinter station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=sprinter`);
+    const searchInput = page.getByPlaceholder("Search Sprinter stations...");
+    await searchInput.fill("Escondido");
+    await expect(page.locator("text=Escondido")).toBeVisible();
+    await assertScreenshot(page, "transit-sprinter-search.png");
+  });
+
+  // ── Transit: SD Trolley only ──
+
+  test("transit - SD Trolley default (all lines)", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=sdtrolley`);
+    await expect(page.getByPlaceholder("Search SD Trolley stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-sdtrolley-default.png");
+  });
+
+  test("transit - SD Trolley solo Orange line", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=sdtrolley`);
+    await page.getByRole("button", { name: "Orange" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "transit-sdtrolley-solo-orange.png");
+  });
+
+  test("transit - SD Trolley station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=sdtrolley`);
+    const searchInput = page.getByPlaceholder("Search SD Trolley stations...");
+    await searchInput.fill("12th");
+    await expect(page.locator("text=12th")).toBeVisible();
+    await assertScreenshot(page, "transit-sdtrolley-search.png");
+  });
+
+  // ── Transit: Metrolink only ──
+
+  test("transit - Metrolink default (all lines)", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=metrolink`);
+    await expect(page.getByPlaceholder("Search Metrolink stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-metrolink-default.png");
+  });
+
+  test("transit - Metrolink station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=metrolink`);
+    const searchInput = page.getByPlaceholder("Search Metrolink stations...");
+    await searchInput.fill("Anaheim");
+    await expect(page.locator("text=Anaheim")).toBeVisible();
+    await assertScreenshot(page, "transit-metrolink-search.png");
+  });
+
+  // ── Transit: SacRT only ──
+
+  test("transit - SacRT default (all lines)", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=sacrt`);
+    await expect(page.getByPlaceholder("Search SacRT stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-sacrt-default.png");
+  });
+
+  test("transit - SacRT solo Gold line", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=sacrt`);
+    await page.getByRole("button", { name: "Gold" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "transit-sacrt-solo-gold.png");
+  });
+
+  test("transit - SacRT station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=sacrt`);
+    const searchInput = page.getByPlaceholder("Search SacRT stations...");
+    await searchInput.fill("Watt");
+    await expect(page.locator("text=Watt")).toBeVisible();
+    await assertScreenshot(page, "transit-sacrt-search.png");
+  });
+
+  // ── Transit: ACE only ──
+
+  test("transit - ACE default", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=ace`);
+    await expect(page.getByPlaceholder("Search ACE stations...")).toBeVisible();
+    await assertScreenshot(page, "transit-ace-default.png");
+  });
+
+  test("transit - ACE station search", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&transit=1&tsys=ace`);
+    const searchInput = page.getByPlaceholder("Search ACE stations...");
+    await searchInput.fill("Fremont");
+    await expect(page.locator("text=Fremont")).toBeVisible();
+    await assertScreenshot(page, "transit-ace-search.png");
+  });
+
   // ── Transit: All systems together ──
 
   test("transit - all systems default view", async ({ page }) => {
@@ -587,6 +839,78 @@ test.describe("Mobile views", () => {
     await page.getByRole("button", { name: "A Line" }).click();
     await page.waitForTimeout(TOGGLE_SETTLE);
     await assertScreenshot(page, "mobile-transit-lametro-solo.png");
+  });
+
+  test("mobile - transit Muni Metro only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=munimetro`);
+    await assertScreenshot(page, "mobile-transit-munimetro.png");
+  });
+
+  test("mobile - transit VTA only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=vta`);
+    await assertScreenshot(page, "mobile-transit-vta.png");
+  });
+
+  test("mobile - transit Capitol Corridor only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=capitolcorridor`);
+    await assertScreenshot(page, "mobile-transit-capitolcorridor.png");
+  });
+
+  test("mobile - transit Pacific Surfliner only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=surfliner`);
+    await assertScreenshot(page, "mobile-transit-surfliner.png");
+  });
+
+  test("mobile - transit San Joaquins only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=sanjoaquins`);
+    await assertScreenshot(page, "mobile-transit-sanjoaquins.png");
+  });
+
+  test("mobile - transit Coast Starlight only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=coaststarlight`);
+    await assertScreenshot(page, "mobile-transit-coaststarlight.png");
+  });
+
+  test("mobile - transit CA Zephyr only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=calzephyr`);
+    await assertScreenshot(page, "mobile-transit-calzephyr.png");
+  });
+
+  test("mobile - transit SW Chief only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=swchief`);
+    await assertScreenshot(page, "mobile-transit-swchief.png");
+  });
+
+  test("mobile - transit Coaster only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=coaster`);
+    await assertScreenshot(page, "mobile-transit-coaster.png");
+  });
+
+  test("mobile - transit Sprinter only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=sprinter`);
+    await assertScreenshot(page, "mobile-transit-sprinter.png");
+  });
+
+  test("mobile - transit SD Trolley solo line", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=sdtrolley`);
+    await page.getByRole("button", { name: "Green" }).click();
+    await page.waitForTimeout(TOGGLE_SETTLE);
+    await assertScreenshot(page, "mobile-transit-sdtrolley-solo.png");
+  });
+
+  test("mobile - transit Metrolink only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=metrolink`);
+    await assertScreenshot(page, "mobile-transit-metrolink.png");
+  });
+
+  test("mobile - transit SacRT only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=sacrt`);
+    await assertScreenshot(page, "mobile-transit-sacrt.png");
+  });
+
+  test("mobile - transit ACE only", async ({ page }) => {
+    await waitForApp(page, `${MAP_2D}&drawer=1&transit=1&tsys=ace`);
+    await assertScreenshot(page, "mobile-transit-ace.png");
   });
 
   test("mobile - transit all systems", async ({ page }) => {
