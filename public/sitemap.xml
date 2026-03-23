@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Default view (relief map) -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Housing cost: Median Home Value -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?housing=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Housing cost: Median Gross Rent -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?housing=1&amp;hmetric=rent&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- County crime: All Crime -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- County crime: Violent Crime -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;ctype=violentTotal&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- County crime: Property Crime -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;ctype=propertyTotal&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- County crime: Homicide -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;ctype=homicide&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- County crime: Robbery -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;ctype=robbery&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- County crime: Burglary -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;ctype=burglary&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- County crime: Motor Vehicle Theft -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;ctype=mvTheft&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- County crime: Larceny-Theft -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;ctype=larceny&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- County crime: Aggravated Assault -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;ctype=aggAssault&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- County crime: Rape -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;ctype=rape&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- City crime: All Crime -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?cityCrime=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- City crime: Violent Crime -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?cityCrime=1&amp;cictype=violentTotal&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- City crime: Property Crime -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?cityCrime=1&amp;cictype=propertyTotal&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- County population -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?pop=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- County borders -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?counties=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- City borders -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?cities=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Temperature: Day High, January -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?temp=1&amp;tmonth=0&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Temperature: Day High, April -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?temp=1&amp;tmonth=3&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Temperature: Day High, July -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?temp=1&amp;tmonth=6&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Temperature: Day High, October -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?temp=1&amp;tmonth=9&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Temperature: Night Low, January -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?temp=1&amp;tmetric=tmin&amp;tmonth=0&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Temperature: Night Low, July -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?temp=1&amp;tmetric=tmin&amp;tmonth=6&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Temperature: Average, January -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?temp=1&amp;tmetric=tavg&amp;tmonth=0&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Temperature: Average, July -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?temp=1&amp;tmetric=tavg&amp;tmonth=6&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Temperature: Celsius -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?temp=1&amp;tunit=C&amp;tmonth=6&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Sunshine hours: January -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?shine=1&amp;smonth=0&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Sunshine hours: April -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?shine=1&amp;smonth=3&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Sunshine hours: July -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?shine=1&amp;smonth=6&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Sunshine hours: October -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?shine=1&amp;smonth=9&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Sunshine hours: Annual -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?shine=1&amp;smonth=12&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Transit: all default systems -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Transit: BART -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=bart&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Transit: Caltrain -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=caltrain&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Transit: LA Metro -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=lametro&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Transit: Muni Metro -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=munimetro&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Transit: Metrolink -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=metrolink&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Transit: San Diego Trolley -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=sdtrolley&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Transit: SMART -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=smart&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Transit: VTA -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=vta&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Transit: Sacramento RT -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=sacrt&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Transit: Capitol Corridor (Amtrak) -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=capitolcorridor&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Transit: Pacific Surfliner (Amtrak) -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=surfliner&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Transit: San Joaquins (Amtrak) -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=sanjoaquins&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Transit: Coast Starlight (Amtrak) -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=coaststarlight&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Transit: California Zephyr (Amtrak) -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=calzephyr&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Transit: Southwest Chief (Amtrak) -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=swchief&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Transit: Coaster -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=coaster&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Transit: Sprinter -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=sprinter&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Transit: ACE -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?transit=1&amp;tsys=ace&amp;relief=0</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- 3D terrain -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?terrain3d=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Dark map style -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?style=dark</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+</urlset>

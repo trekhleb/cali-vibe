@@ -1,7 +1,7 @@
 {
   "name": "CaliVibe",
   "short_name": "CaliVibe",
-  "description": "Explore California Neighborhoods",
+  "description": "Interactive California map — housing costs, crime rates, population, temperature, sunshine, transit, and 3D terrain by county and city.",
   "start_url": "/cali-vibe/",
   "display": "standalone",
   "background_color": "#ffffff",
