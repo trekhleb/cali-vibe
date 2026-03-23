@@ -46,6 +46,8 @@ Average daily sunshine hours by month for every part of California. Satellite-de
 
 ![California sunshine hours per month](./public/demo/11-sunshine.png)
 
+![California monthly sunshine hours](./public/demo/13-california-monthly-sanshine-hours.gif)
+
 ### Transit map — 18 rail systems
 
 Routes and stations for all major California rail and light rail systems: BART, Caltrain, LA Metro, Muni Metro, VTA, SMART, Metrolink, San Diego Trolley, Coaster, Sprinter, Sacramento RT, ACE, and 6 Amtrak routes (Capitol Corridor, Pacific Surfliner, San Joaquins, Coast Starlight, California Zephyr, Southwest Chief). Toggle individual lines, search stations by name.
