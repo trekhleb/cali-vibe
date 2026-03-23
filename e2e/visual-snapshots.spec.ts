@@ -389,8 +389,8 @@ test.describe("Desktop - layer toggles", () => {
   test("transit - Capitol Corridor station search", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&transit=1&tsys=capitolcorridor`);
     const searchInput = page.getByPlaceholder("Search Capitol Corridor stations...");
-    await searchInput.fill("Auburn");
-    await expect(page.locator("ul li").filter({ hasText: "Auburn" }).first()).toBeVisible();
+    await searchInput.fill("Fairfield");
+    await expect(page.locator("text=Fairfield-Vacaville")).toBeVisible();
     await assertScreenshot(page, "transit-capitolcorridor-search.png");
   });
 
@@ -421,8 +421,8 @@ test.describe("Desktop - layer toggles", () => {
   test("transit - San Joaquins station search", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&transit=1&tsys=sanjoaquins`);
     const searchInput = page.getByPlaceholder("Search San Joaquins stations...");
-    await searchInput.fill("Stockton");
-    await expect(page.locator("ul li").filter({ hasText: "Stockton" }).first()).toBeVisible();
+    await searchInput.fill("Turlock");
+    await expect(page.locator("text=Turlock-Denair")).toBeVisible();
     await assertScreenshot(page, "transit-sanjoaquins-search.png");
   });
 
@@ -437,8 +437,8 @@ test.describe("Desktop - layer toggles", () => {
   test("transit - Coast Starlight station search", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&transit=1&tsys=coaststarlight`);
     const searchInput = page.getByPlaceholder("Search Coast Starlight stations...");
-    await searchInput.fill("Emeryville");
-    await expect(page.locator("ul li").filter({ hasText: "Emeryville" }).first()).toBeVisible();
+    await searchInput.fill("Dunsmuir");
+    await expect(page.locator("text=Dunsmuir")).toBeVisible();
     await assertScreenshot(page, "transit-coaststarlight-search.png");
   });
 
@@ -485,8 +485,8 @@ test.describe("Desktop - layer toggles", () => {
   test("transit - Coaster station search", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&transit=1&tsys=coaster`);
     const searchInput = page.getByPlaceholder("Search Coaster stations...");
-    await searchInput.fill("Oceanside");
-    await expect(page.locator("ul li").filter({ hasText: "Oceanside" }).first()).toBeVisible();
+    await searchInput.fill("Sorrento");
+    await expect(page.locator("text=Sorrento Valley")).toBeVisible();
     await assertScreenshot(page, "transit-coaster-search.png");
   });
 
@@ -501,8 +501,8 @@ test.describe("Desktop - layer toggles", () => {
   test("transit - Sprinter station search", async ({ page }) => {
     await waitForApp(page, `${MAP_2D}&transit=1&tsys=sprinter`);
     const searchInput = page.getByPlaceholder("Search Sprinter stations...");
-    await searchInput.fill("Escondido");
-    await expect(page.locator("ul li").filter({ hasText: "Escondido" }).first()).toBeVisible();
+    await searchInput.fill("Palomar");
+    await expect(page.locator("text=Palomar")).toBeVisible();
     await assertScreenshot(page, "transit-sprinter-search.png");
   });
 
