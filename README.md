@@ -94,6 +94,7 @@ React, TypeScript, Vite, MapLibre GL JS, Tailwind CSS. H3 hexagonal grid for cli
 | City boundaries | [US Census Bureau TIGER/Line](https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html) | 2024 |
 | Transit (BART, Caltrain, etc.) | GTFS feeds from each agency | 2024–2025 |
 | Elevation / 3D terrain | [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) | — |
+| Map tiles | [MapLibre GL JS](https://maplibre.org/) with [OpenStreetMap](https://www.openstreetmap.org/copyright) data | — |
 
 ## Vibe-coded
 
