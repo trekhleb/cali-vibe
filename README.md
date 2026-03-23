@@ -16,6 +16,10 @@ Researching California neighborhoods usually means jumping between Census tables
 
 Median home value and median gross rent for all 58 California counties, based on US Census Bureau ACS 5-year estimates (2019–2023). Choropleth color scale, sortable data table, hover to see exact values.
 
+![California housing per county - Homes](./public/demo/10-housing-home.png)
+
+![California housing per county - Rent](./public/demo/10-housing-rental.png)
+
 ### Crime rates by county and city
 
 10 crime categories (violent, property, homicide, robbery, burglary, motor vehicle theft, and more) per 100,000 residents. Data from CA DOJ OpenJustice 2023 report. Sortable table view with absolute and per-capita modes.
@@ -40,11 +44,17 @@ Monthly average high, low, and mean temperatures on an H3 hexagonal grid. 10-yea
 
 Average daily sunshine hours by month for every part of California. Satellite-derived data (NREL NSRDB) and reanalysis data (ERA5) on an H3 hex grid. Great for comparing coastal fog vs. inland sun.
 
+![California sunshine hours per month](./public/demo/11-sunshine.png)
+
 ### Transit map — 18 rail systems
 
 Routes and stations for all major California rail and light rail systems: BART, Caltrain, LA Metro, Muni Metro, VTA, SMART, Metrolink, San Diego Trolley, Coaster, Sprinter, Sacramento RT, ACE, and 6 Amtrak routes (Capitol Corridor, Pacific Surfliner, San Joaquins, Coast Starlight, California Zephyr, Southwest Chief). Toggle individual lines, search stations by name.
 
-![California transit and rail map](./public/demo/09-framed.png)
+![California transit and rail map](./public/demo/12-transit-all.png)
+
+![California transit and rail map: Bay Area](./public/demo/12-transit-bay-area.png)
+
+![California transit and rail map: LA and San Diego](./public/demo/12-transit-la-sd.png)
 
 ### County and city boundaries
 
