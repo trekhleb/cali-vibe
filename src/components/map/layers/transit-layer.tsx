@@ -10,7 +10,7 @@ import { fetchJsonCached } from "@/utils/fetch-json";
 
 // ── Public types ──
 
-export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart" | "munimetro" | "vta" | "capitolcorridor" | "surfliner" | "coaster" | "sprinter" | "sdtrolley" | "metrolink" | "sacrt" | "sanjoaquins";
+export type TransitSystem = "bart" | "caltrain" | "lametro" | "smart" | "munimetro" | "vta" | "capitolcorridor" | "surfliner" | "coaster" | "sprinter" | "sdtrolley" | "metrolink" | "sacrt" | "sanjoaquins" | "ace";
 
 export const TRANSIT_SYSTEMS: {
   id: TransitSystem;
@@ -29,11 +29,12 @@ export const TRANSIT_SYSTEMS: {
   { id: "metrolink", label: "Metrolink" },
   { id: "sacrt", label: "SacRT" },
   { id: "sanjoaquins", label: "San Joaquins" },
+  { id: "ace", label: "ACE" },
   { id: "lametro", label: "LA Metro" },
 ];
 
 // Systems enabled by default
-export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "munimetro", "vta", "capitolcorridor", "surfliner", "coaster", "sprinter", "sdtrolley", "metrolink", "sacrt", "sanjoaquins", "lametro"];
+export const DEFAULT_TRANSIT_SYSTEMS: TransitSystem[] = ["bart", "caltrain", "smart", "munimetro", "vta", "capitolcorridor", "surfliner", "coaster", "sprinter", "sdtrolley", "metrolink", "sacrt", "sanjoaquins", "ace", "lametro"];
 
 // Line colors + labels for per-line toggle UI
 export const BART_LINES: { color: string; label: string }[] = [
@@ -109,6 +110,10 @@ export const SACRT_LINES: { color: string; label: string }[] = [
   { color: "#C4A600", label: "Gold" },
   { color: "#008040", label: "Green" },
   { color: "#0000FF", label: "Blue" },
+];
+
+export const ACE_LINES: { color: string; label: string }[] = [
+  { color: "#77297D", label: "Main Line" },
 ];
 
 export const SANJOAQUINS_LINES: { color: string; label: string }[] = [

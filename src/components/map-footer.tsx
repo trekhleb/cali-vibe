@@ -194,6 +194,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">San Joaquins (Gold Runner). Oakland &amp; Sacramento to Bakersfield. 2 branches, 17 stations.</span>
           </li>
           <li>
+            <strong>Transit Data (ACE)</strong>
+            <br />
+            <a href="https://511.org/open-data" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">511.org GTFS</a>
+            <br />
+            <span className="text-gray-500">Altamont Corridor Express. Stockton to San Jose. 1 line, 10 stations.</span>
+          </li>
+          <li>
             <strong>Transit Data (Sacramento RT)</strong>
             <br />
             <a href="https://www.sacrt.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">SacRT GTFS</a>
