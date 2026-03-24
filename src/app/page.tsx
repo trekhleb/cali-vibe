@@ -52,6 +52,7 @@ import {
   LuMountain,
   LuTrainFront,
   LuHouse,
+  LuWallet,
 } from "react-icons/lu";
 import { RiFocus3Line, RiFocus3Fill } from "react-icons/ri";
 import { FaGithub } from "react-icons/fa";
@@ -59,7 +60,7 @@ import type { California3DTerrainRef } from "@/components/map/terrain-3d/califor
 
 const crimeTypeIds = Object.keys(CRIME_LABELS) as CrimeType[];
 const tempMetricIds = Object.keys(METRIC_LABELS) as TempMetric[];
-const housingMetricIds = Object.keys(HOUSING_LABELS) as HousingMetric[];
+const housingMetricIds = (Object.keys(HOUSING_LABELS) as HousingMetric[]).filter((id) => id !== "income");
 
 const CaliforniaMap = lazy(() => import("@/components/map/california-map"));
 const California3DTerrain = lazy(() => import("@/components/map/terrain-3d/california-3d-terrain"));
@@ -88,6 +89,7 @@ const DEFAULTS = {
   ctype: "total" as CrimeType,
   housing: false,
   hmetric: "homeValue" as HousingMetric,
+  income: false,
   cityCrime: false,
   cictype: "total" as CrimeType,
   style: "light" as MapStyleId,
@@ -129,6 +131,7 @@ function readParams() {
     ctype: str("ctype", DEFAULTS.ctype, crimeTypeIds),
     housing: bool("housing", DEFAULTS.housing),
     hmetric: str("hmetric", DEFAULTS.hmetric, housingMetricIds),
+    income: bool("income", DEFAULTS.income),
     cityCrime: bool("cityCrime", DEFAULTS.cityCrime),
     cictype: str("cictype", DEFAULTS.cictype, crimeTypeIds),
     temp: bool("temp", DEFAULTS.temp),
@@ -188,6 +191,7 @@ export default function Home() {
   const [crimeType, setCrimeType] = useState<CrimeType>(init.ctype);
   const [showHousing, setShowHousing] = useState(init.housing);
   const [housingMetric, setHousingMetric] = useState<HousingMetric>(init.hmetric);
+  const [showIncome, setShowIncome] = useState(init.income);
   const [showCityCrime, setShowCityCrime] = useState(init.cityCrime);
   const [cityCrimeType, setCityCrimeType] = useState<CrimeType>(init.cictype);
   const [showTemperature, setShowTemperature] = useState(init.temp);
@@ -244,6 +248,8 @@ export default function Home() {
   const [showCityCrimeTable, setShowCityCrimeTable] = useState(false);
   const [showHousingTable, setShowHousingTable] = useState(false);
   const [selectedHousingCountyName, setSelectedHousingCountyName] = useState<string | null>(null);
+  const [showIncomeTable, setShowIncomeTable] = useState(false);
+  const [selectedIncomeCountyName, setSelectedIncomeCountyName] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const tempHexUrl = `${import.meta.env.BASE_URL}data/california-temperature-h3-res${tempResolution}.geojson`;
@@ -272,6 +278,7 @@ export default function Home() {
     setStr("ctype", crimeType, DEFAULTS.ctype);
     setBool("housing", showHousing, DEFAULTS.housing);
     setStr("hmetric", housingMetric, DEFAULTS.hmetric);
+    setBool("income", showIncome, DEFAULTS.income);
     setBool("cityCrime", showCityCrime, DEFAULTS.cityCrime);
     setStr("cictype", cityCrimeType, DEFAULTS.cictype);
     setBool("temp", showTemperature, DEFAULTS.temp);
@@ -295,7 +302,7 @@ export default function Home() {
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -319,31 +326,35 @@ export default function Home() {
   // --- Mutually exclusive toggle helpers ---
   const toggleCounties = (on: boolean) => {
     setShowCounties(on);
-    if (on) { setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const togglePopulation = (on: boolean) => {
     setShowPopulation(on);
-    if (on) { setShowCounties(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleCrime = (on: boolean) => {
     setShowCrime(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowHousing(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleHousing = (on: boolean) => {
     setShowHousing(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+  };
+  const toggleIncome = (on: boolean) => {
+    setShowIncome(on);
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleCityCrime = (on: boolean) => {
     setShowCityCrime(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCities(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCities(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleTemperature = (on: boolean) => {
     setShowTemperature(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowCities(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowCities(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleSunshine = (on: boolean) => {
     setShowSunshine(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowCities(false); setShowTemperature(false); setShowRelief(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowCities(false); setShowTemperature(false); setShowRelief(false); }
   };
   const toggleCities = (on: boolean) => {
     setShowCities(on);
@@ -359,7 +370,7 @@ export default function Home() {
   };
   const toggleRelief = (on: boolean) => {
     setShowRelief(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
   };
 
   const resetAll = useCallback(() => {
@@ -373,6 +384,7 @@ export default function Home() {
     setCrimeType("total");
     setShowHousing(false);
     setHousingMetric("homeValue");
+    setShowIncome(false);
     setShowCityCrime(false);
     setCityCrimeType("total");
     setShowTemperature(false);
@@ -416,6 +428,7 @@ export default function Home() {
     setSelectedPopulationCountyName(null);
     setSelectedCrimeCountyName(null);
     setSelectedHousingCountyName(null);
+    setSelectedIncomeCountyName(null);
     setSelectedCrimeCityName(null);
   }, []);
 
@@ -424,6 +437,8 @@ export default function Home() {
     setShowCities(false);
     setShowPopulation(false);
     setShowCrime(false);
+    setShowHousing(false);
+    setShowIncome(false);
     setShowCityCrime(false);
     setShowTemperature(false);
     setShowSunshine(false);
@@ -437,6 +452,8 @@ export default function Home() {
     setShowCounties(false);
     setShowPopulation(false);
     setShowCrime(false);
+    setShowHousing(false);
+    setShowIncome(false);
     setShowCityCrime(false);
     setShowTemperature(false);
     setShowSunshine(false);
@@ -455,6 +472,10 @@ export default function Home() {
 
   const goToHousingCounty = useCallback((name: string) => {
     setSelectedHousingCountyName(name);
+  }, []);
+
+  const goToIncomeCounty = useCallback((name: string) => {
+    setSelectedIncomeCountyName(name);
   }, []);
 
   const hasAnyFavorites = favorites.length > 0;
@@ -524,6 +545,8 @@ export default function Home() {
                 showHousing={showHousing}
                 housingMetric={housingMetric}
                 selectedHousingCountyName={selectedHousingCountyName}
+                showIncome={showIncome}
+                selectedIncomeCountyName={selectedIncomeCountyName}
                 showCityCrime={showCityCrime}
                 cityCrimeType={cityCrimeType}
                 selectedCrimeCityName={selectedCrimeCityName}
@@ -803,6 +826,36 @@ export default function Home() {
                       </div>
                       <button
                         onClick={() => setShowHousingTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Household income toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showIncome ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showIncome} onChange={toggleIncome} />
+                    <LuWallet className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">Household Income</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Median Household Income by county.
+                    </InfoTooltip>
+                  </label>
+                  {showIncome && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <button
+                        onClick={() => setShowIncomeTable(true)}
                         className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
                       >
                         <LuTable className="h-4 w-4 text-gray-900" />
@@ -1647,6 +1700,17 @@ export default function Home() {
         nameLabel="County"
         activeHousingMetric={housingMetric}
         onSelectName={goToHousingCounty}
+        visibleMetrics={["homeValue", "rent"]}
+      />
+      <HousingTableModal
+        open={showIncomeTable}
+        onClose={() => setShowIncomeTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-county-labels.geojson`}
+        title="County Household Income (ACS 2019–2023)"
+        nameLabel="County"
+        activeHousingMetric="income"
+        onSelectName={goToIncomeCounty}
+        visibleMetrics={["income"]}
       />
       <TemperatureTableModal
         open={showTempTable}

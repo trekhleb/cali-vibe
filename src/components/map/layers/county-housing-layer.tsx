@@ -13,11 +13,12 @@ const FILL_LAYER_ID = "county-housing-fill";
 const GEOJSON_URL = `${import.meta.env.BASE_URL}data/california-counties.geojson`;
 const LABELS_URL = `${import.meta.env.BASE_URL}data/california-county-labels.geojson`;
 
-export type HousingMetric = "homeValue" | "rent";
+export type HousingMetric = "homeValue" | "rent" | "income";
 
 export const HOUSING_LABELS: Record<HousingMetric, string> = {
   homeValue: "Median Home Value",
   rent: "Median Gross Rent",
+  income: "Median Household Income",
 };
 
 const SCALE_CONFIGS: Record<HousingMetric, { stops: [number, string][] }> = {
@@ -31,6 +32,12 @@ const SCALE_CONFIGS: Record<HousingMetric, { stops: [number, string][] }> = {
     stops: [
       [800, "#f0fdf4"], [1200, "#bbf7d0"], [1600, "#4ade80"],
       [2200, "#16a34a"], [2900, "#14532d"],
+    ],
+  },
+  income: {
+    stops: [
+      [50000, "#fefce8"], [75000, "#fde68a"], [100000, "#f59e0b"],
+      [130000, "#d97706"], [160000, "#78350f"],
     ],
   },
 };
@@ -73,6 +80,9 @@ function formatValue(val: number, metric: HousingMetric): string {
   if (metric === "rent") {
     return `$${val.toLocaleString()}/mo`;
   }
+  if (metric === "income") {
+    return `$${(val / 1000).toFixed(0)}K/yr`;
+  }
   if (val >= 1000000) {
     return `$${(val / 1000000).toFixed(2)}M`;
   }
@@ -102,7 +112,8 @@ export function HousingLegend({ housingMetric, overlayOffset = 0 }: { housingMet
             <span className="mt-0.5 text-[9px] text-gray-500">
               {housingMetric === "rent"
                 ? `$${val >= 1000 ? `${(val / 1000).toFixed(1)}K` : val}`
-                : `$${val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : `${(val / 1000).toFixed(0)}K`}`}
+                : `$${val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : `${(val / 1000).toFixed(0)}K`}`
+              }
             </span>
           </div>
         ))}

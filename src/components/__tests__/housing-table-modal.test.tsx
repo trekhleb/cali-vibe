@@ -4,10 +4,10 @@ import HousingTableModal from "@/components/housing-table-modal";
 
 const mockGeoJson = {
   features: [
-    { properties: { name: "San Mateo", housing: { homeValue: 1494500, rent: 2893 } } },
-    { properties: { name: "Imperial", housing: { homeValue: 212000, rent: 818 } } },
-    { properties: { name: "Alameda", housing: { homeValue: 1057400, rent: 2318 } } },
-    { properties: { name: "Alpine", housing: { homeValue: 466100, rent: null } } },
+    { properties: { name: "San Mateo", housing: { homeValue: 1494500, rent: 2893, income: 159674 } } },
+    { properties: { name: "Imperial", housing: { homeValue: 212000, rent: 818, income: 53498 } } },
+    { properties: { name: "Alameda", housing: { homeValue: 1057400, rent: 2318, income: 126240 } } },
+    { properties: { name: "Alpine", housing: { homeValue: 466100, rent: null, income: 110781 } } },
     { properties: { name: "No Housing" } },
   ],
 };
@@ -224,13 +224,35 @@ describe("HousingTableModal", () => {
     expect(screen.getByText("$500K")).toBeInTheDocument();
   });
 
-  it("renders both column headers", async () => {
+  it("formats income values with dollar sign and commas", async () => {
+    render(
+      <HousingTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Housing" nameLabel="County" activeHousingMetric="income" />
+    );
+    await waitFor(() => expect(screen.getByText("San Mateo")).toBeInTheDocument());
+    expect(screen.getByText("$159,674")).toBeInTheDocument();
+    expect(screen.getByText("$53,498")).toBeInTheDocument();
+  });
+
+  it("sorts by income column", async () => {
+    const user = userEvent.setup();
+    render(
+      <HousingTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Housing" nameLabel="County" activeHousingMetric="income" />
+    );
+    await waitFor(() => expect(screen.getByText("San Mateo")).toBeInTheDocument());
+
+    // Default sort is desc by income → San Mateo ($159,674) first
+    const rows = screen.getAllByRole("row");
+    expect(rows[1].textContent).toContain("San Mateo");
+  });
+
+  it("renders all column headers", async () => {
     render(
       <HousingTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Housing" nameLabel="County" activeHousingMetric="homeValue" />
     );
     await waitFor(() => expect(screen.getByText("San Mateo")).toBeInTheDocument());
     expect(screen.getByText(/Home Value/, { selector: "th" })).toBeInTheDocument();
     expect(screen.getByText(/^Rent/, { selector: "th" })).toBeInTheDocument();
+    expect(screen.getByText(/^Income/, { selector: "th" })).toBeInTheDocument();
   });
 
   it("renders row numbers", async () => {

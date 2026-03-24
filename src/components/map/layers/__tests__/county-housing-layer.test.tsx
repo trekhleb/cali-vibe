@@ -34,6 +34,14 @@ describe("CountyHousingLayer", () => {
     expect(screen.getByTestId("Layer-county-housing-fill")).toBeInTheDocument();
   });
 
+  it("renders sources and layers for income metric", () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({ activeName: null });
+    render(<CountyHousingLayer housingMetric="income" />);
+
+    expect(screen.getByTestId("Source-counties-housing")).toBeInTheDocument();
+    expect(screen.getByTestId("Layer-county-housing-fill")).toBeInTheDocument();
+  });
+
   it("shows popup with home value when active county is present", () => {
     vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
       activeName: "San Mateo",
@@ -64,6 +72,17 @@ describe("CountyHousingLayer", () => {
 
     render(<CountyHousingLayer housingMetric="homeValue" />);
     expect(screen.getByText(/\$212K/)).toBeInTheDocument();
+  });
+
+  it("shows popup with income value when active county is present", () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
+      activeName: "Santa Clara",
+      activeProperties: { housing: { homeValue: 1500000, rent: 2800, income: 159674 } },
+    });
+
+    render(<CountyHousingLayer housingMetric="income" />);
+    expect(screen.getByText("Santa Clara County")).toBeInTheDocument();
+    expect(screen.getByText(/\$160K\/yr/)).toBeInTheDocument();
   });
 
   it("handles null properties gracefully (no popup)", () => {
@@ -166,6 +185,24 @@ describe("HousingLegend", () => {
     expect(colorBoxes).toHaveLength(5);
   });
 
+  it("renders legend title for income", () => {
+    render(<HousingLegend housingMetric="income" />);
+    expect(screen.getByText(/Median Household Income.*ACS 2019/)).toBeInTheDocument();
+  });
+
+  it("renders 5 color stops for income", () => {
+    const { container } = render(<HousingLegend housingMetric="income" />);
+    const colorBoxes = container.querySelectorAll(".h-3.w-8");
+    expect(colorBoxes).toHaveLength(5);
+  });
+
+  it("formats income legend labels as $XK", () => {
+    render(<HousingLegend housingMetric="income" />);
+    expect(screen.getByText("$50K")).toBeInTheDocument();
+    expect(screen.getByText("$75K")).toBeInTheDocument();
+    expect(screen.getByText("$160K")).toBeInTheDocument();
+  });
+
   it("formats homeValue legend labels as $XK and $XM", () => {
     render(<HousingLegend housingMetric="homeValue" />);
     expect(screen.getByText("$200K")).toBeInTheDocument();
@@ -194,12 +231,13 @@ describe("HousingLegend", () => {
 });
 
 describe("HOUSING_LABELS", () => {
-  it("has exactly 2 metrics", () => {
-    expect(Object.keys(HOUSING_LABELS)).toHaveLength(2);
+  it("has exactly 3 metrics", () => {
+    expect(Object.keys(HOUSING_LABELS)).toHaveLength(3);
   });
 
-  it("includes homeValue and rent", () => {
+  it("includes homeValue, rent, and income", () => {
     expect(HOUSING_LABELS.homeValue).toBe("Median Home Value");
     expect(HOUSING_LABELS.rent).toBe("Median Gross Rent");
+    expect(HOUSING_LABELS.income).toBe("Median Household Income");
   });
 });

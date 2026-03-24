@@ -18,16 +18,19 @@ interface HousingTableModalProps {
   nameLabel: string;
   activeHousingMetric: HousingMetric;
   onSelectName?: (name: string) => void;
+  visibleMetrics?: HousingMetric[];
 }
 
-const COLUMNS: { key: HousingMetric; short: string }[] = [
+const ALL_COLUMNS: { key: HousingMetric; short: string }[] = [
   { key: "homeValue", short: "Home Value" },
   { key: "rent", short: "Rent" },
+  { key: "income", short: "Income" },
 ];
 
 function formatCurrency(val: number | null, metric: HousingMetric): string {
   if (val == null) return "\u2014";
   if (metric === "rent") return `$${val.toLocaleString()}`;
+  if (metric === "income") return `$${val.toLocaleString()}`;
   if (val >= 1000000) return `$${(val / 1000000).toFixed(2)}M`;
   return `$${(val / 1000).toFixed(0)}K`;
 }
@@ -40,7 +43,11 @@ export default function HousingTableModal({
   nameLabel,
   activeHousingMetric,
   onSelectName,
+  visibleMetrics,
 }: HousingTableModalProps) {
+  const columns = visibleMetrics
+    ? ALL_COLUMNS.filter((col) => visibleMetrics.includes(col.key))
+    : ALL_COLUMNS;
   const [rows, setRows] = useState<HousingRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>(activeHousingMetric);
@@ -123,7 +130,7 @@ export default function HousingTableModal({
               <th className={thBase} onClick={() => toggleSort("name")}>
                 {nameLabel}{sortIndicator("name")}
               </th>
-              {COLUMNS.map((col) => (
+              {columns.map((col) => (
                 <th
                   key={col.key}
                   className={`${thBase} text-right`}
@@ -156,7 +163,7 @@ export default function HousingTableModal({
                     row.name
                   )}
                 </td>
-                {COLUMNS.map((col) => {
+                {columns.map((col) => {
                   const val = row.housing[col.key] as number | null;
                   return (
                     <td

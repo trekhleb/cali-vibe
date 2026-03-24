@@ -7,6 +7,7 @@
  * Tables used:
  *   B25077_001E  — Median Home Value (owner-occupied units)
  *   B25064_001E  — Median Gross Rent
+ *   B19013_001E  — Median Household Income
  *
  * Usage: node scripts/build-housing-data.mjs
  */
@@ -19,7 +20,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "..", "public", "data");
 
 const CENSUS_URL =
-  "https://api.census.gov/data/2023/acs/acs5?get=NAME,B25077_001E,B25064_001E&for=county:*&in=state:06";
+  "https://api.census.gov/data/2023/acs/acs5?get=NAME,B25077_001E,B25064_001E,B19013_001E&for=county:*&in=state:06";
 
 // County name normalization: Census returns "Alameda County, California" → "Alameda"
 function normalizeCountyName(censusName) {
@@ -32,17 +33,19 @@ async function fetchHousingData() {
   if (!res.ok) throw new Error(`Census API HTTP ${res.status}: ${await res.text()}`);
   const rows = await res.json();
 
-  // First row is the header: ["NAME","B25077_001E","B25064_001E","state","county"]
+  // First row is the header: ["NAME","B25077_001E","B25064_001E","B19013_001E","state","county"]
   const [header, ...data] = rows;
   console.log(`  Received ${data.length} counties (header: ${header.join(", ")})`);
 
   const byName = new Map();
   for (const row of data) {
-    const [name, homeValueRaw, rentRaw] = row;
+    const [name, homeValueRaw, rentRaw, incomeRaw] = row;
     const countyName = normalizeCountyName(name);
-    const homeValue = homeValueRaw && homeValueRaw !== "-666666666" ? Number(homeValueRaw) : null;
-    const rent = rentRaw && rentRaw !== "-666666666" ? Number(rentRaw) : null;
-    byName.set(countyName, { homeValue, rent });
+    const parse = (v) => v && v !== "-666666666" ? Number(v) : null;
+    const homeValue = parse(homeValueRaw);
+    const rent = parse(rentRaw);
+    const income = parse(incomeRaw);
+    byName.set(countyName, { homeValue, rent, income });
   }
   return byName;
 }

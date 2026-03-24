@@ -77,7 +77,7 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <br />
             <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">US Census Bureau</a>
             <br />
-            <span className="text-gray-500">ACS 5-Year Estimates (2019–2023). Median Home Value (B25077) &amp; Median Gross Rent (B25064) by county.</span>
+            <span className="text-gray-500">ACS 5-Year Estimates (2019–2023). Median Home Value (B25077), Median Gross Rent (B25064) &amp; Median Household Income (B19013) by county.</span>
           </li>
           <li>
             <strong>County Boundaries</strong>

@@ -22,6 +22,13 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- Household Income -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?income=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- County crime: All Crime -->
   <url>
     <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;relief=0</loc>
