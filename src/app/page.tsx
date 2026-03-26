@@ -19,7 +19,9 @@ import MapFooter from "@/components/map-footer";
 import CrimeTableModal from "@/components/crime-table-modal";
 import PopulationTableModal from "@/components/population-table-modal";
 import HousingTableModal from "@/components/housing-table-modal";
+import EducationTableModal from "@/components/education-table-modal";
 import { HOUSING_LABELS, type HousingMetric } from "@/components/map/layers/county-housing-layer";
+import { EDUCATION_LABELS, type EducationMetric } from "@/components/map/layers/county-education-layer";
 import TemperatureTableModal from "@/components/temperature-table-modal";
 import SunshineTableModal from "@/components/sunshine-table-modal";
 import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution, type SunshineDataSource } from "@/components/map/layers/sunshine-layer";
@@ -53,6 +55,7 @@ import {
   LuTrainFront,
   LuHouse,
   LuWallet,
+  LuGraduationCap,
 } from "react-icons/lu";
 import { RiFocus3Line, RiFocus3Fill } from "react-icons/ri";
 import { FaGithub } from "react-icons/fa";
@@ -61,6 +64,7 @@ import type { California3DTerrainRef } from "@/components/map/terrain-3d/califor
 const crimeTypeIds = Object.keys(CRIME_LABELS) as CrimeType[];
 const tempMetricIds = Object.keys(METRIC_LABELS) as TempMetric[];
 const housingMetricIds = (Object.keys(HOUSING_LABELS) as HousingMetric[]).filter((id) => id !== "income");
+const educationMetricIds = Object.keys(EDUCATION_LABELS) as EducationMetric[];
 
 const CaliforniaMap = lazy(() => import("@/components/map/california-map"));
 const California3DTerrain = lazy(() => import("@/components/map/terrain-3d/california-3d-terrain"));
@@ -95,6 +99,10 @@ const DEFAULTS = {
   cityIncome: false,
   cityCrime: false,
   cictype: "total" as CrimeType,
+  edu: false,
+  emetric: "bachPlus" as EducationMetric,
+  cityEdu: false,
+  cemetric: "bachPlus" as EducationMetric,
   style: "light" as MapStyleId,
   temp: false,
   tmetric: "tmax" as TempMetric,
@@ -140,6 +148,10 @@ function readParams() {
     cityIncome: bool("cityIncome", DEFAULTS.cityIncome),
     cityCrime: bool("cityCrime", DEFAULTS.cityCrime),
     cictype: str("cictype", DEFAULTS.cictype, crimeTypeIds),
+    edu: bool("edu", DEFAULTS.edu),
+    emetric: str("emetric", DEFAULTS.emetric, educationMetricIds),
+    cityEdu: bool("cityEdu", DEFAULTS.cityEdu),
+    cemetric: str("cemetric", DEFAULTS.cemetric, educationMetricIds),
     temp: bool("temp", DEFAULTS.temp),
     tmetric: str("tmetric", DEFAULTS.tmetric, tempMetricIds),
     tmonth: (() => {
@@ -203,6 +215,14 @@ export default function Home() {
   const [showCityIncome, setShowCityIncome] = useState(init.cityIncome);
   const [showCityCrime, setShowCityCrime] = useState(init.cityCrime);
   const [cityCrimeType, setCityCrimeType] = useState<CrimeType>(init.cictype);
+  const [showEducation, setShowEducation] = useState(init.edu);
+  const [educationMetric, setEducationMetric] = useState<EducationMetric>(init.emetric);
+  const [showCityEducation, setShowCityEducation] = useState(init.cityEdu);
+  const [cityEducationMetric, setCityEducationMetric] = useState<EducationMetric>(init.cemetric);
+  const [showEducationTable, setShowEducationTable] = useState(false);
+  const [selectedEducationCountyName, setSelectedEducationCountyName] = useState<string | null>(null);
+  const [showCityEducationTable, setShowCityEducationTable] = useState(false);
+  const [selectedEducationCityName, setSelectedEducationCityName] = useState<string | null>(null);
   const [showTemperature, setShowTemperature] = useState(init.temp);
   const [tempMetric, setTempMetric] = useState<TempMetric>(init.tmetric);
   const [tempMonth, setTempMonth] = useState(init.tmonth);
@@ -297,6 +317,10 @@ export default function Home() {
     setBool("cityIncome", showCityIncome, DEFAULTS.cityIncome);
     setBool("cityCrime", showCityCrime, DEFAULTS.cityCrime);
     setStr("cictype", cityCrimeType, DEFAULTS.cictype);
+    setBool("edu", showEducation, DEFAULTS.edu);
+    setStr("emetric", educationMetric, DEFAULTS.emetric);
+    setBool("cityEdu", showCityEducation, DEFAULTS.cityEdu);
+    setStr("cemetric", cityEducationMetric, DEFAULTS.cemetric);
     setBool("temp", showTemperature, DEFAULTS.temp);
     setStr("tmetric", tempMetric, DEFAULTS.tmetric);
     if (tempMonth !== DEFAULTS.tmonth) p.set("tmonth", String(tempMonth));
@@ -318,7 +342,7 @@ export default function Home() {
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -342,8 +366,8 @@ export default function Home() {
   // --- Mutually exclusive toggle helpers ---
   const clearOverlays = () => {
     setShowCounties(false); setShowPopulation(false); setShowCrime(false);
-    setShowHousing(false); setShowIncome(false);
-    setShowCityHousing(false); setShowCityIncome(false);
+    setShowHousing(false); setShowIncome(false); setShowEducation(false);
+    setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false);
     setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false);
     setShowRelief(false);
   };
@@ -367,6 +391,14 @@ export default function Home() {
     if (on) clearOverlays();
     setShowIncome(on);
   };
+  const toggleEducation = (on: boolean) => {
+    if (on) clearOverlays();
+    setShowEducation(on);
+  };
+  const toggleCityEducation = (on: boolean) => {
+    if (on) { clearOverlays(); setShowCities(false); }
+    setShowCityEducation(on);
+  };
   const toggleCityHousing = (on: boolean) => {
     if (on) { clearOverlays(); setShowCities(false); }
     setShowCityHousing(on);
@@ -389,7 +421,7 @@ export default function Home() {
   };
   const toggleCities = (on: boolean) => {
     setShowCities(on);
-    if (on) { setShowCityCrime(false); setShowCityHousing(false); setShowCityIncome(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCityCrime(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleTerrain3d = (on: boolean) => {
     setTerrain3d(on);
@@ -401,7 +433,7 @@ export default function Home() {
   };
   const toggleRelief = (on: boolean) => {
     setShowRelief(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
   };
 
   const resetAll = useCallback(() => {
@@ -421,6 +453,10 @@ export default function Home() {
     setShowCityIncome(false);
     setShowCityCrime(false);
     setCityCrimeType("total");
+    setShowEducation(false);
+    setEducationMetric("bachPlus");
+    setShowCityEducation(false);
+    setCityEducationMetric("bachPlus");
     setShowTemperature(false);
     setTempMetric(DEFAULTS.tmetric);
     setTempMonth(new Date().getMonth());
@@ -466,6 +502,8 @@ export default function Home() {
     setSelectedHousingCityName(null);
     setSelectedIncomeCityName(null);
     setSelectedCrimeCityName(null);
+    setSelectedEducationCountyName(null);
+    setSelectedEducationCityName(null);
   }, []);
 
   const goToFavoriteCounty = useCallback((name: string) => {
@@ -475,8 +513,10 @@ export default function Home() {
     setShowCrime(false);
     setShowHousing(false);
     setShowIncome(false);
+    setShowEducation(false);
     setShowCityHousing(false);
     setShowCityIncome(false);
+    setShowCityEducation(false);
     setShowCityCrime(false);
     setShowTemperature(false);
     setShowSunshine(false);
@@ -492,8 +532,10 @@ export default function Home() {
     setShowCrime(false);
     setShowHousing(false);
     setShowIncome(false);
+    setShowEducation(false);
     setShowCityHousing(false);
     setShowCityIncome(false);
+    setShowCityEducation(false);
     setShowCityCrime(false);
     setShowTemperature(false);
     setShowSunshine(false);
@@ -524,6 +566,14 @@ export default function Home() {
 
   const goToIncomeCity = useCallback((name: string) => {
     setSelectedIncomeCityName(name);
+  }, []);
+
+  const goToEducationCounty = useCallback((name: string) => {
+    setSelectedEducationCountyName(name);
+  }, []);
+
+  const goToEducationCity = useCallback((name: string) => {
+    setSelectedEducationCityName(name);
   }, []);
 
   const hasAnyFavorites = favorites.length > 0;
@@ -600,6 +650,12 @@ export default function Home() {
                 selectedHousingCityName={selectedHousingCityName}
                 showCityIncome={showCityIncome}
                 selectedIncomeCityName={selectedIncomeCityName}
+                showEducation={showEducation}
+                educationMetric={educationMetric}
+                selectedEducationCountyName={selectedEducationCountyName}
+                showCityEducation={showCityEducation}
+                cityEducationMetric={cityEducationMetric}
+                selectedEducationCityName={selectedEducationCityName}
                 showCityCrime={showCityCrime}
                 cityCrimeType={cityCrimeType}
                 selectedCrimeCityName={selectedCrimeCityName}
@@ -965,6 +1021,54 @@ export default function Home() {
                   )}
                 </div>
 
+                {/* County education toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showEducation ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showEducation} onChange={toggleEducation} />
+                    <LuGraduationCap className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">County Education</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Educational Attainment (Table B15003).
+                      <br />
+                      Population 25 years and over.
+                    </InfoTooltip>
+                  </label>
+                  {showEducation && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={educationMetric}
+                          onChange={(e) => setEducationMetric(e.target.value as EducationMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {educationMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {EDUCATION_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowEducationTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="my-1 border-t border-gray-300" />
 
                 {/* City borders toggle */}
@@ -1117,6 +1221,54 @@ export default function Home() {
                     <div className="mt-2 ml-14 flex flex-col gap-2">
                       <button
                         onClick={() => setShowCityIncomeTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* City education toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityEducation ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCityEducation} onChange={toggleCityEducation} />
+                    <LuGraduationCap className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Education</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Educational Attainment (Table B15003).
+                      <br />
+                      Population 25 years and over.
+                    </InfoTooltip>
+                  </label>
+                  {showCityEducation && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={cityEducationMetric}
+                          onChange={(e) => setCityEducationMetric(e.target.value as EducationMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {educationMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {EDUCATION_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowCityEducationTable(true)}
                         className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
                       >
                         <LuTable className="h-4 w-4 text-gray-900" />
@@ -1866,6 +2018,24 @@ export default function Home() {
         activeHousingMetric="income"
         onSelectName={goToIncomeCity}
         visibleMetrics={["income"]}
+      />
+      <EducationTableModal
+        open={showEducationTable}
+        onClose={() => setShowEducationTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-county-labels.geojson`}
+        title="County Educational Attainment (ACS 2019–2023)"
+        nameLabel="County"
+        activeEducationMetric={educationMetric}
+        onSelectName={goToEducationCounty}
+      />
+      <EducationTableModal
+        open={showCityEducationTable}
+        onClose={() => setShowCityEducationTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-city-labels.geojson`}
+        title="City Educational Attainment (ACS 2019–2023)"
+        nameLabel="City"
+        activeEducationMetric={cityEducationMetric}
+        onSelectName={goToEducationCity}
       />
       <TemperatureTableModal
         open={showTempTable}

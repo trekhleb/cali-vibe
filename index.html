@@ -13,23 +13,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>CaliVibe — Interactive California Map: Housing, Income, Crime, Temperature, Transit</title>
-    <meta name="description" content="Explore California on one interactive map. Housing costs, household income, crime rates, population, temperature, sunshine hours, 18 transit systems, and 3D terrain — by county and city." />
-    <meta name="keywords" content="California map, California housing cost, California city housing, California household income, California city income, California crime rate, California temperature, California sunshine hours, California transit map, BART map, LA Metro map, California population, California counties, California cities, interactive map" />
+    <title>CaliVibe — Interactive California Map: Housing, Income, Education, Crime, Temperature, Transit</title>
+    <meta name="description" content="Explore California on one interactive map. Housing costs, household income, educational attainment, crime rates, population, temperature, sunshine hours, 18 transit systems, and 3D terrain — by county and city." />
+    <meta name="keywords" content="California map, California housing cost, California city housing, California household income, California city income, California education, California educational attainment, California crime rate, California temperature, California sunshine hours, California transit map, BART map, LA Metro map, California population, California counties, California cities, interactive map" />
 
     <!-- Open Graph (Facebook, LinkedIn, etc.) -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://trekhleb.dev/cali-vibe/" />
-    <meta property="og:title" content="CaliVibe — Interactive California Map: Housing, Income, Crime, Temperature, Transit" />
-    <meta property="og:description" content="Explore California on one interactive map. Housing costs, household income, crime rates, population, temperature, sunshine hours, 18 transit systems, and 3D terrain — by county and city." />
+    <meta property="og:title" content="CaliVibe — Interactive California Map: Housing, Income, Education, Crime, Temperature, Transit" />
+    <meta property="og:description" content="Explore California on one interactive map. Housing costs, household income, educational attainment, crime rates, population, temperature, sunshine hours, 18 transit systems, and 3D terrain — by county and city." />
     <meta property="og:image" content="https://trekhleb.dev/cali-vibe/demo/00-preview-md.jpg" />
     <meta property="og:image:width" content="1800" />
     <meta property="og:image:height" content="1224" />
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CaliVibe — Interactive California Map: Housing, Income, Crime, Temperature, Transit" />
-    <meta name="twitter:description" content="Explore California on one interactive map. Housing costs, household income, crime rates, population, temperature, sunshine hours, 18 transit systems, and 3D terrain — by county and city." />
+    <meta name="twitter:title" content="CaliVibe — Interactive California Map: Housing, Income, Education, Crime, Temperature, Transit" />
+    <meta name="twitter:description" content="Explore California on one interactive map. Housing costs, household income, educational attainment, crime rates, population, temperature, sunshine hours, 18 transit systems, and 3D terrain — by county and city." />
     <meta name="twitter:image" content="https://trekhleb.dev/cali-vibe/demo/00-preview-md.jpg" />
 
     <!-- Structured data -->
@@ -39,7 +39,7 @@
       "@type": "WebApplication",
       "name": "CaliVibe",
       "url": "https://trekhleb.dev/cali-vibe/",
-      "description": "Interactive California map with housing costs, household income, crime rates, population, temperature, sunshine hours, transit routes, and 3D terrain by county and city.",
+      "description": "Interactive California map with housing costs, household income, educational attainment, crime rates, population, temperature, sunshine hours, transit routes, and 3D terrain by county and city.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Any",
       "offers": {
@@ -53,7 +53,7 @@
         "url": "https://trekhleb.dev"
       },
       "screenshot": "https://trekhleb.dev/cali-vibe/demo/00-preview-xl.png",
-      "featureList": "Housing cost map, Household income map, Crime rate map, Population map, Temperature map, Sunshine hours map, Transit route map, 3D terrain, Sortable data tables, Shareable URLs"
+      "featureList": "Housing cost map, Household income map, Educational attainment map, Crime rate map, Population map, Temperature map, Sunshine hours map, Transit route map, 3D terrain, Sortable data tables, Shareable URLs"
     }
     </script>
 
@@ -67,11 +67,12 @@
     <div id="root"></div>
     <noscript>
       <h1>CaliVibe — Interactive California Map</h1>
-      <p>Explore California neighborhoods on a single interactive map: housing costs, household income, crime rates, population, temperature, sunshine hours, transit routes, and 3D terrain — all by county and city.</p>
+      <p>Explore California neighborhoods on a single interactive map: housing costs, household income, educational attainment, crime rates, population, temperature, sunshine hours, transit routes, and 3D terrain — all by county and city.</p>
       <h2>What you can explore</h2>
       <ul>
         <li><strong>Housing Cost</strong> — Median home value and median gross rent for all 58 California counties and 482 cities (Census ACS 2019–2023)</li>
         <li><strong>Household Income</strong> — Median household income for all 58 California counties and 482 cities (Census ACS 2019–2023)</li>
+        <li><strong>Educational Attainment</strong> — Bachelor's degree+, high school diploma+, and graduate degree+ rates for all 58 counties and 482 cities (Census ACS 2019–2023, Table B15003)</li>
         <li><strong>Crime Rates</strong> — 10 crime categories per 100,000 residents for counties and cities (CA DOJ 2023)</li>
         <li><strong>Population</strong> — 2024 county population estimates (CA Dept. of Finance)</li>
         <li><strong>Temperature</strong> — Monthly average highs, lows, and means on an H3 hex grid (2014–2023 normals)</li>

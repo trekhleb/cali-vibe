@@ -50,6 +50,48 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- County Education: Bachelor's+ -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?edu=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- County Education: HS+ -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?edu=1&amp;emetric=hsPlus&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- County Education: Graduate+ -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?edu=1&amp;emetric=gradPlus&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- City Education: Bachelor's+ -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?cityEdu=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- City Education: HS+ -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?cityEdu=1&amp;cemetric=hsPlus&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- City Education: Graduate+ -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?cityEdu=1&amp;cemetric=gradPlus&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- County crime: All Crime -->
   <url>
     <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;relief=0</loc>

@@ -80,6 +80,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">ACS 5-Year Estimates (2019–2023). Median Home Value (B25077), Median Gross Rent (B25064) &amp; Median Household Income (B19013) by county and city.</span>
           </li>
           <li>
+            <strong>Educational Attainment</strong>
+            <br />
+            <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">US Census Bureau</a>
+            <br />
+            <span className="text-gray-500">ACS 5-Year Estimates (2019–2023). Table B15003 &mdash; Educational Attainment for Population 25+. Bachelor&rsquo;s+, HS+, Graduate+ by county and city.</span>
+          </li>
+          <li>
             <strong>County Boundaries</strong>
             <br />
             <a href="https://data.ca.gov/dataset/ca-geographic-boundaries" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">California Open Data Portal</a>

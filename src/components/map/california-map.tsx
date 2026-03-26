@@ -28,6 +28,11 @@ import CountyHousingLayer, {
 import CityBordersLayer, { type CityDisplayMode } from "./layers/city-borders-layer";
 import CityCrimeLayer, { CityCrimeLegend } from "./layers/city-crime-layer";
 import CityHousingLayer, { CityHousingLegend } from "./layers/city-housing-layer";
+import CountyEducationLayer, {
+  EducationLegend,
+  type EducationMetric,
+} from "./layers/county-education-layer";
+import CityEducationLayer, { CityEducationLegend } from "./layers/city-education-layer";
 import TemperatureLayer, {
   TemperatureLegend,
   type TempMetric,
@@ -70,11 +75,17 @@ interface CaliforniaMapProps {
   selectedHousingCountyName?: string | null;
   showIncome?: boolean;
   selectedIncomeCountyName?: string | null;
+  showEducation?: boolean;
+  educationMetric?: EducationMetric;
+  selectedEducationCountyName?: string | null;
   showCityHousing?: boolean;
   cityHousingMetric?: HousingMetric;
   selectedHousingCityName?: string | null;
   showCityIncome?: boolean;
   selectedIncomeCityName?: string | null;
+  showCityEducation?: boolean;
+  cityEducationMetric?: EducationMetric;
+  selectedEducationCityName?: string | null;
   showCityCrime?: boolean;
   cityCrimeType?: CrimeType;
   selectedCrimeCityName?: string | null;
@@ -126,11 +137,17 @@ export default function CaliforniaMap({
   selectedHousingCountyName = null,
   showIncome = false,
   selectedIncomeCountyName = null,
+  showEducation = false,
+  educationMetric = "bachPlus",
+  selectedEducationCountyName = null,
   showCityHousing = false,
   cityHousingMetric = "homeValue",
   selectedHousingCityName = null,
   showCityIncome = false,
   selectedIncomeCityName = null,
+  showCityEducation = false,
+  cityEducationMetric = "bachPlus",
+  selectedEducationCityName = null,
   showCityCrime = false,
   cityCrimeType = "total",
   selectedCrimeCityName = null,
@@ -168,8 +185,8 @@ export default function CaliforniaMap({
 }: CaliforniaMapProps) {
   // Smart zoom for "locate me": city layers → street level, county → county level
   const locateZoom =
-    showCities || showCityCrime || showCityHousing || showCityIncome ? 11 :
-    showCounties || showPopulation || showCrime || showHousing || showIncome ? 8 :
+    showCities || showCityCrime || showCityHousing || showCityIncome || showCityEducation ? 11 :
+    showCounties || showPopulation || showCrime || showHousing || showIncome || showEducation ? 8 :
     showTemperature || showSunshine ? 9 : 10;
 
   return (
@@ -201,6 +218,8 @@ export default function CaliforniaMap({
       {showHousing && <HousingLegend housingMetric={housingMetric} overlayOffset={overlayOffset} />}
       {showIncome && <CountyHousingLayer housingMetric="income" overlayOffset={overlayOffset} selectName={selectedIncomeCountyName} />}
       {showIncome && <HousingLegend housingMetric="income" overlayOffset={overlayOffset} />}
+      {showEducation && <CountyEducationLayer educationMetric={educationMetric} overlayOffset={overlayOffset} selectName={selectedEducationCountyName} />}
+      {showEducation && <EducationLegend educationMetric={educationMetric} overlayOffset={overlayOffset} />}
       {showCities && (
         <CityBordersLayer
           displayMode={cityDisplayMode}
@@ -218,6 +237,8 @@ export default function CaliforniaMap({
       {showCityHousing && <CityHousingLegend housingMetric={cityHousingMetric} overlayOffset={overlayOffset} />}
       {showCityIncome && <CityHousingLayer housingMetric="income" overlayOffset={overlayOffset} selectName={selectedIncomeCityName} />}
       {showCityIncome && <CityHousingLegend housingMetric="income" overlayOffset={overlayOffset} />}
+      {showCityEducation && <CityEducationLayer educationMetric={cityEducationMetric} overlayOffset={overlayOffset} selectName={selectedEducationCityName} />}
+      {showCityEducation && <CityEducationLegend educationMetric={cityEducationMetric} overlayOffset={overlayOffset} />}
       {showTemperature && (
         <TemperatureLayer
           metric={tempMetric}
