@@ -73,11 +73,11 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">E-1 City/County Population Estimates, January 2024.<br />E-6 County Population Estimates, 2024.</span>
           </li>
           <li>
-            <strong>Housing Cost</strong>
+            <strong>Housing Cost &amp; Household Income</strong>
             <br />
             <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">US Census Bureau</a>
             <br />
-            <span className="text-gray-500">ACS 5-Year Estimates (2019–2023). Median Home Value (B25077), Median Gross Rent (B25064) &amp; Median Household Income (B19013) by county.</span>
+            <span className="text-gray-500">ACS 5-Year Estimates (2019–2023). Median Home Value (B25077), Median Gross Rent (B25064) &amp; Median Household Income (B19013) by county and city.</span>
           </li>
           <li>
             <strong>County Boundaries</strong>

@@ -27,6 +27,7 @@ import CountyHousingLayer, {
 } from "./layers/county-housing-layer";
 import CityBordersLayer, { type CityDisplayMode } from "./layers/city-borders-layer";
 import CityCrimeLayer, { CityCrimeLegend } from "./layers/city-crime-layer";
+import CityHousingLayer, { CityHousingLegend } from "./layers/city-housing-layer";
 import TemperatureLayer, {
   TemperatureLegend,
   type TempMetric,
@@ -69,6 +70,11 @@ interface CaliforniaMapProps {
   selectedHousingCountyName?: string | null;
   showIncome?: boolean;
   selectedIncomeCountyName?: string | null;
+  showCityHousing?: boolean;
+  cityHousingMetric?: HousingMetric;
+  selectedHousingCityName?: string | null;
+  showCityIncome?: boolean;
+  selectedIncomeCityName?: string | null;
   showCityCrime?: boolean;
   cityCrimeType?: CrimeType;
   selectedCrimeCityName?: string | null;
@@ -120,6 +126,11 @@ export default function CaliforniaMap({
   selectedHousingCountyName = null,
   showIncome = false,
   selectedIncomeCountyName = null,
+  showCityHousing = false,
+  cityHousingMetric = "homeValue",
+  selectedHousingCityName = null,
+  showCityIncome = false,
+  selectedIncomeCityName = null,
   showCityCrime = false,
   cityCrimeType = "total",
   selectedCrimeCityName = null,
@@ -157,7 +168,7 @@ export default function CaliforniaMap({
 }: CaliforniaMapProps) {
   // Smart zoom for "locate me": city layers → street level, county → county level
   const locateZoom =
-    showCities || showCityCrime ? 11 :
+    showCities || showCityCrime || showCityHousing || showCityIncome ? 11 :
     showCounties || showPopulation || showCrime || showHousing || showIncome ? 8 :
     showTemperature || showSunshine ? 9 : 10;
 
@@ -203,6 +214,10 @@ export default function CaliforniaMap({
       {showCrime && <CrimeLegend crimeType={crimeType} overlayOffset={overlayOffset} />}
       {showCityCrime && <CityCrimeLayer crimeType={cityCrimeType} overlayOffset={overlayOffset} selectName={selectedCrimeCityName} />}
       {showCityCrime && <CityCrimeLegend crimeType={cityCrimeType} overlayOffset={overlayOffset} />}
+      {showCityHousing && <CityHousingLayer housingMetric={cityHousingMetric} overlayOffset={overlayOffset} selectName={selectedHousingCityName} />}
+      {showCityHousing && <CityHousingLegend housingMetric={cityHousingMetric} overlayOffset={overlayOffset} />}
+      {showCityIncome && <CityHousingLayer housingMetric="income" overlayOffset={overlayOffset} selectName={selectedIncomeCityName} />}
+      {showCityIncome && <CityHousingLegend housingMetric="income" overlayOffset={overlayOffset} />}
       {showTemperature && (
         <TemperatureLayer
           metric={tempMetric}

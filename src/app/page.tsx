@@ -90,6 +90,9 @@ const DEFAULTS = {
   housing: false,
   hmetric: "homeValue" as HousingMetric,
   income: false,
+  cityHousing: false,
+  chmetric: "homeValue" as HousingMetric,
+  cityIncome: false,
   cityCrime: false,
   cictype: "total" as CrimeType,
   style: "light" as MapStyleId,
@@ -132,6 +135,9 @@ function readParams() {
     housing: bool("housing", DEFAULTS.housing),
     hmetric: str("hmetric", DEFAULTS.hmetric, housingMetricIds),
     income: bool("income", DEFAULTS.income),
+    cityHousing: bool("cityHousing", DEFAULTS.cityHousing),
+    chmetric: str("chmetric", DEFAULTS.chmetric, housingMetricIds),
+    cityIncome: bool("cityIncome", DEFAULTS.cityIncome),
     cityCrime: bool("cityCrime", DEFAULTS.cityCrime),
     cictype: str("cictype", DEFAULTS.cictype, crimeTypeIds),
     temp: bool("temp", DEFAULTS.temp),
@@ -192,6 +198,9 @@ export default function Home() {
   const [showHousing, setShowHousing] = useState(init.housing);
   const [housingMetric, setHousingMetric] = useState<HousingMetric>(init.hmetric);
   const [showIncome, setShowIncome] = useState(init.income);
+  const [showCityHousing, setShowCityHousing] = useState(init.cityHousing);
+  const [cityHousingMetric, setCityHousingMetric] = useState<HousingMetric>(init.chmetric);
+  const [showCityIncome, setShowCityIncome] = useState(init.cityIncome);
   const [showCityCrime, setShowCityCrime] = useState(init.cityCrime);
   const [cityCrimeType, setCityCrimeType] = useState<CrimeType>(init.cictype);
   const [showTemperature, setShowTemperature] = useState(init.temp);
@@ -250,6 +259,10 @@ export default function Home() {
   const [selectedHousingCountyName, setSelectedHousingCountyName] = useState<string | null>(null);
   const [showIncomeTable, setShowIncomeTable] = useState(false);
   const [selectedIncomeCountyName, setSelectedIncomeCountyName] = useState<string | null>(null);
+  const [showCityHousingTable, setShowCityHousingTable] = useState(false);
+  const [selectedHousingCityName, setSelectedHousingCityName] = useState<string | null>(null);
+  const [showCityIncomeTable, setShowCityIncomeTable] = useState(false);
+  const [selectedIncomeCityName, setSelectedIncomeCityName] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const tempHexUrl = `${import.meta.env.BASE_URL}data/california-temperature-h3-res${tempResolution}.geojson`;
@@ -279,6 +292,9 @@ export default function Home() {
     setBool("housing", showHousing, DEFAULTS.housing);
     setStr("hmetric", housingMetric, DEFAULTS.hmetric);
     setBool("income", showIncome, DEFAULTS.income);
+    setBool("cityHousing", showCityHousing, DEFAULTS.cityHousing);
+    setStr("chmetric", cityHousingMetric, DEFAULTS.chmetric);
+    setBool("cityIncome", showCityIncome, DEFAULTS.cityIncome);
     setBool("cityCrime", showCityCrime, DEFAULTS.cityCrime);
     setStr("cictype", cityCrimeType, DEFAULTS.cictype);
     setBool("temp", showTemperature, DEFAULTS.temp);
@@ -302,7 +318,7 @@ export default function Home() {
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -324,41 +340,56 @@ export default function Home() {
   );
 
   // --- Mutually exclusive toggle helpers ---
+  const clearOverlays = () => {
+    setShowCounties(false); setShowPopulation(false); setShowCrime(false);
+    setShowHousing(false); setShowIncome(false);
+    setShowCityHousing(false); setShowCityIncome(false);
+    setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false);
+    setShowRelief(false);
+  };
   const toggleCounties = (on: boolean) => {
+    if (on) clearOverlays();
     setShowCounties(on);
-    if (on) { setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const togglePopulation = (on: boolean) => {
+    if (on) clearOverlays();
     setShowPopulation(on);
-    if (on) { setShowCounties(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleCrime = (on: boolean) => {
+    if (on) clearOverlays();
     setShowCrime(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleHousing = (on: boolean) => {
+    if (on) clearOverlays();
     setShowHousing(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleIncome = (on: boolean) => {
+    if (on) clearOverlays();
     setShowIncome(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+  };
+  const toggleCityHousing = (on: boolean) => {
+    if (on) { clearOverlays(); setShowCities(false); }
+    setShowCityHousing(on);
+  };
+  const toggleCityIncome = (on: boolean) => {
+    if (on) { clearOverlays(); setShowCities(false); }
+    setShowCityIncome(on);
   };
   const toggleCityCrime = (on: boolean) => {
+    if (on) { clearOverlays(); setShowCities(false); }
     setShowCityCrime(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCities(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleTemperature = (on: boolean) => {
+    if (on) { clearOverlays(); setShowCities(false); }
     setShowTemperature(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowCities(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleSunshine = (on: boolean) => {
+    if (on) { clearOverlays(); setShowCities(false); }
     setShowSunshine(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowCities(false); setShowTemperature(false); setShowRelief(false); }
   };
   const toggleCities = (on: boolean) => {
     setShowCities(on);
-    if (on) { setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCityCrime(false); setShowCityHousing(false); setShowCityIncome(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleTerrain3d = (on: boolean) => {
     setTerrain3d(on);
@@ -370,7 +401,7 @@ export default function Home() {
   };
   const toggleRelief = (on: boolean) => {
     setShowRelief(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
   };
 
   const resetAll = useCallback(() => {
@@ -385,6 +416,9 @@ export default function Home() {
     setShowHousing(false);
     setHousingMetric("homeValue");
     setShowIncome(false);
+    setShowCityHousing(false);
+    setCityHousingMetric("homeValue");
+    setShowCityIncome(false);
     setShowCityCrime(false);
     setCityCrimeType("total");
     setShowTemperature(false);
@@ -429,6 +463,8 @@ export default function Home() {
     setSelectedCrimeCountyName(null);
     setSelectedHousingCountyName(null);
     setSelectedIncomeCountyName(null);
+    setSelectedHousingCityName(null);
+    setSelectedIncomeCityName(null);
     setSelectedCrimeCityName(null);
   }, []);
 
@@ -439,6 +475,8 @@ export default function Home() {
     setShowCrime(false);
     setShowHousing(false);
     setShowIncome(false);
+    setShowCityHousing(false);
+    setShowCityIncome(false);
     setShowCityCrime(false);
     setShowTemperature(false);
     setShowSunshine(false);
@@ -454,6 +492,8 @@ export default function Home() {
     setShowCrime(false);
     setShowHousing(false);
     setShowIncome(false);
+    setShowCityHousing(false);
+    setShowCityIncome(false);
     setShowCityCrime(false);
     setShowTemperature(false);
     setShowSunshine(false);
@@ -476,6 +516,14 @@ export default function Home() {
 
   const goToIncomeCounty = useCallback((name: string) => {
     setSelectedIncomeCountyName(name);
+  }, []);
+
+  const goToHousingCity = useCallback((name: string) => {
+    setSelectedHousingCityName(name);
+  }, []);
+
+  const goToIncomeCity = useCallback((name: string) => {
+    setSelectedIncomeCityName(name);
   }, []);
 
   const hasAnyFavorites = favorites.length > 0;
@@ -547,6 +595,11 @@ export default function Home() {
                 selectedHousingCountyName={selectedHousingCountyName}
                 showIncome={showIncome}
                 selectedIncomeCountyName={selectedIncomeCountyName}
+                showCityHousing={showCityHousing}
+                cityHousingMetric={cityHousingMetric}
+                selectedHousingCityName={selectedHousingCityName}
+                showCityIncome={showCityIncome}
+                selectedIncomeCityName={selectedIncomeCityName}
                 showCityCrime={showCityCrime}
                 cityCrimeType={cityCrimeType}
                 selectedCrimeCityName={selectedCrimeCityName}
@@ -686,6 +739,53 @@ export default function Home() {
                   </div>
                 </div>
 
+                {/* 3D Relief toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showRelief ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showRelief} onChange={toggleRelief} />
+                    <LuMountain className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">3D Vibe</span>
+                    <InfoTooltip>
+                      Artistic raised-relief visualization.
+                      <br />
+                      Elevation data:{" "}
+                      <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        AWS Terrain Tiles
+                      </a>
+                      <br />
+                      Rotatable 3D view (drag to rotate).
+                    </InfoTooltip>
+                  </label>
+                  {showRelief && (
+                    <div className="mt-2 ml-14 flex flex-col gap-3">
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <Toggle checked={showPeaks} onChange={setShowPeaks} size="sm" />
+                        <span className="text-sm font-medium text-gray-700">Show Peaks</span>
+                      </label>
+
+                      {showPeaks && (
+                        <div className="ml-11">
+                          <SegmentedControl
+                            value={peakUnit}
+                            onChange={(v) => setPeakUnit(v as "ft" | "m")}
+                            options={PEAK_UNIT_OPTIONS}
+                          />
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => terrainRef.current?.resetView()}
+                        className="mt-1 inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start w-auto"
+                      >
+                        <LuRotateCcw className="h-4 w-4 text-gray-900" />
+                        Reset View
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="my-1 border-t border-gray-300" />
+
                 {/* County borders toggle */}
                 <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCounties ? "bg-gray-100/80" : ""}`}>
                   <label className="flex cursor-pointer items-center gap-3">
@@ -794,7 +894,7 @@ export default function Home() {
                   <label className="flex cursor-pointer items-center gap-3">
                     <Toggle checked={showHousing} onChange={toggleHousing} />
                     <LuHouse className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">Housing Cost</span>
+                    <span className="text-sm font-medium">County Housing</span>
                     <InfoTooltip>
                       Source:{" "}
                       <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
@@ -835,12 +935,12 @@ export default function Home() {
                   )}
                 </div>
 
-                {/* Household income toggle */}
+                {/* County income toggle */}
                 <div className={`-mx-2 rounded-lg p-2 transition-colors ${showIncome ? "bg-gray-100/80" : ""}`}>
                   <label className="flex cursor-pointer items-center gap-3">
                     <Toggle checked={showIncome} onChange={toggleIncome} />
                     <LuWallet className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">Household Income</span>
+                    <span className="text-sm font-medium">County Income</span>
                     <InfoTooltip>
                       Source:{" "}
                       <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
@@ -864,6 +964,8 @@ export default function Home() {
                     </div>
                   )}
                 </div>
+
+                <div className="my-1 border-t border-gray-300" />
 
                 {/* City borders toggle */}
                 <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCities ? "bg-gray-100/80" : ""}`}>
@@ -947,6 +1049,84 @@ export default function Home() {
                     </div>
                   )}
                 </div>
+
+                {/* City housing toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityHousing ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCityHousing} onChange={toggleCityHousing} />
+                    <LuHouse className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Housing</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Median Home Value &amp; Median Gross Rent by city.
+                    </InfoTooltip>
+                  </label>
+                  {showCityHousing && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={cityHousingMetric}
+                          onChange={(e) => setCityHousingMetric(e.target.value as HousingMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {housingMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {HOUSING_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowCityHousingTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* City income toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityIncome ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCityIncome} onChange={toggleCityIncome} />
+                    <LuWallet className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Income</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Median Household Income by city.
+                    </InfoTooltip>
+                  </label>
+                  {showCityIncome && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <button
+                        onClick={() => setShowCityIncomeTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="my-1 border-t border-gray-300" />
 
                 {/* Temperature toggle */}
                 <div className={`-mx-2 rounded-lg p-2 transition-colors ${showTemperature ? "bg-gray-100/80" : ""}`}>
@@ -1530,51 +1710,6 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-
-                {/* 3D Relief toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showRelief ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showRelief} onChange={toggleRelief} />
-                    <LuMountain className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">3D Vibe</span>
-                    <InfoTooltip>
-                      Artistic raised-relief visualization.
-                      <br />
-                      Elevation data:{" "}
-                      <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        AWS Terrain Tiles
-                      </a>
-                      <br />
-                      Rotatable 3D view (drag to rotate).
-                    </InfoTooltip>
-                  </label>
-                  {showRelief && (
-                    <div className="mt-2 ml-14 flex flex-col gap-3">
-                      <label className="flex cursor-pointer items-center gap-3">
-                        <Toggle checked={showPeaks} onChange={setShowPeaks} size="sm" />
-                        <span className="text-sm font-medium text-gray-700">Show Peaks</span>
-                      </label>
-
-                      {showPeaks && (
-                        <div className="ml-11">
-                          <SegmentedControl
-                            value={peakUnit}
-                            onChange={(v) => setPeakUnit(v as "ft" | "m")}
-                            options={PEAK_UNIT_OPTIONS}
-                          />
-                        </div>
-                      )}
-
-                      <button
-                        onClick={() => terrainRef.current?.resetView()}
-                        className="mt-1 inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start w-auto"
-                      >
-                        <LuRotateCcw className="h-4 w-4 text-gray-900" />
-                        Reset View
-                      </button>
-                    </div>
-                  )}
-                </div>
               </div>
             )}
 
@@ -1710,6 +1845,26 @@ export default function Home() {
         nameLabel="County"
         activeHousingMetric="income"
         onSelectName={goToIncomeCounty}
+        visibleMetrics={["income"]}
+      />
+      <HousingTableModal
+        open={showCityHousingTable}
+        onClose={() => setShowCityHousingTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-city-labels.geojson`}
+        title="City Housing Cost (ACS 2019–2023)"
+        nameLabel="City"
+        activeHousingMetric={cityHousingMetric}
+        onSelectName={goToHousingCity}
+        visibleMetrics={["homeValue", "rent"]}
+      />
+      <HousingTableModal
+        open={showCityIncomeTable}
+        onClose={() => setShowCityIncomeTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-city-labels.geojson`}
+        title="City Household Income (ACS 2019–2023)"
+        nameLabel="City"
+        activeHousingMetric="income"
+        onSelectName={goToIncomeCity}
         visibleMetrics={["income"]}
       />
       <TemperatureTableModal
