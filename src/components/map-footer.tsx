@@ -94,6 +94,13 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">ACS 5-Year Estimates (2019–2023). Table B03002 &mdash; Hispanic or Latino Origin by Race. White, Hispanic, Black, Asian, Other by county and city.</span>
           </li>
           <li>
+            <strong>Poverty Rate</strong>
+            <br />
+            <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">US Census Bureau</a>
+            <br />
+            <span className="text-gray-500">ACS 5-Year Estimates (2019–2023). Table B17001 &mdash; Poverty Status in the Past 12 Months. % below poverty level by county and city.</span>
+          </li>
+          <li>
             <strong>County Boundaries</strong>
             <br />
             <a href="https://data.ca.gov/dataset/ca-geographic-boundaries" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">California Open Data Portal</a>

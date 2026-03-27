@@ -21,6 +21,7 @@ import PopulationTableModal from "@/components/population-table-modal";
 import HousingTableModal from "@/components/housing-table-modal";
 import EducationTableModal from "@/components/education-table-modal";
 import RaceTableModal from "@/components/race-table-modal";
+import PovertyTableModal from "@/components/poverty-table-modal";
 import { HOUSING_LABELS, type HousingMetric } from "@/components/map/layers/county-housing-layer";
 import { EDUCATION_LABELS, type EducationMetric } from "@/components/map/layers/county-education-layer";
 import { RACE_LABELS, type RaceMetric } from "@/components/map/layers/county-race-layer";
@@ -57,6 +58,7 @@ import {
   LuHouse,
   LuWallet,
   LuGraduationCap,
+  LuTrendingDown,
 } from "react-icons/lu";
 import { IoManOutline } from "react-icons/io5";
 import { RiFocus3Line, RiFocus3Fill } from "react-icons/ri";
@@ -110,6 +112,8 @@ const DEFAULTS = {
   rmetric: "hispanic" as RaceMetric,
   cityRace: false,
   crmetric: "hispanic" as RaceMetric,
+  pov: false,
+  cityPov: false,
   style: "light" as MapStyleId,
   temp: false,
   tmetric: "tmax" as TempMetric,
@@ -163,6 +167,8 @@ function readParams() {
     rmetric: str("rmetric", DEFAULTS.rmetric, raceMetricIds),
     cityRace: bool("cityRace", DEFAULTS.cityRace),
     crmetric: str("crmetric", DEFAULTS.crmetric, raceMetricIds),
+    pov: bool("pov", DEFAULTS.pov),
+    cityPov: bool("cityPov", DEFAULTS.cityPov),
     temp: bool("temp", DEFAULTS.temp),
     tmetric: str("tmetric", DEFAULTS.tmetric, tempMetricIds),
     tmonth: (() => {
@@ -242,6 +248,12 @@ export default function Home() {
   const [selectedRaceCountyName, setSelectedRaceCountyName] = useState<string | null>(null);
   const [showCityRaceTable, setShowCityRaceTable] = useState(false);
   const [selectedRaceCityName, setSelectedRaceCityName] = useState<string | null>(null);
+  const [showPoverty, setShowPoverty] = useState(init.pov);
+  const [showCityPoverty, setShowCityPoverty] = useState(init.cityPov);
+  const [showPovertyTable, setShowPovertyTable] = useState(false);
+  const [selectedPovertyCountyName, setSelectedPovertyCountyName] = useState<string | null>(null);
+  const [showCityPovertyTable, setShowCityPovertyTable] = useState(false);
+  const [selectedPovertyCityName, setSelectedPovertyCityName] = useState<string | null>(null);
   const [showTemperature, setShowTemperature] = useState(init.temp);
   const [tempMetric, setTempMetric] = useState<TempMetric>(init.tmetric);
   const [tempMonth, setTempMonth] = useState(init.tmonth);
@@ -344,6 +356,8 @@ export default function Home() {
     setStr("rmetric", raceMetric, DEFAULTS.rmetric);
     setBool("cityRace", showCityRace, DEFAULTS.cityRace);
     setStr("crmetric", cityRaceMetric, DEFAULTS.crmetric);
+    setBool("pov", showPoverty, DEFAULTS.pov);
+    setBool("cityPov", showCityPoverty, DEFAULTS.cityPov);
     setBool("temp", showTemperature, DEFAULTS.temp);
     setStr("tmetric", tempMetric, DEFAULTS.tmetric);
     if (tempMonth !== DEFAULTS.tmonth) p.set("tmonth", String(tempMonth));
@@ -365,7 +379,7 @@ export default function Home() {
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showPoverty, showCityPoverty, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -389,8 +403,8 @@ export default function Home() {
   // --- Mutually exclusive toggle helpers ---
   const clearOverlays = () => {
     setShowCounties(false); setShowPopulation(false); setShowCrime(false);
-    setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false);
-    setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false);
+    setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowPoverty(false);
+    setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false);
     setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false);
     setShowRelief(false);
   };
@@ -430,6 +444,14 @@ export default function Home() {
     if (on) { clearOverlays(); setShowCities(false); }
     setShowCityRace(on);
   };
+  const togglePoverty = (on: boolean) => {
+    if (on) clearOverlays();
+    setShowPoverty(on);
+  };
+  const toggleCityPoverty = (on: boolean) => {
+    if (on) { clearOverlays(); setShowCities(false); }
+    setShowCityPoverty(on);
+  };
   const toggleCityHousing = (on: boolean) => {
     if (on) { clearOverlays(); setShowCities(false); }
     setShowCityHousing(on);
@@ -452,7 +474,7 @@ export default function Home() {
   };
   const toggleCities = (on: boolean) => {
     setShowCities(on);
-    if (on) { setShowCityCrime(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCityCrime(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleTerrain3d = (on: boolean) => {
     setTerrain3d(on);
@@ -464,7 +486,7 @@ export default function Home() {
   };
   const toggleRelief = (on: boolean) => {
     setShowRelief(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowPoverty(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
   };
 
   const resetAll = useCallback(() => {
@@ -492,6 +514,8 @@ export default function Home() {
     setRaceMetric("hispanic");
     setShowCityRace(false);
     setCityRaceMetric("hispanic");
+    setShowPoverty(false);
+    setShowCityPoverty(false);
     setShowTemperature(false);
     setTempMetric(DEFAULTS.tmetric);
     setTempMonth(new Date().getMonth());
@@ -552,10 +576,12 @@ export default function Home() {
     setShowIncome(false);
     setShowEducation(false);
     setShowRace(false);
+    setShowPoverty(false);
     setShowCityHousing(false);
     setShowCityIncome(false);
     setShowCityEducation(false);
     setShowCityRace(false);
+    setShowCityPoverty(false);
     setShowCityCrime(false);
     setShowTemperature(false);
     setShowSunshine(false);
@@ -573,10 +599,12 @@ export default function Home() {
     setShowIncome(false);
     setShowEducation(false);
     setShowRace(false);
+    setShowPoverty(false);
     setShowCityHousing(false);
     setShowCityIncome(false);
     setShowCityEducation(false);
     setShowCityRace(false);
+    setShowCityPoverty(false);
     setShowCityCrime(false);
     setShowTemperature(false);
     setShowSunshine(false);
@@ -623,6 +651,14 @@ export default function Home() {
 
   const goToRaceCity = useCallback((name: string) => {
     setSelectedRaceCityName(name);
+  }, []);
+
+  const goToPovertyCounty = useCallback((name: string) => {
+    setSelectedPovertyCountyName(name);
+  }, []);
+
+  const goToPovertyCity = useCallback((name: string) => {
+    setSelectedPovertyCityName(name);
   }, []);
 
   const hasAnyFavorites = favorites.length > 0;
@@ -711,6 +747,10 @@ export default function Home() {
                 showCityRace={showCityRace}
                 cityRaceMetric={cityRaceMetric}
                 selectedRaceCityName={selectedRaceCityName}
+                showPoverty={showPoverty}
+                selectedPovertyCountyName={selectedPovertyCountyName}
+                showCityPoverty={showCityPoverty}
+                selectedPovertyCityName={selectedPovertyCityName}
                 showCityCrime={showCityCrime}
                 cityCrimeType={cityCrimeType}
                 selectedCrimeCityName={selectedCrimeCityName}
@@ -1759,6 +1799,39 @@ export default function Home() {
                   )}
                 </div>
 
+                {/* County poverty toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showPoverty ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showPoverty} onChange={togglePoverty} />
+                    <LuTrendingDown className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">County Poverty</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Poverty Status (Table B17001).
+                      <br />
+                      % of population with income below
+                      the federal poverty threshold.
+                    </InfoTooltip>
+                  </label>
+                  {showPoverty && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <button
+                        onClick={() => setShowPovertyTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="my-1 border-t border-gray-300">
                   <div className="mt-1 text-[10px] font-medium uppercase tracking-widest text-gray-400">Cities</div>
                 </div>
@@ -2015,6 +2088,39 @@ export default function Home() {
                     </div>
                   )}
                 </div>
+
+                {/* City poverty toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityPoverty ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCityPoverty} onChange={toggleCityPoverty} />
+                    <LuTrendingDown className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Poverty</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Poverty Status (Table B17001).
+                      <br />
+                      % of population with income below
+                      the federal poverty threshold.
+                    </InfoTooltip>
+                  </label>
+                  {showCityPoverty && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <button
+                        onClick={() => setShowCityPovertyTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -2207,6 +2313,22 @@ export default function Home() {
         nameLabel="City"
         activeRaceMetric={cityRaceMetric}
         onSelectName={goToRaceCity}
+      />
+      <PovertyTableModal
+        open={showPovertyTable}
+        onClose={() => setShowPovertyTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-county-labels.geojson`}
+        title="County Poverty Rate (ACS 2019–2023)"
+        nameLabel="County"
+        onSelectName={goToPovertyCounty}
+      />
+      <PovertyTableModal
+        open={showCityPovertyTable}
+        onClose={() => setShowCityPovertyTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-city-labels.geojson`}
+        title="City Poverty Rate (ACS 2019–2023)"
+        nameLabel="City"
+        onSelectName={goToPovertyCity}
       />
       <TemperatureTableModal
         open={showTempTable}

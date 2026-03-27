@@ -134,6 +134,20 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- County Poverty Rate -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?pov=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- City Poverty Rate -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?cityPov=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- County crime: All Crime -->
   <url>
     <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;relief=0</loc>

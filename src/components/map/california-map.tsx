@@ -38,6 +38,10 @@ import CountyRaceLayer, {
   type RaceMetric,
 } from "./layers/county-race-layer";
 import CityRaceLayer, { CityRaceLegend } from "./layers/city-race-layer";
+import CountyPovertyLayer, {
+  PovertyLegend,
+} from "./layers/county-poverty-layer";
+import CityPovertyLayer, { CityPovertyLegend } from "./layers/city-poverty-layer";
 import TemperatureLayer, {
   TemperatureLegend,
   type TempMetric,
@@ -97,6 +101,10 @@ interface CaliforniaMapProps {
   showCityRace?: boolean;
   cityRaceMetric?: RaceMetric;
   selectedRaceCityName?: string | null;
+  showPoverty?: boolean;
+  selectedPovertyCountyName?: string | null;
+  showCityPoverty?: boolean;
+  selectedPovertyCityName?: string | null;
   showCityCrime?: boolean;
   cityCrimeType?: CrimeType;
   selectedCrimeCityName?: string | null;
@@ -165,6 +173,10 @@ export default function CaliforniaMap({
   showCityRace = false,
   cityRaceMetric = "white",
   selectedRaceCityName = null,
+  showPoverty = false,
+  selectedPovertyCountyName = null,
+  showCityPoverty = false,
+  selectedPovertyCityName = null,
   showCityCrime = false,
   cityCrimeType = "total",
   selectedCrimeCityName = null,
@@ -202,8 +214,8 @@ export default function CaliforniaMap({
 }: CaliforniaMapProps) {
   // Smart zoom for "locate me": city layers → street level, county → county level
   const locateZoom =
-    showCities || showCityCrime || showCityHousing || showCityIncome || showCityEducation || showCityRace ? 11 :
-    showCounties || showPopulation || showCrime || showHousing || showIncome || showEducation || showRace ? 8 :
+    showCities || showCityCrime || showCityHousing || showCityIncome || showCityEducation || showCityRace || showCityPoverty ? 11 :
+    showCounties || showPopulation || showCrime || showHousing || showIncome || showEducation || showRace || showPoverty ? 8 :
     showTemperature || showSunshine ? 9 : 10;
 
   return (
@@ -260,6 +272,10 @@ export default function CaliforniaMap({
       {showCityEducation && <CityEducationLegend educationMetric={cityEducationMetric} overlayOffset={overlayOffset} />}
       {showCityRace && <CityRaceLayer raceMetric={cityRaceMetric} overlayOffset={overlayOffset} selectName={selectedRaceCityName} />}
       {showCityRace && <CityRaceLegend raceMetric={cityRaceMetric} overlayOffset={overlayOffset} />}
+      {showPoverty && <CountyPovertyLayer overlayOffset={overlayOffset} selectName={selectedPovertyCountyName} />}
+      {showPoverty && <PovertyLegend overlayOffset={overlayOffset} />}
+      {showCityPoverty && <CityPovertyLayer overlayOffset={overlayOffset} selectName={selectedPovertyCityName} />}
+      {showCityPoverty && <CityPovertyLegend overlayOffset={overlayOffset} />}
       {showTemperature && (
         <TemperatureLayer
           metric={tempMetric}
