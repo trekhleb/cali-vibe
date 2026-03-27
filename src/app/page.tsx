@@ -850,6 +850,10 @@ export default function Home() {
                   </div>
                 </div>
 
+                <div className="my-1 border-t border-gray-300">
+                  <div className="mt-1 text-[10px] font-medium uppercase tracking-widest text-gray-400">Overlays</div>
+                </div>
+
                 {/* 3D Relief toggle */}
                 <div className={`-mx-2 rounded-lg p-2 transition-colors ${showRelief ? "bg-gray-100/80" : ""}`}>
                   <label className="flex cursor-pointer items-center gap-3">
