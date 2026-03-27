@@ -895,538 +895,6 @@ export default function Home() {
                   )}
                 </div>
 
-                <div className="my-1 border-t border-gray-300" />
-
-                {/* County borders toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCounties ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showCounties} onChange={toggleCounties} />
-                    <LuMap className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">Counties</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://data.ca.gov/dataset/ca-geographic-boundaries" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        California Open Data Portal
-                      </a>
-                      <br />
-                      US Census Bureau TIGER/Line, 2023
-                    </InfoTooltip>
-                  </label>
-                  {showCounties && (
-                    <>
-                      <div className="mt-2 ml-14">
-                        <SegmentedControl
-                          value={countyDisplayMode}
-                          onChange={(v) => setCountyDisplayMode(v as CountyDisplayMode)}
-                          options={DISPLAY_MODE_OPTIONS}
-                        />
-                      </div>
-                      <GeoSearch dataUrl={`${import.meta.env.BASE_URL}data/california-county-labels.geojson`} placeholder="Search counties..." onSelect={goToFavoriteCounty} />
-                    </>
-                  )}
-                </div>
-
-                {/* County population toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showPopulation ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showPopulation} onChange={togglePopulation} />
-                    <LuUsers className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">County Population</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://dof.ca.gov/forecasting/demographics/estimates/E-6/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        CA Dept. of Finance
-                      </a>
-                      <br />
-                      E-6 Population Estimates, 2024
-                    </InfoTooltip>
-                  </label>
-                  {showPopulation && (
-                    <div className="mt-2 ml-14">
-                      <button
-                        onClick={() => setShowPopulationTable(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
-                      >
-                        <LuTable className="h-4 w-4 text-gray-900" />
-                        View Table
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* County crime toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCrime ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showCrime} onChange={toggleCrime} />
-                    <LuSiren className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">County Crime</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://openjustice.doj.ca.gov/data" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        CA DOJ OpenJustice
-                      </a>
-                      <br />
-                      &ldquo;Crime in California&rdquo; 2023 report.
-                      <br />
-                      Rates per 100K population.
-                    </InfoTooltip>
-                  </label>
-                  {showCrime && (
-                    <div className="mt-2 ml-14 flex flex-col gap-2">
-                      <div className="relative inline-flex items-center">
-                        <select
-                          value={crimeType}
-                          onChange={(e) => setCrimeType(e.target.value as CrimeType)}
-                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
-                        >
-                          {crimeTypeIds.map((id) => (
-                            <option key={id} value={id}>
-                              {CRIME_LABELS[id]}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
-                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setShowCountyCrimeTable(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
-                      >
-                        <LuTable className="h-4 w-4 text-gray-900" />
-                        View Table
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* County housing toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showHousing ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showHousing} onChange={toggleHousing} />
-                    <LuHouse className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">County Housing</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        US Census Bureau
-                      </a>
-                      <br />
-                      ACS 5-Year Estimates (2019–2023).
-                      <br />
-                      Median Home Value &amp; Median Gross Rent by county.
-                    </InfoTooltip>
-                  </label>
-                  {showHousing && (
-                    <div className="mt-2 ml-14 flex flex-col gap-2">
-                      <div className="relative inline-flex items-center">
-                        <select
-                          value={housingMetric}
-                          onChange={(e) => setHousingMetric(e.target.value as HousingMetric)}
-                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
-                        >
-                          {housingMetricIds.map((id) => (
-                            <option key={id} value={id}>
-                              {HOUSING_LABELS[id]}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
-                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setShowHousingTable(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
-                      >
-                        <LuTable className="h-4 w-4 text-gray-900" />
-                        View Table
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* County income toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showIncome ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showIncome} onChange={toggleIncome} />
-                    <LuWallet className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">County Income</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        US Census Bureau
-                      </a>
-                      <br />
-                      ACS 5-Year Estimates (2019–2023).
-                      <br />
-                      Median Household Income by county.
-                    </InfoTooltip>
-                  </label>
-                  {showIncome && (
-                    <div className="mt-2 ml-14 flex flex-col gap-2">
-                      <button
-                        onClick={() => setShowIncomeTable(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
-                      >
-                        <LuTable className="h-4 w-4 text-gray-900" />
-                        View Table
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* County education toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showEducation ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showEducation} onChange={toggleEducation} />
-                    <LuGraduationCap className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">County Education</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        US Census Bureau
-                      </a>
-                      <br />
-                      ACS 5-Year Estimates (2019–2023).
-                      <br />
-                      Educational Attainment (Table B15003).
-                      <br />
-                      Population 25 years and over.
-                    </InfoTooltip>
-                  </label>
-                  {showEducation && (
-                    <div className="mt-2 ml-14 flex flex-col gap-2">
-                      <div className="relative inline-flex items-center">
-                        <select
-                          value={educationMetric}
-                          onChange={(e) => setEducationMetric(e.target.value as EducationMetric)}
-                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
-                        >
-                          {educationMetricIds.map((id) => (
-                            <option key={id} value={id}>
-                              {EDUCATION_LABELS[id]}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
-                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setShowEducationTable(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
-                      >
-                        <LuTable className="h-4 w-4 text-gray-900" />
-                        View Table
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* County race/ethnicity toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showRace ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showRace} onChange={toggleRace} />
-                    <IoManOutline className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">County Race</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        US Census Bureau
-                      </a>
-                      <br />
-                      ACS 5-Year Estimates (2019–2023).
-                      <br />
-                      Hispanic or Latino Origin by Race (Table B03002).
-                    </InfoTooltip>
-                  </label>
-                  {showRace && (
-                    <div className="mt-2 ml-14 flex flex-col gap-2">
-                      <div className="relative inline-flex items-center">
-                        <select
-                          value={raceMetric}
-                          onChange={(e) => setRaceMetric(e.target.value as RaceMetric)}
-                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
-                        >
-                          {raceMetricIds.map((id) => (
-                            <option key={id} value={id}>
-                              {RACE_LABELS[id]}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
-                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setShowRaceTable(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
-                      >
-                        <LuTable className="h-4 w-4 text-gray-900" />
-                        View Table
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="my-1 border-t border-gray-300" />
-
-                {/* City borders toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCities ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showCities} onChange={toggleCities} />
-                    <LuBuilding2 className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">Cities</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        US Census Bureau
-                      </a>
-                      <br />
-                      TIGER/Line Places, 2024.
-                      <br />
-                      482 incorporated cities.
-                    </InfoTooltip>
-                  </label>
-                  {showCities && (
-                    <>
-                      <div className="mt-2 ml-14">
-                        <SegmentedControl
-                          value={cityDisplayMode}
-                          onChange={(v) => setCityDisplayMode(v as CityDisplayMode)}
-                          options={DISPLAY_MODE_OPTIONS}
-                        />
-                      </div>
-                      <GeoSearch dataUrl={`${import.meta.env.BASE_URL}data/california-city-labels.geojson`} placeholder="Search cities..." onSelect={goToFavoriteCity} />
-                    </>
-                  )}
-                </div>
-
-                {/* City crime toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityCrime ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showCityCrime} onChange={toggleCityCrime} />
-                    <LuSiren className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">City Crime</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://openjustice.doj.ca.gov/data" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        CA DOJ OpenJustice
-                      </a>
-                      <br />
-                      Crimes &amp; Clearances 2023.
-                      <br />
-                      Rates per 100K population.
-                      <br />
-                      Population:{" "}
-                      <a href="https://dof.ca.gov/forecasting/demographics/estimates-e1/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        CA Dept. of Finance
-                      </a>{" "}
-                      E-1, 2024.
-                    </InfoTooltip>
-                  </label>
-                  {showCityCrime && (
-                    <div className="mt-2 ml-14 flex flex-col gap-2">
-                      <div className="relative inline-flex items-center">
-                        <select
-                          value={cityCrimeType}
-                          onChange={(e) => setCityCrimeType(e.target.value as CrimeType)}
-                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
-                        >
-                          {crimeTypeIds.map((id) => (
-                            <option key={id} value={id}>
-                              {CRIME_LABELS[id]}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
-                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setShowCityCrimeTable(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
-                      >
-                        <LuTable className="h-4 w-4 text-gray-900" />
-                        View Table
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* City housing toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityHousing ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showCityHousing} onChange={toggleCityHousing} />
-                    <LuHouse className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">City Housing</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        US Census Bureau
-                      </a>
-                      <br />
-                      ACS 5-Year Estimates (2019–2023).
-                      <br />
-                      Median Home Value &amp; Median Gross Rent by city.
-                    </InfoTooltip>
-                  </label>
-                  {showCityHousing && (
-                    <div className="mt-2 ml-14 flex flex-col gap-2">
-                      <div className="relative inline-flex items-center">
-                        <select
-                          value={cityHousingMetric}
-                          onChange={(e) => setCityHousingMetric(e.target.value as HousingMetric)}
-                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
-                        >
-                          {housingMetricIds.map((id) => (
-                            <option key={id} value={id}>
-                              {HOUSING_LABELS[id]}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
-                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setShowCityHousingTable(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
-                      >
-                        <LuTable className="h-4 w-4 text-gray-900" />
-                        View Table
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* City income toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityIncome ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showCityIncome} onChange={toggleCityIncome} />
-                    <LuWallet className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">City Income</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        US Census Bureau
-                      </a>
-                      <br />
-                      ACS 5-Year Estimates (2019–2023).
-                      <br />
-                      Median Household Income by city.
-                    </InfoTooltip>
-                  </label>
-                  {showCityIncome && (
-                    <div className="mt-2 ml-14 flex flex-col gap-2">
-                      <button
-                        onClick={() => setShowCityIncomeTable(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
-                      >
-                        <LuTable className="h-4 w-4 text-gray-900" />
-                        View Table
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* City education toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityEducation ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showCityEducation} onChange={toggleCityEducation} />
-                    <LuGraduationCap className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">City Education</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        US Census Bureau
-                      </a>
-                      <br />
-                      ACS 5-Year Estimates (2019–2023).
-                      <br />
-                      Educational Attainment (Table B15003).
-                      <br />
-                      Population 25 years and over.
-                    </InfoTooltip>
-                  </label>
-                  {showCityEducation && (
-                    <div className="mt-2 ml-14 flex flex-col gap-2">
-                      <div className="relative inline-flex items-center">
-                        <select
-                          value={cityEducationMetric}
-                          onChange={(e) => setCityEducationMetric(e.target.value as EducationMetric)}
-                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
-                        >
-                          {educationMetricIds.map((id) => (
-                            <option key={id} value={id}>
-                              {EDUCATION_LABELS[id]}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
-                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setShowCityEducationTable(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
-                      >
-                        <LuTable className="h-4 w-4 text-gray-900" />
-                        View Table
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* City race/ethnicity toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityRace ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showCityRace} onChange={toggleCityRace} />
-                    <IoManOutline className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">City Race</span>
-                    <InfoTooltip>
-                      Source:{" "}
-                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        US Census Bureau
-                      </a>
-                      <br />
-                      ACS 5-Year Estimates (2019–2023).
-                      <br />
-                      Hispanic or Latino Origin by Race (Table B03002).
-                    </InfoTooltip>
-                  </label>
-                  {showCityRace && (
-                    <div className="mt-2 ml-14 flex flex-col gap-2">
-                      <div className="relative inline-flex items-center">
-                        <select
-                          value={cityRaceMetric}
-                          onChange={(e) => setCityRaceMetric(e.target.value as RaceMetric)}
-                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
-                        >
-                          {raceMetricIds.map((id) => (
-                            <option key={id} value={id}>
-                              {RACE_LABELS[id]}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
-                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setShowCityRaceTable(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
-                      >
-                        <LuTable className="h-4 w-4 text-gray-900" />
-                        View Table
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="my-1 border-t border-gray-300" />
-
                 {/* Temperature toggle */}
                 <div className={`-mx-2 rounded-lg p-2 transition-colors ${showTemperature ? "bg-gray-100/80" : ""}`}>
                   <label className="flex cursor-pointer items-center gap-3">
@@ -2006,6 +1474,536 @@ export default function Home() {
                           </div>
                         );
                       })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="my-1 border-t border-gray-300" />
+
+                {/* County borders toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCounties ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCounties} onChange={toggleCounties} />
+                    <LuMap className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">Counties</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.ca.gov/dataset/ca-geographic-boundaries" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        California Open Data Portal
+                      </a>
+                      <br />
+                      US Census Bureau TIGER/Line, 2023
+                    </InfoTooltip>
+                  </label>
+                  {showCounties && (
+                    <>
+                      <div className="mt-2 ml-14">
+                        <SegmentedControl
+                          value={countyDisplayMode}
+                          onChange={(v) => setCountyDisplayMode(v as CountyDisplayMode)}
+                          options={DISPLAY_MODE_OPTIONS}
+                        />
+                      </div>
+                      <GeoSearch dataUrl={`${import.meta.env.BASE_URL}data/california-county-labels.geojson`} placeholder="Search counties..." onSelect={goToFavoriteCounty} />
+                    </>
+                  )}
+                </div>
+
+                {/* County population toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showPopulation ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showPopulation} onChange={togglePopulation} />
+                    <LuUsers className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">County Population</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://dof.ca.gov/forecasting/demographics/estimates/E-6/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        CA Dept. of Finance
+                      </a>
+                      <br />
+                      E-6 Population Estimates, 2024
+                    </InfoTooltip>
+                  </label>
+                  {showPopulation && (
+                    <div className="mt-2 ml-14">
+                      <button
+                        onClick={() => setShowPopulationTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* County crime toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCrime ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCrime} onChange={toggleCrime} />
+                    <LuSiren className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">County Crime</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://openjustice.doj.ca.gov/data" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        CA DOJ OpenJustice
+                      </a>
+                      <br />
+                      &ldquo;Crime in California&rdquo; 2023 report.
+                      <br />
+                      Rates per 100K population.
+                    </InfoTooltip>
+                  </label>
+                  {showCrime && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={crimeType}
+                          onChange={(e) => setCrimeType(e.target.value as CrimeType)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {crimeTypeIds.map((id) => (
+                            <option key={id} value={id}>
+                              {CRIME_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowCountyCrimeTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* County housing toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showHousing ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showHousing} onChange={toggleHousing} />
+                    <LuHouse className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">County Housing</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Median Home Value &amp; Median Gross Rent by county.
+                    </InfoTooltip>
+                  </label>
+                  {showHousing && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={housingMetric}
+                          onChange={(e) => setHousingMetric(e.target.value as HousingMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {housingMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {HOUSING_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowHousingTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* County income toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showIncome ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showIncome} onChange={toggleIncome} />
+                    <LuWallet className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">County Income</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Median Household Income by county.
+                    </InfoTooltip>
+                  </label>
+                  {showIncome && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <button
+                        onClick={() => setShowIncomeTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* County education toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showEducation ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showEducation} onChange={toggleEducation} />
+                    <LuGraduationCap className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">County Education</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Educational Attainment (Table B15003).
+                      <br />
+                      Population 25 years and over.
+                    </InfoTooltip>
+                  </label>
+                  {showEducation && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={educationMetric}
+                          onChange={(e) => setEducationMetric(e.target.value as EducationMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {educationMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {EDUCATION_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowEducationTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* County race/ethnicity toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showRace ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showRace} onChange={toggleRace} />
+                    <IoManOutline className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">County Race</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Hispanic or Latino Origin by Race (Table B03002).
+                    </InfoTooltip>
+                  </label>
+                  {showRace && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={raceMetric}
+                          onChange={(e) => setRaceMetric(e.target.value as RaceMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {raceMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {RACE_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowRaceTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="my-1 border-t border-gray-300" />
+
+                {/* City borders toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCities ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCities} onChange={toggleCities} />
+                    <LuBuilding2 className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">Cities</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      TIGER/Line Places, 2024.
+                      <br />
+                      482 incorporated cities.
+                    </InfoTooltip>
+                  </label>
+                  {showCities && (
+                    <>
+                      <div className="mt-2 ml-14">
+                        <SegmentedControl
+                          value={cityDisplayMode}
+                          onChange={(v) => setCityDisplayMode(v as CityDisplayMode)}
+                          options={DISPLAY_MODE_OPTIONS}
+                        />
+                      </div>
+                      <GeoSearch dataUrl={`${import.meta.env.BASE_URL}data/california-city-labels.geojson`} placeholder="Search cities..." onSelect={goToFavoriteCity} />
+                    </>
+                  )}
+                </div>
+
+                {/* City crime toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityCrime ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCityCrime} onChange={toggleCityCrime} />
+                    <LuSiren className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Crime</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://openjustice.doj.ca.gov/data" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        CA DOJ OpenJustice
+                      </a>
+                      <br />
+                      Crimes &amp; Clearances 2023.
+                      <br />
+                      Rates per 100K population.
+                      <br />
+                      Population:{" "}
+                      <a href="https://dof.ca.gov/forecasting/demographics/estimates-e1/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        CA Dept. of Finance
+                      </a>{" "}
+                      E-1, 2024.
+                    </InfoTooltip>
+                  </label>
+                  {showCityCrime && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={cityCrimeType}
+                          onChange={(e) => setCityCrimeType(e.target.value as CrimeType)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {crimeTypeIds.map((id) => (
+                            <option key={id} value={id}>
+                              {CRIME_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowCityCrimeTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* City housing toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityHousing ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCityHousing} onChange={toggleCityHousing} />
+                    <LuHouse className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Housing</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Median Home Value &amp; Median Gross Rent by city.
+                    </InfoTooltip>
+                  </label>
+                  {showCityHousing && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={cityHousingMetric}
+                          onChange={(e) => setCityHousingMetric(e.target.value as HousingMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {housingMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {HOUSING_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowCityHousingTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* City income toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityIncome ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCityIncome} onChange={toggleCityIncome} />
+                    <LuWallet className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Income</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Median Household Income by city.
+                    </InfoTooltip>
+                  </label>
+                  {showCityIncome && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <button
+                        onClick={() => setShowCityIncomeTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* City education toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityEducation ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCityEducation} onChange={toggleCityEducation} />
+                    <LuGraduationCap className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Education</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Educational Attainment (Table B15003).
+                      <br />
+                      Population 25 years and over.
+                    </InfoTooltip>
+                  </label>
+                  {showCityEducation && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={cityEducationMetric}
+                          onChange={(e) => setCityEducationMetric(e.target.value as EducationMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {educationMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {EDUCATION_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowCityEducationTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* City race/ethnicity toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityRace ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCityRace} onChange={toggleCityRace} />
+                    <IoManOutline className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Race</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Hispanic or Latino Origin by Race (Table B03002).
+                    </InfoTooltip>
+                  </label>
+                  {showCityRace && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={cityRaceMetric}
+                          onChange={(e) => setCityRaceMetric(e.target.value as RaceMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {raceMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {RACE_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowCityRaceTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
                     </div>
                   )}
                 </div>
