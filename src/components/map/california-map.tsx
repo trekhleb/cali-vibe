@@ -33,6 +33,11 @@ import CountyEducationLayer, {
   type EducationMetric,
 } from "./layers/county-education-layer";
 import CityEducationLayer, { CityEducationLegend } from "./layers/city-education-layer";
+import CountyRaceLayer, {
+  RaceLegend,
+  type RaceMetric,
+} from "./layers/county-race-layer";
+import CityRaceLayer, { CityRaceLegend } from "./layers/city-race-layer";
 import TemperatureLayer, {
   TemperatureLegend,
   type TempMetric,
@@ -86,6 +91,12 @@ interface CaliforniaMapProps {
   showCityEducation?: boolean;
   cityEducationMetric?: EducationMetric;
   selectedEducationCityName?: string | null;
+  showRace?: boolean;
+  raceMetric?: RaceMetric;
+  selectedRaceCountyName?: string | null;
+  showCityRace?: boolean;
+  cityRaceMetric?: RaceMetric;
+  selectedRaceCityName?: string | null;
   showCityCrime?: boolean;
   cityCrimeType?: CrimeType;
   selectedCrimeCityName?: string | null;
@@ -148,6 +159,12 @@ export default function CaliforniaMap({
   showCityEducation = false,
   cityEducationMetric = "bachPlus",
   selectedEducationCityName = null,
+  showRace = false,
+  raceMetric = "white",
+  selectedRaceCountyName = null,
+  showCityRace = false,
+  cityRaceMetric = "white",
+  selectedRaceCityName = null,
   showCityCrime = false,
   cityCrimeType = "total",
   selectedCrimeCityName = null,
@@ -185,8 +202,8 @@ export default function CaliforniaMap({
 }: CaliforniaMapProps) {
   // Smart zoom for "locate me": city layers → street level, county → county level
   const locateZoom =
-    showCities || showCityCrime || showCityHousing || showCityIncome || showCityEducation ? 11 :
-    showCounties || showPopulation || showCrime || showHousing || showIncome || showEducation ? 8 :
+    showCities || showCityCrime || showCityHousing || showCityIncome || showCityEducation || showCityRace ? 11 :
+    showCounties || showPopulation || showCrime || showHousing || showIncome || showEducation || showRace ? 8 :
     showTemperature || showSunshine ? 9 : 10;
 
   return (
@@ -237,8 +254,12 @@ export default function CaliforniaMap({
       {showCityHousing && <CityHousingLegend housingMetric={cityHousingMetric} overlayOffset={overlayOffset} />}
       {showCityIncome && <CityHousingLayer housingMetric="income" overlayOffset={overlayOffset} selectName={selectedIncomeCityName} />}
       {showCityIncome && <CityHousingLegend housingMetric="income" overlayOffset={overlayOffset} />}
+      {showRace && <CountyRaceLayer raceMetric={raceMetric} overlayOffset={overlayOffset} selectName={selectedRaceCountyName} />}
+      {showRace && <RaceLegend raceMetric={raceMetric} overlayOffset={overlayOffset} />}
       {showCityEducation && <CityEducationLayer educationMetric={cityEducationMetric} overlayOffset={overlayOffset} selectName={selectedEducationCityName} />}
       {showCityEducation && <CityEducationLegend educationMetric={cityEducationMetric} overlayOffset={overlayOffset} />}
+      {showCityRace && <CityRaceLayer raceMetric={cityRaceMetric} overlayOffset={overlayOffset} selectName={selectedRaceCityName} />}
+      {showCityRace && <CityRaceLegend raceMetric={cityRaceMetric} overlayOffset={overlayOffset} />}
       {showTemperature && (
         <TemperatureLayer
           metric={tempMetric}
