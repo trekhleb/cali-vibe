@@ -16,7 +16,7 @@ Researching California neighborhoods usually means jumping between Census tables
 
 Compare any California counties or cities side by side across all metrics — population, crime, housing, income, education, race/ethnicity, and poverty. Color-coded cells highlight the best and worst values. Sortable columns, drag-to-reorder, and shareable via URL.
 
-<!-- TODO: add compare screenshot -->
+![California cities/counties comparison](./public/demo/15-california-city-county-comparison.gif)
 
 ### Housing cost by county
 
