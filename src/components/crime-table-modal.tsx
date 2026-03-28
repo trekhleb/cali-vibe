@@ -188,7 +188,7 @@ export default function CrimeTableModal({
                   {onSelectName ? (
                     <button
                       onClick={() => { onSelectName(row.name); onClose(); }}
-                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                      className="text-left text-blue-600 hover:text-blue-800 hover:underline"
                     >
                       {row.name}
                     </button>

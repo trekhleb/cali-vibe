@@ -6,6 +6,7 @@ import type {
   ExpressionSpecification,
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
+import HeartButton from "@/components/heart-button";
 
 const SOURCE_ID = "counties-crime";
 const LABEL_SOURCE_ID = "county-crime-labels-source";
@@ -109,6 +110,8 @@ interface CountyCrimeLayerProps {
   crimeType: CrimeType;
   overlayOffset?: number;
   selectName?: string | null;
+  onToggleFavorite?: (name: string) => void;
+  isFavorite?: (name: string) => boolean;
 }
 
 export function CrimeLegend({ crimeType, overlayOffset = 0 }: { crimeType: CrimeType; overlayOffset?: number }) {
@@ -135,7 +138,7 @@ export function CrimeLegend({ crimeType, overlayOffset = 0 }: { crimeType: Crime
   );
 }
 
-export default function CountyCrimeLayer({ crimeType, overlayOffset = 0, selectName = null }: CountyCrimeLayerProps) {
+export default function CountyCrimeLayer({ crimeType, overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CountyCrimeLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,
@@ -143,6 +146,7 @@ export default function CountyCrimeLayer({ crimeType, overlayOffset = 0, selectN
   });
 
   const activeRate = parseCrimeRate(activeProperties, crimeType);
+  const favorited = activeName ? isFavorite?.(activeName) ?? false : false;
 
   const fillLayer: FillLayerSpecification = {
     id: FILL_LAYER_ID,
@@ -228,8 +232,13 @@ export default function CountyCrimeLayer({ crimeType, overlayOffset = 0, selectN
           className="absolute rounded-lg bg-white/90 px-3 py-2 shadow backdrop-blur-sm transition-all duration-300 left-4 top-24 md:left-6 md:top-28"
           style={overlayOffset ? { left: overlayOffset + 24, top: 24 } : undefined}
         >
-          <div className="text-sm font-semibold text-gray-800">
-            {activeName} County
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-semibold text-gray-800">
+              {activeName} County
+            </div>
+            {onToggleFavorite && (
+              <HeartButton favorited={favorited} onToggle={() => onToggleFavorite(activeName)} />
+            )}
           </div>
           <div className="text-sm text-gray-600">
             {CRIME_LABELS[crimeType]}: {activeRate.toFixed(1)} per 100K

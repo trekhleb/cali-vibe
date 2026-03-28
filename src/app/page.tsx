@@ -22,6 +22,7 @@ import HousingTableModal from "@/components/housing-table-modal";
 import EducationTableModal from "@/components/education-table-modal";
 import RaceTableModal from "@/components/race-table-modal";
 import PovertyTableModal from "@/components/poverty-table-modal";
+import CompareModal, { type CompareType, type SortConfig } from "@/components/compare-modal";
 import { POPULATION_LABELS, type PopulationMetric } from "@/components/map/layers/county-population-layer";
 import { HOUSING_LABELS, type HousingMetric } from "@/components/map/layers/county-housing-layer";
 import { EDUCATION_LABELS, type EducationMetric } from "@/components/map/layers/county-education-layer";
@@ -60,6 +61,7 @@ import {
   LuWallet,
   LuGraduationCap,
   LuTrendingDown,
+  LuColumns3,
 } from "react-icons/lu";
 import { IoManOutline } from "react-icons/io5";
 import { RiFocus3Line, RiFocus3Fill } from "react-icons/ri";
@@ -120,7 +122,7 @@ const DEFAULTS = {
   pov: false,
   cityPov: false,
   style: "light" as MapStyleId,
-  temp: false,
+  temp: true,
   tmetric: "tmax" as TempMetric,
   tmonth: new Date().getMonth() as number,
   tunit: "F" as TempUnit,
@@ -130,11 +132,15 @@ const DEFAULTS = {
   sres: 5 as SunshineHexResolution,
   ssrc: "nsrdb" as SunshineDataSource,
   transit: false,
-  relief: true,
-  peaks: true,
+  relief: false,
+  peaks: false,
   punit: "ft" as "ft" | "m",
   tab: "layers" as "layers" | "favorites",
   drawer: null as boolean | null,
+  compare: null as CompareType | null,
+  cnames: [] as string[],
+  csort: null as SortConfig,
+  about: false,
 };
 
 function readParams() {
@@ -218,6 +224,27 @@ function readParams() {
     punit: str("punit", DEFAULTS.punit, ["ft", "m"] as const),
     tab: str("tab", DEFAULTS.tab, ["layers", "favorites"] as const),
     drawer: p.has("drawer") ? p.get("drawer") === "1" : DEFAULTS.drawer,
+    compare: (() => {
+      const v = p.get("compare");
+      if (v === "county" || v === "city") return v as CompareType;
+      return null;
+    })(),
+    cnames: (() => {
+      const v = p.get("cnames");
+      if (!v) return [] as string[];
+      try {
+        return v.split(",").map(decodeURIComponent).filter(Boolean);
+      } catch {
+        return [] as string[];
+      }
+    })(),
+    csort: (() => {
+      const k = p.get("csort");
+      const d = p.get("cdir");
+      if (!k) return null;
+      return { metricKey: k, direction: (d === "asc" ? "asc" : "desc") } as SortConfig;
+    })(),
+    about: bool("about", DEFAULTS.about),
   };
 }
 
@@ -327,6 +354,10 @@ export default function Home() {
   const [selectedHousingCityName, setSelectedHousingCityName] = useState<string | null>(null);
   const [showCityIncomeTable, setShowCityIncomeTable] = useState(false);
   const [selectedIncomeCityName, setSelectedIncomeCityName] = useState<string | null>(null);
+  const [compareType, setCompareType] = useState<CompareType | null>(init.compare);
+  const [compareNames, setCompareNames] = useState<string[]>(init.cnames);
+  const [compareSortConfig, setCompareSortConfig] = useState<SortConfig>(init.csort);
+  const [showAbout, setShowAbout] = useState(init.about);
   const isMobile = useIsMobile();
 
   const tempHexUrl = `${import.meta.env.BASE_URL}data/california-temperature-h3-res${tempResolution}.geojson`;
@@ -392,10 +423,19 @@ export default function Home() {
     setStr("punit", peakUnit, DEFAULTS.punit);
     setStr("tab", activeTab, DEFAULTS.tab);
     setBool("drawer", isDrawerOpen, !window.matchMedia("(max-width: 767px)").matches);
+    if (compareType) {
+      p.set("compare", compareType);
+      if (compareNames.length > 0) p.set("cnames", compareNames.map(encodeURIComponent).join(","));
+      if (compareSortConfig) {
+        p.set("csort", compareSortConfig.metricKey);
+        if (compareSortConfig.direction === "asc") p.set("cdir", "asc");
+      }
+    }
+    setBool("about", showAbout, DEFAULTS.about);
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showPoverty, showCityPoverty, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showPoverty, showCityPoverty, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, showAbout]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -415,6 +455,17 @@ export default function Home() {
     (name: string) => favoriteCitySet.has(name),
     [favoriteCitySet]
   );
+
+  const openCompare = useCallback((type: CompareType, names: string[]) => {
+    setCompareType(type);
+    setCompareNames(names);
+    setCompareSortConfig(null);
+  }, []);
+  const closeCompare = useCallback(() => {
+    setCompareType(null);
+    setCompareNames([]);
+    setCompareSortConfig(null);
+  }, []);
 
   // --- Mutually exclusive toggle helpers ---
   const clearOverlays = () => {
@@ -498,7 +549,7 @@ export default function Home() {
   };
   const toggleTerrain3d = (on: boolean) => {
     setTerrain3d(on);
-    if (on) { setShowRelief(false); }
+    if (on) { setShowRelief(false); setShowPeaks(true); }
   };
   const toggleTransit = (on: boolean) => {
     setShowTransit(on);
@@ -506,7 +557,7 @@ export default function Home() {
   };
   const toggleRelief = (on: boolean) => {
     setShowRelief(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowPoverty(false); setShowCityPopulation(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowPoverty(false); setShowCityPopulation(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); setShowPeaks(true); }
   };
 
   const resetAll = useCallback(() => {
@@ -539,7 +590,7 @@ export default function Home() {
     setCityRaceMetric("hispanic");
     setShowPoverty(false);
     setShowCityPoverty(false);
-    setShowTemperature(false);
+    setShowTemperature(DEFAULTS.temp);
     setTempMetric(DEFAULTS.tmetric);
     setTempMonth(new Date().getMonth());
     setTempUnit("F");
@@ -571,8 +622,8 @@ export default function Home() {
     setSelectedTransitStopName(null);
     setFlyToTransitStop(false);
     setMapStyleId(DEFAULTS.style);
-    setShowRelief(true);
-    setShowPeaks(true);
+    setShowRelief(DEFAULTS.relief);
+    setShowPeaks(DEFAULTS.peaks);
     setPeakUnit("ft");
     setActiveTab("layers");
     setSelectedCountyName(null);
@@ -824,7 +875,7 @@ export default function Home() {
       </div>
 
       {/* Persistent legal footer on the map */}
-      <MapFooter overlayOffset={overlayOffset} />
+      <MapFooter overlayOffset={overlayOffset} initialModal={showAbout ? "about" : null} onModalChange={(m) => setShowAbout(m === "about")} />
 
       {/* Mobile backdrop */}
       {isDrawerOpen && (
@@ -894,6 +945,17 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Compare button */}
+          <div className="flex-shrink-0 mt-2 -mx-4 px-4 md:-mx-6 md:px-6">
+            <button
+              onClick={() => openCompare(compareType ?? "county", compareNames)}
+              className="w-full inline-flex items-center justify-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+            >
+              <LuColumns3 className="h-3.5 w-3.5" />
+              Compare Counties / Cities
+            </button>
+          </div>
+
           <div className="mt-3 flex-1 overflow-y-auto -mx-4 px-4 md:-mx-6 md:px-6">
             {activeTab === "layers" && (
               <div className="flex flex-col gap-2">
@@ -924,53 +986,8 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="my-1 border-t border-gray-300">
-                  <div className="mt-1 text-[10px] font-medium uppercase tracking-widest text-gray-400">Overlays</div>
-                </div>
-
-                {/* 3D Relief toggle */}
-                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showRelief ? "bg-gray-100/80" : ""}`}>
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <Toggle checked={showRelief} onChange={toggleRelief} />
-                    <LuMountain className="h-4 w-4 text-gray-900" />
-                    <span className="text-sm font-medium">3D Vibe</span>
-                    <InfoTooltip>
-                      Artistic raised-relief visualization.
-                      <br />
-                      Elevation data:{" "}
-                      <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                        AWS Terrain Tiles
-                      </a>
-                      <br />
-                      Rotatable 3D view (drag to rotate).
-                    </InfoTooltip>
-                  </label>
-                  {showRelief && (
-                    <div className="mt-2 ml-14 flex flex-col gap-3">
-                      <label className="flex cursor-pointer items-center gap-3">
-                        <Toggle checked={showPeaks} onChange={setShowPeaks} size="sm" />
-                        <span className="text-sm font-medium text-gray-700">Show Peaks</span>
-                      </label>
-
-                      {showPeaks && (
-                        <div className="ml-11">
-                          <SegmentedControl
-                            value={peakUnit}
-                            onChange={(v) => setPeakUnit(v as "ft" | "m")}
-                            options={PEAK_UNIT_OPTIONS}
-                          />
-                        </div>
-                      )}
-
-                      <button
-                        onClick={() => terrainRef.current?.resetView()}
-                        className="mt-1 inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start w-auto"
-                      >
-                        <LuRotateCcw className="h-4 w-4 text-gray-900" />
-                        Reset View
-                      </button>
-                    </div>
-                  )}
+                <div className="mt-2">
+                  <span className="text-sm font-medium text-gray-700">Overlays</span>
                 </div>
 
                 {/* Temperature toggle */}
@@ -1552,6 +1569,51 @@ export default function Home() {
                           </div>
                         );
                       })}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3D Relief toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showRelief ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showRelief} onChange={toggleRelief} />
+                    <LuMountain className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">3D Vibe</span>
+                    <InfoTooltip>
+                      Artistic raised-relief visualization.
+                      <br />
+                      Elevation data:{" "}
+                      <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        AWS Terrain Tiles
+                      </a>
+                      <br />
+                      Rotatable 3D view (drag to rotate).
+                    </InfoTooltip>
+                  </label>
+                  {showRelief && (
+                    <div className="mt-2 ml-14 flex flex-col gap-3">
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <Toggle checked={showPeaks} onChange={setShowPeaks} size="sm" />
+                        <span className="text-sm font-medium text-gray-700">Show Peaks</span>
+                      </label>
+
+                      {showPeaks && (
+                        <div className="ml-11">
+                          <SegmentedControl
+                            value={peakUnit}
+                            onChange={(v) => setPeakUnit(v as "ft" | "m")}
+                            options={PEAK_UNIT_OPTIONS}
+                          />
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => terrainRef.current?.resetView()}
+                        className="mt-1 inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start w-auto"
+                      >
+                        <LuRotateCcw className="h-4 w-4 text-gray-900" />
+                        Reset View
+                      </button>
                     </div>
                   )}
                 </div>
@@ -2227,12 +2289,26 @@ export default function Home() {
                     <p className="text-xs mt-1 text-gray-400">
                       Click the heart icon on the map to save counties and cities.
                     </p>
+                    <p className="text-xs mt-3 text-gray-400">
+                      Add 2 or more to <strong className="text-gray-500">compare</strong> them side by side across all metrics.
+                    </p>
                   </div>
                 ) : (
                   <>
-                    {favoriteCounties.length > 0 && (
-                      <div>
+                    <div>
+                      <div className="flex items-center justify-between">
                         <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Counties</h3>
+                        {favoriteCounties.length >= 2 && (
+                          <button
+                            onClick={() => openCompare("county", favoriteCounties)}
+                            className="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-medium text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
+                          >
+                            <LuColumns3 className="h-3 w-3" />
+                            Compare
+                          </button>
+                        )}
+                      </div>
+                      {favoriteCounties.length > 0 ? (
                         <div className="mt-1">
                           <SortableFavoriteList
                             items={favoriteCounties}
@@ -2241,12 +2317,27 @@ export default function Home() {
                             onRemoveItem={(name) => toggleFavorite("county", name)}
                           />
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <p className="mt-1 text-xs text-gray-400">
+                          Hover over a county on the map and tap the heart icon to add it here. Add 2+ to compare.
+                        </p>
+                      )}
+                    </div>
 
-                    {favoriteCities.length > 0 && (
-                      <div className="mt-3">
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between">
                         <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Cities</h3>
+                        {favoriteCities.length >= 2 && (
+                          <button
+                            onClick={() => openCompare("city", favoriteCities)}
+                            className="inline-flex items-center gap-1 rounded border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-medium text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
+                          >
+                            <LuColumns3 className="h-3 w-3" />
+                            Compare
+                          </button>
+                        )}
+                      </div>
+                      {favoriteCities.length > 0 ? (
                         <div className="mt-1">
                           <SortableFavoriteList
                             items={favoriteCities}
@@ -2255,8 +2346,12 @@ export default function Home() {
                             onRemoveItem={(name) => toggleFavorite("city", name)}
                           />
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <p className="mt-1 text-xs text-gray-400">
+                          Hover over a city on the map and tap the heart icon to add it here. Add 2+ to compare.
+                        </p>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -2300,7 +2395,7 @@ export default function Home() {
           className="relative p-2 rounded-full text-black hover:bg-black/5 transition-colors"
           title="Open Menu"
         >
-          <span className="absolute inset-0 rounded-full bg-gray-400/40" style={{ animation: "pulse-ring 4.5s ease-out infinite" }} />
+          <span className="absolute inset-0 rounded-full bg-gray-400/60" style={{ animation: "pulse-ring 3s ease-out infinite", animationDelay: "-3s" }} />
           <LuPanelLeftOpen className="relative h-5 w-5" />
         </button>
       </div>
@@ -2431,6 +2526,16 @@ export default function Home() {
         title="City Poverty Rate (ACS 2019–2023)"
         nameLabel="City"
         onSelectName={goToPovertyCity}
+      />
+      <CompareModal
+        open={compareType !== null}
+        onClose={closeCompare}
+        compareType={compareType ?? "county"}
+        names={compareNames}
+        sortConfig={compareSortConfig}
+        onTypeChange={setCompareType}
+        onNamesChange={setCompareNames}
+        onSortChange={setCompareSortConfig}
       />
       <TemperatureTableModal
         open={showTempTable}

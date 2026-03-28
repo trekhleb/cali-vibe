@@ -6,6 +6,7 @@ import type {
   ExpressionSpecification,
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
+import HeartButton from "@/components/heart-button";
 
 const SOURCE_ID = "counties-education";
 const LABEL_SOURCE_ID = "county-education-labels-source";
@@ -80,6 +81,8 @@ interface CountyEducationLayerProps {
   educationMetric: EducationMetric;
   overlayOffset?: number;
   selectName?: string | null;
+  onToggleFavorite?: (name: string) => void;
+  isFavorite?: (name: string) => boolean;
 }
 
 export function EducationLegend({ educationMetric, overlayOffset = 0 }: { educationMetric: EducationMetric; overlayOffset?: number }) {
@@ -104,7 +107,7 @@ export function EducationLegend({ educationMetric, overlayOffset = 0 }: { educat
   );
 }
 
-export default function CountyEducationLayer({ educationMetric, overlayOffset = 0, selectName = null }: CountyEducationLayerProps) {
+export default function CountyEducationLayer({ educationMetric, overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CountyEducationLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,
@@ -112,6 +115,7 @@ export default function CountyEducationLayer({ educationMetric, overlayOffset = 
   });
 
   const activeVal = parseEducationValue(activeProperties, educationMetric);
+  const favorited = activeName ? isFavorite?.(activeName) ?? false : false;
 
   const fillLayer: FillLayerSpecification = {
     id: FILL_LAYER_ID,
@@ -197,8 +201,13 @@ export default function CountyEducationLayer({ educationMetric, overlayOffset = 
           className="absolute rounded-lg bg-white/90 px-3 py-2 shadow backdrop-blur-sm transition-all duration-300 left-4 top-24 md:left-6 md:top-28"
           style={overlayOffset ? { left: overlayOffset + 24, top: 24 } : undefined}
         >
-          <div className="text-sm font-semibold text-gray-800">
-            {activeName} County
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-semibold text-gray-800">
+              {activeName} County
+            </div>
+            {onToggleFavorite && (
+              <HeartButton favorited={favorited} onToggle={() => onToggleFavorite(activeName)} />
+            )}
           </div>
           <div className="text-sm text-gray-600">
             {EDUCATION_LABELS[educationMetric]}: {activeVal.toFixed(1)}%

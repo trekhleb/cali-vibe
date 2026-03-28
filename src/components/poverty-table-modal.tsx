@@ -118,11 +118,11 @@ export default function PovertyTableModal({
                 <td className={`${tdBase} text-center text-xs text-gray-400`}>
                   {i + 1}
                 </td>
-                <td className={`${tdBase} font-medium text-gray-900 whitespace-nowrap`}>
+                <td className={`${tdBase} text-left font-medium text-gray-900 whitespace-nowrap`}>
                   {onSelectName ? (
                     <button
                       onClick={() => { onSelectName(row.name); onClose(); }}
-                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                      className="text-left text-blue-600 hover:text-blue-800 hover:underline"
                     >
                       {row.name}
                     </button>

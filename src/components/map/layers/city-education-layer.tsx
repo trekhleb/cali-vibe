@@ -6,6 +6,7 @@ import type {
   ExpressionSpecification,
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
+import HeartButton from "@/components/heart-button";
 import {
   EDUCATION_LABELS,
   type EducationMetric,
@@ -81,6 +82,8 @@ interface CityEducationLayerProps {
   educationMetric: EducationMetric;
   overlayOffset?: number;
   selectName?: string | null;
+  onToggleFavorite?: (name: string) => void;
+  isFavorite?: (name: string) => boolean;
 }
 
 export function CityEducationLegend({ educationMetric, overlayOffset = 0 }: { educationMetric: EducationMetric; overlayOffset?: number }) {
@@ -105,7 +108,7 @@ export function CityEducationLegend({ educationMetric, overlayOffset = 0 }: { ed
   );
 }
 
-export default function CityEducationLayer({ educationMetric, overlayOffset = 0, selectName = null }: CityEducationLayerProps) {
+export default function CityEducationLayer({ educationMetric, overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CityEducationLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,
@@ -113,6 +116,7 @@ export default function CityEducationLayer({ educationMetric, overlayOffset = 0,
   });
 
   const activeVal = parseEducationValue(activeProperties, educationMetric);
+  const favorited = activeName ? isFavorite?.(activeName) ?? false : false;
 
   const fillLayer: FillLayerSpecification = {
     id: FILL_LAYER_ID,
@@ -198,8 +202,13 @@ export default function CityEducationLayer({ educationMetric, overlayOffset = 0,
           className="absolute rounded-lg bg-white/90 px-3 py-2 shadow backdrop-blur-sm transition-all duration-300 left-4 top-24 md:left-6 md:top-28"
           style={overlayOffset ? { left: overlayOffset + 24, top: 24 } : undefined}
         >
-          <div className="text-sm font-semibold text-gray-800">
-            {activeName}
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-semibold text-gray-800">
+              {activeName}
+            </div>
+            {onToggleFavorite && (
+              <HeartButton favorited={favorited} onToggle={() => onToggleFavorite(activeName)} />
+            )}
           </div>
           <div className="text-sm text-gray-600">
             {EDUCATION_LABELS[educationMetric]}: {activeVal.toFixed(1)}%

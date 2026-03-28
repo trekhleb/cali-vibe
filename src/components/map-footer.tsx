@@ -1,12 +1,21 @@
 import { useState } from "react";
 import LegalModal from "./legal-modal";
 
+type ModalType = "about" | "disclaimer" | "privacy" | "sources" | null;
+
 interface MapFooterProps {
   overlayOffset?: number;
+  initialModal?: ModalType;
+  onModalChange?: (modal: ModalType) => void;
 }
 
-export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
-  const [modal, setModal] = useState<"disclaimer" | "privacy" | "sources" | null>(null);
+export default function MapFooter({ overlayOffset = 0, initialModal = null, onModalChange }: MapFooterProps) {
+  const [modal, setModalInternal] = useState<ModalType>(initialModal);
+
+  const setModal = (m: ModalType) => {
+    setModalInternal(m);
+    onModalChange?.(m);
+  };
 
   return (
     <>
@@ -14,14 +23,54 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
         className="absolute bottom-2.5 left-4 md:left-6 z-10 flex items-center gap-1.5 text-[10px] text-white/70 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] transition-all duration-300"
         style={overlayOffset ? { left: overlayOffset + 24 } : undefined}
       >
+        <button onClick={() => setModal("about")} className="underline underline-offset-2 hover:text-white transition-colors">About</button>
+        <span className="text-white/30">|</span>
         <button onClick={() => setModal("disclaimer")} className="underline underline-offset-2 hover:text-white transition-colors">Disclaimer</button>
         <span className="text-white/30">|</span>
         <button onClick={() => setModal("privacy")} className="underline underline-offset-2 hover:text-white transition-colors">Privacy</button>
         <span className="text-white/30">|</span>
         <button onClick={() => setModal("sources")} className="underline underline-offset-2 hover:text-white transition-colors">Sources</button>
-        <span className="text-white/30">|</span>
-        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white transition-colors">&copy; OpenStreetMap</a>
+        <span className="hidden md:inline text-white/30">|</span>
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="hidden md:inline underline underline-offset-2 hover:text-white transition-colors">&copy; OpenStreetMap</a>
       </div>
+
+      <LegalModal open={modal === "about"} onClose={() => setModal(null)} title="About CaliVibe">
+        <p>
+          <strong>CaliVibe</strong> is a free, open-source interactive map for exploring and comparing California counties and cities across a wide range of metrics.
+        </p>
+
+        <h3 className="mt-4 text-sm font-semibold text-gray-900">What you can explore</h3>
+        <ul className="mt-2 space-y-2 text-sm">
+          <li><strong>Compare</strong> &mdash; Compare any California counties or cities side by side across all metrics including population, crime, housing, income, education, race/ethnicity, and poverty with color-coded rankings.</li>
+          <li><strong>Housing Cost</strong> &mdash; Median home value and median gross rent for all 58 California counties and 482 cities (Census ACS 2019&ndash;2023).</li>
+          <li><strong>Household Income</strong> &mdash; Median household income for all 58 California counties and 482 cities (Census ACS 2019&ndash;2023).</li>
+          <li><strong>Educational Attainment</strong> &mdash; Bachelor&rsquo;s degree+, high school diploma+, and graduate degree+ rates for all 58 counties and 482 cities (Census ACS 2019&ndash;2023).</li>
+          <li><strong>Race/Ethnicity Breakdown</strong> &mdash; White, Hispanic/Latino, Black, Asian, and Other race/ethnicity percentages for all 58 counties and 482 cities (Census ACS 2019&ndash;2023).</li>
+          <li><strong>Poverty Rate</strong> &mdash; Percentage of population below the poverty level for all 58 counties and 482 cities (Census ACS 2019&ndash;2023).</li>
+          <li><strong>Crime Rates</strong> &mdash; 10 crime categories per 100,000 residents for counties and cities (CA DOJ 2023).</li>
+          <li><strong>Population &amp; Density</strong> &mdash; 2024 county and city population estimates with population density per square mile (CA Dept. of Finance).</li>
+          <li><strong>Temperature</strong> &mdash; Monthly average highs, lows, and means on an H3 hex grid (2014&ndash;2023 normals).</li>
+          <li><strong>Sunshine Hours</strong> &mdash; Average daily sunshine hours by month, satellite-derived (NREL NSRDB).</li>
+          <li><strong>Transit</strong> &mdash; 18 California rail systems: BART, Caltrain, LA Metro, Muni Metro, VTA, SMART, Metrolink, San Diego Trolley, Coaster, Sprinter, Sacramento RT, ACE, Capitol Corridor, Pacific Surfliner, San Joaquins, Coast Starlight, California Zephyr, Southwest Chief.</li>
+          <li><strong>3D Terrain</strong> &mdash; Raised-relief view with labeled mountain peaks.</li>
+          <li><strong>County &amp; City Boundaries</strong> &mdash; 58 counties and 482 incorporated cities.</li>
+        </ul>
+
+        <h3 className="mt-4 text-sm font-semibold text-gray-900">Features</h3>
+        <ul className="mt-2 space-y-1 text-sm">
+          <li>&bull; Color-coded comparison tables across all metrics</li>
+          <li>&bull; Sortable data tables for every layer</li>
+          <li>&bull; Shareable URLs &mdash; every view and comparison can be shared via link</li>
+          <li>&bull; Favorites list with drag-to-reorder</li>
+          <li>&bull; Mobile-friendly responsive design</li>
+        </ul>
+
+        <p className="mt-4 text-xs text-gray-400">
+          <a href="https://trekhleb.dev/cali-vibe/" className="text-blue-600 underline hover:text-blue-800">trekhleb.dev/cali-vibe</a>
+          {" "}&mdash;{" "}
+          <a href="https://github.com/trekhleb/cali-vibe" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">GitHub</a>
+        </p>
+      </LegalModal>
 
       <LegalModal open={modal === "disclaimer"} onClose={() => setModal(null)} title="Disclaimer">
         <p>

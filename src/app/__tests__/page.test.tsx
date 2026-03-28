@@ -44,10 +44,10 @@ Object.defineProperty(window, "matchMedia", {
   })),
 });
 
-/** Wait until the lazy-loaded terrain component appears. */
+/** Wait until the lazy-loaded map component appears. */
 async function waitForApp() {
   await waitFor(
-    () => expect(screen.getByTestId("california-3d-terrain")).toBeInTheDocument(),
+    () => expect(screen.getByTestId("california-map")).toBeInTheDocument(),
     { timeout: 5000 },
   );
 }
@@ -71,26 +71,16 @@ describe("Home page", () => {
     expect(screen.getAllByText("CaliVibe")[0]).toBeInTheDocument();
 
     // Switch tabs
-    await user.click(screen.getByText(/Favorites/));
-    await user.click(screen.getByText(/Layers/));
+    await user.click(screen.getByRole("button", { name: /Favorites/ }));
+    await user.click(screen.getByRole("button", { name: /Layers/ }));
   });
 
   it("toggles various layers and updates URL", async () => {
     render(<Home />);
     await waitForApp();
 
-    // The panel shows "Show Peaks" when 3D Vibe is on initially
-    expect(screen.getByRole("checkbox", { name: /Show Peaks/i })).toBeInTheDocument();
-    await user.click(screen.getByRole("checkbox", { name: /Show Peaks/i }));
-
-    // Turn off 3D Vibe to see the 2D map
-    await user.click(screen.getByRole("checkbox", { name: /3D Vibe/i }));
-    await waitFor(() =>
-      expect(screen.getByTestId("california-map")).toBeInTheDocument(),
-    );
-
-    // Toggle Terrain 3D
-    await user.click(screen.getByRole("checkbox", { name: /Terrain/i }));
+    // Temperature is on by default — turn it off to test other layers
+    expect(screen.getByRole("checkbox", { name: /Temperature/i })).toBeChecked();
 
     // Turn on counties
     await user.click(screen.getByRole("checkbox", { name: /Counties/i }));
@@ -159,7 +149,7 @@ describe("Home page", () => {
     render(<Home />);
     await waitForApp();
 
-    await user.click(screen.getByText(/Favorites/));
+    await user.click(screen.getByRole("button", { name: /Favorites/ }));
 
     expect(screen.getByText("No favorites yet")).toBeInTheDocument();
   });
@@ -171,7 +161,7 @@ describe("Home page", () => {
     render(<Home />);
     await waitForApp();
 
-    await user.click(screen.getByText(/Favorites/));
+    await user.click(screen.getByRole("button", { name: /Favorites/ }));
 
     expect(screen.getByText("San Francisco")).toBeInTheDocument();
     expect(screen.getByText("Los Angeles")).toBeInTheDocument();
@@ -195,6 +185,12 @@ describe("Home page", () => {
     render(<Home />);
     await waitForApp();
 
+    // Enable 3D Vibe first (not on by default)
+    await user.click(screen.getByRole("checkbox", { name: /3D Vibe/i }));
+    await waitFor(() =>
+      expect(screen.getByTestId("california-3d-terrain")).toBeInTheDocument(),
+    );
+
     const resetBtn = screen.getByText(/Reset View/i);
     await user.click(resetBtn);
   });
@@ -202,12 +198,6 @@ describe("Home page", () => {
   it("sunshine toggle shows controls and interacts", async () => {
     render(<Home />);
     await waitForApp();
-
-    // Switch to 2D map
-    await user.click(screen.getByRole("checkbox", { name: /3D Vibe/i }));
-    await waitFor(() =>
-      expect(screen.getByTestId("california-map")).toBeInTheDocument(),
-    );
 
     // Turn on sunshine
     await user.click(screen.getByRole("checkbox", { name: /Sunshine/i }));
@@ -242,12 +232,6 @@ describe("Home page", () => {
     render(<Home />);
     await waitForApp();
 
-    // Switch to 2D map
-    await user.click(screen.getByRole("checkbox", { name: /3D Vibe/i }));
-    await waitFor(() =>
-      expect(screen.getByTestId("california-map")).toBeInTheDocument(),
-    );
-
     // Turn on sunshine
     await user.click(screen.getByRole("checkbox", { name: /Sunshine/i }));
 
@@ -276,11 +260,7 @@ describe("Home page", () => {
     render(<Home />);
     await waitForApp();
 
-    // Switch to 2D map and turn on sunshine
-    await user.click(screen.getByRole("checkbox", { name: /3D Vibe/i }));
-    await waitFor(() =>
-      expect(screen.getByTestId("california-map")).toBeInTheDocument(),
-    );
+    // Turn on sunshine
     await user.click(screen.getByRole("checkbox", { name: /Sunshine/i }));
 
     // There should be info icons — find all info icons within the data source row

@@ -519,6 +519,48 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Compare counties -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?compare=county</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Compare cities -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?compare=city</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Compare example: Bay Area counties -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?compare=county&amp;cnames=San%20Francisco,Alameda,Santa%20Clara,San%20Mateo,Contra%20Costa</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Compare example: major cities -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?compare=city&amp;cnames=Los%20Angeles,San%20Francisco,San%20Diego,San%20Jose,Sacramento</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Favorites tab -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?tab=favorites</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- About page -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?about=1</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- Dark map style -->
   <url>
     <loc>https://trekhleb.dev/cali-vibe/?style=dark</loc>

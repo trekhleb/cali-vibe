@@ -5,10 +5,12 @@ interface LegalModalProps {
   onClose: () => void;
   title: string;
   wide?: boolean;
+  /** Override width/height classes for the dialog (applies on top of wide mode) */
+  sizeClassName?: string;
   children: ReactNode;
 }
 
-export default function LegalModal({ open, onClose, title, wide, children }: LegalModalProps) {
+export default function LegalModal({ open, onClose, title, wide, sizeClassName, children }: LegalModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -23,7 +25,7 @@ export default function LegalModal({ open, onClose, title, wide, children }: Leg
       ref={dialogRef}
       onClose={onClose}
       onClick={(e) => { if (e.target === dialogRef.current) onClose(); }}
-      className={`fixed inset-0 z-50 m-auto w-[90vw] rounded-xl bg-white p-0 shadow-2xl backdrop:bg-black/40 backdrop:backdrop-blur-sm ${wide ? "max-w-4xl h-[80vh] h-[80dvh] open:flex open:flex-col" : "max-w-lg max-h-[80vh] max-h-[80dvh]"}`}
+      className={`fixed inset-0 z-50 m-auto w-[90vw] rounded-xl bg-white p-0 shadow-2xl backdrop:bg-black/40 backdrop:backdrop-blur-sm ${wide ? "max-w-4xl h-[80vh] h-[80dvh] open:flex open:flex-col" : "max-w-lg max-h-[80vh] max-h-[80dvh]"} ${sizeClassName ?? ""}`}
     >
       <div className={`flex items-center justify-between border-b border-gray-200 px-5 py-3 ${wide ? "" : "sticky top-0 bg-white rounded-t-xl z-10"}`}>
         <h2 className="text-base font-semibold text-gray-900">{title}</h2>
