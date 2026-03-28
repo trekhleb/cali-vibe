@@ -42,7 +42,7 @@ const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    label: "Crime (per 100k)",
+    label: "Crime",
     icon: <LuSiren className="h-3 w-3" />,
     metrics: [
       { key: "crime.total", label: "Total", format: fmtDec1, polarity: "lower" },
@@ -165,6 +165,7 @@ export default function CompareModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [crimeAbsolute, setCrimeAbsolute] = useState(false);
   const dragItemRef = useRef<string | null>(null);
 
   const dataUrl = DATA_URLS[compareType];
@@ -360,6 +361,8 @@ export default function CompareModal({
                     onToggle={() => toggleCategory(cat.label)}
                     onMetricSort={handleMetricSort}
                     sortIndicator={sortIndicator}
+                    crimeAbsolute={crimeAbsolute}
+                    onCrimeAbsoluteToggle={() => setCrimeAbsolute((v) => !v)}
                   />
                 );
               })}
@@ -538,6 +541,8 @@ function CategoryGroup({
   onToggle,
   onMetricSort,
   sortIndicator,
+  crimeAbsolute,
+  onCrimeAbsoluteToggle,
 }: {
   category: CategoryDef;
   places: PlaceData[];
@@ -545,7 +550,11 @@ function CategoryGroup({
   onToggle: () => void;
   onMetricSort: (key: string) => void;
   sortIndicator: (key: string) => string;
+  crimeAbsolute?: boolean;
+  onCrimeAbsoluteToggle?: () => void;
 }) {
+  const isCrime = category.label === "Crime";
+
   return (
     <>
       <tr
@@ -560,6 +569,25 @@ function CategoryGroup({
             <LuChevronDown className={`h-3 w-3 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
             {category.icon}
             {category.label}
+            {isCrime && onCrimeAbsoluteToggle && (
+              <span
+                className="inline-flex rounded border border-gray-300 text-[9px] font-medium overflow-hidden ml-1 normal-case tracking-normal"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={onCrimeAbsoluteToggle}
+                  className={`px-1.5 py-0.5 transition-colors ${!crimeAbsolute ? "bg-gray-700 text-white" : "bg-white text-gray-500 hover:bg-gray-100"}`}
+                >
+                  per 100k
+                </button>
+                <button
+                  onClick={onCrimeAbsoluteToggle}
+                  className={`px-1.5 py-0.5 transition-colors border-l border-gray-300 ${crimeAbsolute ? "bg-gray-700 text-white" : "bg-white text-gray-500 hover:bg-gray-100"}`}
+                >
+                  absolute
+                </button>
+              </span>
+            )}
           </span>
         </td>
       </tr>
@@ -571,6 +599,7 @@ function CategoryGroup({
             places={places}
             onSort={() => onMetricSort(metric.key)}
             sortLabel={sortIndicator(metric.key)}
+            crimeAbsolute={isCrime ? crimeAbsolute : undefined}
           />
         ))}
     </>
@@ -584,13 +613,27 @@ function MetricRow({
   places,
   onSort,
   sortLabel,
+  crimeAbsolute,
 }: {
   metric: MetricDef;
   places: PlaceData[];
   onSort: () => void;
   sortLabel: string;
+  crimeAbsolute?: boolean;
 }) {
-  const values = places.map((p) => getNestedValue(p.properties, metric.key));
+  const rawValues = places.map((p) => getNestedValue(p.properties, metric.key));
+
+  // When crimeAbsolute is on, convert per-100k rates to absolute counts
+  const values = crimeAbsolute
+    ? rawValues.map((val, i) => {
+        if (val === null) return null;
+        const pop = getNestedValue(places[i].properties, "population");
+        if (pop === null) return null;
+        return Math.round(val * pop / 100000);
+      })
+    : rawValues;
+
+  const fmt = crimeAbsolute ? fmtInt : metric.format;
 
   return (
     <tr className="hover:bg-gray-50/50">
@@ -610,7 +653,7 @@ function MetricRow({
             className="px-2 py-1 text-center border-b border-gray-100 tabular-nums"
             style={bg ? { backgroundColor: bg } : undefined}
           >
-            {val !== null ? metric.format(val) : <span className="text-gray-300">—</span>}
+            {val !== null ? fmt(val) : <span className="text-gray-300">—</span>}
           </td>
         );
       })}
