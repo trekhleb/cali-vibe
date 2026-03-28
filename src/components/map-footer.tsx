@@ -66,11 +66,11 @@ export default function MapFooter({ overlayOffset = 0 }: MapFooterProps) {
             <span className="text-gray-500">Crimes &amp; Clearances, 2023. Rates per 100K population.</span>
           </li>
           <li>
-            <strong>Population Estimates</strong>
+            <strong>Population &amp; Density</strong>
             <br />
             <a href="https://dof.ca.gov/forecasting/demographics/estimates-e1/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">CA Department of Finance</a>
             <br />
-            <span className="text-gray-500">E-1 City/County Population Estimates, January 2024.<br />E-6 County Population Estimates, 2024.</span>
+            <span className="text-gray-500">E-1 City/County Population Estimates, January 2024.<br />E-6 County Population Estimates, 2024. Density derived from polygon area.</span>
           </li>
           <li>
             <strong>Housing Cost &amp; Household Income</strong>

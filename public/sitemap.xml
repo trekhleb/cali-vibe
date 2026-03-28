@@ -246,6 +246,27 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- County population density -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?pop=1&amp;pmetric=density&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- City population -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?cityPop=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- City population density -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?cityPop=1&amp;cpmetric=density&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- County borders -->
   <url>
     <loc>https://trekhleb.dev/cali-vibe/?counties=1&amp;relief=0</loc>

@@ -22,6 +22,7 @@ import HousingTableModal from "@/components/housing-table-modal";
 import EducationTableModal from "@/components/education-table-modal";
 import RaceTableModal from "@/components/race-table-modal";
 import PovertyTableModal from "@/components/poverty-table-modal";
+import { POPULATION_LABELS, type PopulationMetric } from "@/components/map/layers/county-population-layer";
 import { HOUSING_LABELS, type HousingMetric } from "@/components/map/layers/county-housing-layer";
 import { EDUCATION_LABELS, type EducationMetric } from "@/components/map/layers/county-education-layer";
 import { RACE_LABELS, type RaceMetric } from "@/components/map/layers/county-race-layer";
@@ -67,6 +68,7 @@ import type { California3DTerrainRef } from "@/components/map/terrain-3d/califor
 
 const crimeTypeIds = Object.keys(CRIME_LABELS) as CrimeType[];
 const tempMetricIds = Object.keys(METRIC_LABELS) as TempMetric[];
+const populationMetricIds = Object.keys(POPULATION_LABELS) as PopulationMetric[];
 const housingMetricIds = (Object.keys(HOUSING_LABELS) as HousingMetric[]).filter((id) => id !== "income");
 const educationMetricIds = Object.keys(EDUCATION_LABELS) as EducationMetric[];
 const raceMetricIds = Object.keys(RACE_LABELS) as RaceMetric[];
@@ -92,6 +94,9 @@ const DEFAULTS = {
   counties: false,
   cmode: "colored" as CountyDisplayMode,
   pop: false,
+  pmetric: "total" as PopulationMetric,
+  cityPop: false,
+  cpmetric: "total" as PopulationMetric,
   cities: false,
   cimode: "colored" as CityDisplayMode,
   crime: false,
@@ -147,6 +152,9 @@ function readParams() {
     counties: bool("counties", DEFAULTS.counties),
     cmode: str("cmode", DEFAULTS.cmode, ["borders", "colored"] as const),
     pop: bool("pop", DEFAULTS.pop),
+    pmetric: str("pmetric", DEFAULTS.pmetric, populationMetricIds),
+    cityPop: bool("cityPop", DEFAULTS.cityPop),
+    cpmetric: str("cpmetric", DEFAULTS.cpmetric, populationMetricIds),
     cities: bool("cities", DEFAULTS.cities),
     cimode: str("cimode", DEFAULTS.cimode, ["borders", "colored"] as const),
     crime: bool("crime", DEFAULTS.crime),
@@ -220,6 +228,11 @@ export default function Home() {
   const [showCounties, setShowCounties] = useState(init.counties);
   const [countyDisplayMode, setCountyDisplayMode] = useState<CountyDisplayMode>(init.cmode);
   const [showPopulation, setShowPopulation] = useState(init.pop);
+  const [populationMetric, setPopulationMetric] = useState<PopulationMetric>(init.pmetric);
+  const [showCityPopulation, setShowCityPopulation] = useState(init.cityPop);
+  const [cityPopulationMetric, setCityPopulationMetric] = useState<PopulationMetric>(init.cpmetric);
+  const [showCityPopulationTable, setShowCityPopulationTable] = useState(false);
+  const [selectedPopulationCityName, setSelectedPopulationCityName] = useState<string | null>(null);
   const [showCities, setShowCities] = useState(init.cities);
   const [cityDisplayMode, setCityDisplayMode] = useState<CityDisplayMode>(init.cimode);
   const [showCrime, setShowCrime] = useState(init.crime);
@@ -336,6 +349,9 @@ export default function Home() {
     setBool("counties", showCounties, DEFAULTS.counties);
     setStr("cmode", countyDisplayMode, DEFAULTS.cmode);
     setBool("pop", showPopulation, DEFAULTS.pop);
+    setStr("pmetric", populationMetric, DEFAULTS.pmetric);
+    setBool("cityPop", showCityPopulation, DEFAULTS.cityPop);
+    setStr("cpmetric", cityPopulationMetric, DEFAULTS.cpmetric);
     setBool("cities", showCities, DEFAULTS.cities);
     setStr("cimode", cityDisplayMode, DEFAULTS.cimode);
     setBool("crime", showCrime, DEFAULTS.crime);
@@ -379,7 +395,7 @@ export default function Home() {
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showPoverty, showCityPoverty, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showPoverty, showCityPoverty, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -404,7 +420,7 @@ export default function Home() {
   const clearOverlays = () => {
     setShowCounties(false); setShowPopulation(false); setShowCrime(false);
     setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowPoverty(false);
-    setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false);
+    setShowCityPopulation(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false);
     setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false);
     setShowRelief(false);
   };
@@ -444,6 +460,10 @@ export default function Home() {
     if (on) { clearOverlays(); setShowCities(false); }
     setShowCityRace(on);
   };
+  const toggleCityPopulation = (on: boolean) => {
+    if (on) { clearOverlays(); setShowCities(false); }
+    setShowCityPopulation(on);
+  };
   const togglePoverty = (on: boolean) => {
     if (on) clearOverlays();
     setShowPoverty(on);
@@ -474,7 +494,7 @@ export default function Home() {
   };
   const toggleCities = (on: boolean) => {
     setShowCities(on);
-    if (on) { setShowCityCrime(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCityPopulation(false); setShowCityCrime(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleTerrain3d = (on: boolean) => {
     setTerrain3d(on);
@@ -486,7 +506,7 @@ export default function Home() {
   };
   const toggleRelief = (on: boolean) => {
     setShowRelief(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowPoverty(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowPoverty(false); setShowCityPopulation(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); }
   };
 
   const resetAll = useCallback(() => {
@@ -494,6 +514,9 @@ export default function Home() {
     setShowCounties(false);
     setCountyDisplayMode("colored");
     setShowPopulation(false);
+    setPopulationMetric("total");
+    setShowCityPopulation(false);
+    setCityPopulationMetric("total");
     setShowCities(false);
     setCityDisplayMode("colored");
     setShowCrime(false);
@@ -555,6 +578,7 @@ export default function Home() {
     setSelectedCountyName(null);
     setSelectedCityName(null);
     setSelectedPopulationCountyName(null);
+    setSelectedPopulationCityName(null);
     setSelectedCrimeCountyName(null);
     setSelectedHousingCountyName(null);
     setSelectedIncomeCountyName(null);
@@ -577,6 +601,7 @@ export default function Home() {
     setShowEducation(false);
     setShowRace(false);
     setShowPoverty(false);
+    setShowCityPopulation(false);
     setShowCityHousing(false);
     setShowCityIncome(false);
     setShowCityEducation(false);
@@ -600,6 +625,7 @@ export default function Home() {
     setShowEducation(false);
     setShowRace(false);
     setShowPoverty(false);
+    setShowCityPopulation(false);
     setShowCityHousing(false);
     setShowCityIncome(false);
     setShowCityEducation(false);
@@ -651,6 +677,10 @@ export default function Home() {
 
   const goToRaceCity = useCallback((name: string) => {
     setSelectedRaceCityName(name);
+  }, []);
+
+  const goToPopulationCity = useCallback((name: string) => {
+    setSelectedPopulationCityName(name);
   }, []);
 
   const goToPovertyCounty = useCallback((name: string) => {
@@ -719,7 +749,11 @@ export default function Home() {
                 showCounties={showCounties}
                 countyDisplayMode={countyDisplayMode}
                 showPopulation={showPopulation}
+                populationMetric={populationMetric}
                 selectedPopulationCountyName={selectedPopulationCountyName}
+                showCityPopulation={showCityPopulation}
+                cityPopulationMetric={cityPopulationMetric}
+                selectedPopulationCityName={selectedPopulationCityName}
                 showCities={showCities}
                 cityDisplayMode={cityDisplayMode}
                 showCrime={showCrime}
@@ -1571,7 +1605,23 @@ export default function Home() {
                     </InfoTooltip>
                   </label>
                   {showPopulation && (
-                    <div className="mt-2 ml-14">
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={populationMetric}
+                          onChange={(e) => setPopulationMetric(e.target.value as PopulationMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {populationMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {POPULATION_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
                       <button
                         onClick={() => setShowPopulationTable(true)}
                         className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
@@ -1864,6 +1914,50 @@ export default function Home() {
                       </div>
                       <GeoSearch dataUrl={`${import.meta.env.BASE_URL}data/california-city-labels.geojson`} placeholder="Search cities..." onSelect={goToFavoriteCity} />
                     </>
+                  )}
+                </div>
+
+                {/* City population toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityPopulation ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCityPopulation} onChange={toggleCityPopulation} />
+                    <LuUsers className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Population</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://dof.ca.gov/forecasting/demographics/estimates-e1/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        CA Dept. of Finance
+                      </a>
+                      <br />
+                      E-1 Population Estimates, 2024
+                    </InfoTooltip>
+                  </label>
+                  {showCityPopulation && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={cityPopulationMetric}
+                          onChange={(e) => setCityPopulationMetric(e.target.value as PopulationMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {populationMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {POPULATION_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowCityPopulationTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -2219,6 +2313,14 @@ export default function Home() {
         title="County Population (2024)"
         nameLabel="County"
         onSelectName={setSelectedPopulationCountyName}
+      />
+      <PopulationTableModal
+        open={showCityPopulationTable}
+        onClose={() => setShowCityPopulationTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-city-labels.geojson`}
+        title="City Population (2024)"
+        nameLabel="City"
+        onSelectName={goToPopulationCity}
       />
       <CrimeTableModal
         open={showCountyCrimeTable}

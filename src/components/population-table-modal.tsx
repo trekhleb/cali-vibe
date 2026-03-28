@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import LegalModal from "./legal-modal";
 
 type SortDir = "asc" | "desc";
-type SortKey = "name" | "population";
+type SortKey = "name" | "population" | "density" | "area";
 
 interface PopRow {
   name: string;
   population: number;
+  area: number;
+  density: number;
 }
 
 interface PopulationTableModalProps {
@@ -44,9 +46,14 @@ export default function PopulationTableModal({
         if (cancelled) return;
         const parsed: PopRow[] = [];
         for (const feat of gj.features) {
-          const { name, population } = feat.properties;
+          const { name, population, area, density } = feat.properties;
           if (name && population != null) {
-            parsed.push({ name, population });
+            parsed.push({
+              name,
+              population,
+              area: typeof area === "number" ? area : 0,
+              density: typeof density === "number" ? density : 0,
+            });
           }
         }
         setRows(parsed);
@@ -67,9 +74,9 @@ export default function PopulationTableModal({
           ? a.name.localeCompare(b.name)
           : b.name.localeCompare(a.name);
       }
-      return sortDir === "asc"
-        ? a.population - b.population
-        : b.population - a.population;
+      const av = a[sortKey];
+      const bv = b[sortKey];
+      return sortDir === "asc" ? av - bv : bv - av;
     });
     return copy;
   }, [rows, sortKey, sortDir]);
@@ -89,8 +96,8 @@ export default function PopulationTableModal({
   }
 
   const thBase =
-    "sticky top-0 bg-gray-50 px-3 py-2 text-left text-[11px] font-semibold text-gray-600 cursor-pointer select-none hover:bg-gray-100 transition-colors whitespace-nowrap border-b border-gray-200";
-  const tdBase = "px-3 py-1.5 text-sm tabular-nums";
+    "sticky top-0 bg-gray-50 px-2 py-2 text-left text-[11px] font-semibold text-gray-600 cursor-pointer select-none hover:bg-gray-100 transition-colors whitespace-nowrap border-b border-gray-200";
+  const tdBase = "px-2 py-1.5 text-sm tabular-nums";
 
   return (
     <LegalModal open={open} onClose={onClose} title={title}>
@@ -103,10 +110,16 @@ export default function PopulationTableModal({
                 {nameLabel}{sortIndicator("name")}
               </th>
               <th className={`${thBase} text-right`} onClick={() => toggleSort("population")}>
-                Population{sortIndicator("population")}
+                Pop.{sortIndicator("population")}
               </th>
-              <th className={`${thBase} text-right w-20`}>
-                % of Total
+              <th className={`${thBase} text-right`}>
+                %
+              </th>
+              <th className={`${thBase} text-right`} onClick={() => toggleSort("area")}>
+                mi²{sortIndicator("area")}
+              </th>
+              <th className={`${thBase} text-right`} onClick={() => toggleSort("density")}>
+                /mi²{sortIndicator("density")}
               </th>
             </tr>
           </thead>
@@ -119,7 +132,7 @@ export default function PopulationTableModal({
                 <td className={`${tdBase} text-center text-xs text-gray-400`}>
                   {i + 1}
                 </td>
-                <td className={`${tdBase} font-medium text-gray-900 whitespace-nowrap`}>
+                <td className={`${tdBase} font-medium text-gray-900`}>
                   {onSelectName ? (
                     <button
                       onClick={() => { onSelectName(row.name); onClose(); }}
@@ -136,6 +149,12 @@ export default function PopulationTableModal({
                 </td>
                 <td className={`${tdBase} text-right text-gray-500`}>
                   {total > 0 ? ((row.population / total) * 100).toFixed(1) + "%" : "\u2014"}
+                </td>
+                <td className={`${tdBase} text-right ${sortKey === "area" ? "bg-amber-50 font-medium" : "text-gray-600"}`}>
+                  {row.area.toLocaleString(undefined, { maximumFractionDigits: 1 })}
+                </td>
+                <td className={`${tdBase} text-right ${sortKey === "density" ? "bg-amber-50 font-medium" : "text-gray-600"}`}>
+                  {row.density.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </td>
               </tr>
             ))}

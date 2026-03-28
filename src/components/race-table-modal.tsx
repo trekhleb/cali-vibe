@@ -106,8 +106,8 @@ export default function RaceTableModal({
   }
 
   const thBase =
-    "sticky top-0 bg-gray-50 px-3 py-2 text-left text-[11px] font-semibold text-gray-600 cursor-pointer select-none hover:bg-gray-100 transition-colors whitespace-nowrap border-b border-gray-200";
-  const tdBase = "px-3 py-1.5 text-sm tabular-nums";
+    "sticky top-0 bg-gray-50 px-2 py-2 text-left text-[11px] font-semibold text-gray-600 cursor-pointer select-none hover:bg-gray-100 transition-colors whitespace-nowrap border-b border-gray-200";
+  const tdBase = "px-2 py-1.5 text-sm tabular-nums";
 
   return (
     <LegalModal open={open} onClose={onClose} title={title}>
@@ -140,7 +140,7 @@ export default function RaceTableModal({
                 <td className={`${tdBase} text-center text-xs text-gray-400`}>
                   {i + 1}
                 </td>
-                <td className={`${tdBase} font-medium text-gray-900 whitespace-nowrap`}>
+                <td className={`${tdBase} font-medium text-gray-900`}>
                   {onSelectName ? (
                     <button
                       onClick={() => { onSelectName(row.name); onClose(); }}

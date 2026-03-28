@@ -7,6 +7,12 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 
+export type PopulationMetric = "total" | "density";
+export const POPULATION_LABELS: Record<PopulationMetric, string> = {
+  total: "Total Population",
+  density: "Density (per sq mi)",
+};
+
 const SOURCE_ID = "counties-pop";
 const LABEL_SOURCE_ID = "county-pop-labels-source";
 const FILL_LAYER_ID = "county-pop-fill";
@@ -23,6 +29,16 @@ const POP_STOPS: [number, string][] = [
   [3000000, "#08589e"],
 ];
 
+const DENSITY_STOPS: [number, string][] = [
+  [0, "#fef3c7"],
+  [50, "#fde68a"],
+  [200, "#fbbf24"],
+  [500, "#f59e0b"],
+  [2000, "#d97706"],
+  [5000, "#b45309"],
+  [15000, "#78350f"],
+];
+
 function isHighlighted(): ExpressionSpecification {
   return [
     "any",
@@ -31,20 +47,16 @@ function isHighlighted(): ExpressionSpecification {
   ] as ExpressionSpecification;
 }
 
-const fillLayer: FillLayerSpecification = {
-  id: FILL_LAYER_ID,
-  type: "fill",
-  source: SOURCE_ID,
-  paint: {
-    "fill-color": [
-      "interpolate",
-      ["linear"],
-      ["get", "population"],
-      ...POP_STOPS.flat(),
-    ],
-    "fill-opacity": ["case", isHighlighted(), 0.9, 0.7],
-  },
-};
+function buildFillColor(metric: PopulationMetric): ExpressionSpecification {
+  const stops = metric === "density" ? DENSITY_STOPS : POP_STOPS;
+  const prop = metric === "density" ? "density" : "population";
+  return [
+    "interpolate",
+    ["linear"],
+    ["get", prop],
+    ...stops.flat(),
+  ] as ExpressionSpecification;
+}
 
 const lineLayer: LineLayerSpecification = {
   id: "county-pop-borders",
@@ -64,12 +76,9 @@ const highlightLineLayer: LineLayerSpecification = {
   },
 };
 
-const labelLayer: SymbolLayerSpecification = {
-  id: "county-pop-labels",
-  type: "symbol",
-  source: LABEL_SOURCE_ID,
-  layout: {
-    "text-field": [
+function buildLabelTextField(metric: PopulationMetric): ExpressionSpecification {
+  if (metric === "density") {
+    return [
       "format",
       ["get", "name"],
       { "font-scale": 1 },
@@ -77,14 +86,36 @@ const labelLayer: SymbolLayerSpecification = {
       {},
       [
         "case",
-        [">=", ["get", "population"], 1000000],
-        ["concat", ["to-string", ["/", ["round", ["/", ["get", "population"], 100000]], 10]], "M"],
-        [">=", ["get", "population"], 1000],
-        ["concat", ["to-string", ["round", ["/", ["get", "population"], 1000]]], "K"],
-        ["to-string", ["get", "population"]],
+        [">=", ["get", "density"], 1000],
+        ["concat", ["to-string", ["round", ["/", ["get", "density"], 1000]]], "K/mi²"],
+        ["concat", ["to-string", ["round", ["get", "density"]]], "/mi²"],
       ],
       { "font-scale": 0.8 },
+    ] as ExpressionSpecification;
+  }
+  return [
+    "format",
+    ["get", "name"],
+    { "font-scale": 1 },
+    "\n",
+    {},
+    [
+      "case",
+      [">=", ["get", "population"], 1000000],
+      ["concat", ["to-string", ["/", ["round", ["/", ["get", "population"], 100000]], 10]], "M"],
+      [">=", ["get", "population"], 1000],
+      ["concat", ["to-string", ["round", ["/", ["get", "population"], 1000]]], "K"],
+      ["to-string", ["get", "population"]],
     ],
+    { "font-scale": 0.8 },
+  ] as ExpressionSpecification;
+}
+
+const labelLayerBase: Omit<SymbolLayerSpecification, "layout"> & { layout: Omit<SymbolLayerSpecification["layout"], "text-field"> } = {
+  id: "county-pop-labels",
+  type: "symbol",
+  source: LABEL_SOURCE_ID,
+  layout: {
     "text-size": ["interpolate", ["linear"], ["zoom"], 5, 0, 7, 10, 10, 13],
     "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
     "text-max-width": 8,
@@ -99,18 +130,22 @@ const labelLayer: SymbolLayerSpecification = {
   },
 };
 
-export function PopulationLegend({ overlayOffset = 0 }: { overlayOffset?: number }) {
-  const labels = ["0", "10K", "50K", "100K", "500K", "1M", "3M+"];
+export function PopulationLegend({ overlayOffset = 0, populationMetric = "total" as PopulationMetric }: { overlayOffset?: number; populationMetric?: PopulationMetric }) {
+  const popLabels = ["0", "10K", "50K", "100K", "500K", "1M", "3M+"];
+  const densityLabels = ["0", "50", "200", "500", "2K", "5K", "15K+"];
+  const stops = populationMetric === "density" ? DENSITY_STOPS : POP_STOPS;
+  const labels = populationMetric === "density" ? densityLabels : popLabels;
+  const title = populationMetric === "density" ? "Pop. Density / sq mi (2024)" : "Population (2024)";
   return (
     <div
       className="absolute bottom-16 md:bottom-12 rounded-lg bg-white/90 px-3 py-2 shadow backdrop-blur-sm transition-all duration-300 left-4 md:left-6"
       style={overlayOffset ? { left: overlayOffset + 24 } : undefined}
     >
       <div className="mb-1 text-xs font-medium text-gray-700">
-        Population (2024)
+        {title}
       </div>
       <div className="flex">
-        {POP_STOPS.map(([, color], i) => (
+        {stops.map(([, color], i) => (
           <div key={i} className="flex flex-col items-center">
             <div className="h-3 w-8" style={{ backgroundColor: color }} />
             <span className="mt-0.5 text-[9px] text-gray-500">{labels[i]}</span>
@@ -121,7 +156,7 @@ export function PopulationLegend({ overlayOffset = 0 }: { overlayOffset?: number
   );
 }
 
-export default function CountyPopulationLayer({ overlayOffset = 0, selectName = null }: { overlayOffset?: number; selectName?: string | null }) {
+export default function CountyPopulationLayer({ overlayOffset = 0, selectName = null, populationMetric = "total" as PopulationMetric }: { overlayOffset?: number; selectName?: string | null; populationMetric?: PopulationMetric }) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,
@@ -129,6 +164,7 @@ export default function CountyPopulationLayer({ overlayOffset = 0, selectName = 
   });
 
   const activePop = (activeProperties?.population as number) ?? null;
+  const activeDensity = (activeProperties?.density as number) ?? null;
 
   const labelHighlightFilter: SymbolLayerSpecification["filter"] = activeName
     ? ["==", ["get", "name"], activeName]
@@ -137,6 +173,21 @@ export default function CountyPopulationLayer({ overlayOffset = 0, selectName = 
   const labelDimFilter: SymbolLayerSpecification["filter"] = activeName
     ? ["!=", ["get", "name"], activeName]
     : ["literal", true];
+
+  const fillLayer: FillLayerSpecification = {
+    id: FILL_LAYER_ID,
+    type: "fill",
+    source: SOURCE_ID,
+    paint: {
+      "fill-color": buildFillColor(populationMetric),
+      "fill-opacity": ["case", isHighlighted(), 0.9, 0.7],
+    },
+  };
+
+  const labelLayout = {
+    ...labelLayerBase.layout,
+    "text-field": buildLabelTextField(populationMetric),
+  };
 
   return (
     <>
@@ -147,13 +198,14 @@ export default function CountyPopulationLayer({ overlayOffset = 0, selectName = 
       </Source>
 
       <Source id={LABEL_SOURCE_ID} type="geojson" data={LABELS_URL}>
-        <Layer {...labelLayer} id="county-pop-labels-dim" filter={labelDimFilter} />
+        <Layer {...labelLayerBase} layout={labelLayout} id="county-pop-labels-dim" filter={labelDimFilter} />
         <Layer
-          {...labelLayer}
+          {...labelLayerBase}
+          layout={labelLayout}
           id="county-pop-labels-highlight"
           filter={labelHighlightFilter}
           paint={{
-            ...labelLayer.paint,
+            ...labelLayerBase.paint,
             "text-color": "#0f172a",
             "text-halo-color": "#ffffff",
             "text-halo-width": 2.5,
@@ -172,6 +224,11 @@ export default function CountyPopulationLayer({ overlayOffset = 0, selectName = 
           <div className="text-sm text-gray-600">
             Pop: {activePop.toLocaleString()}
           </div>
+          {activeDensity !== null && (
+            <div className="text-sm text-gray-600">
+              Density: {activeDensity.toLocaleString()}/sq mi
+            </div>
+          )}
         </div>
       )}
     </>

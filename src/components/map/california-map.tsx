@@ -53,6 +53,8 @@ import SunshineLayer, {
   type HexResolution as SunshineHexResolution,
   type SunshineDataSource,
 } from "./layers/sunshine-layer";
+import CityPopulationLayer, { CityPopulationLegend } from "./layers/city-population-layer";
+import type { PopulationMetric } from "./layers/county-population-layer";
 import TransitLayer, { type TransitSystem, type ActiveColorMap } from "./layers/transit-layer";
 import LocateControl from "./locate-control";
 
@@ -75,7 +77,11 @@ interface CaliforniaMapProps {
   showCounties?: boolean;
   countyDisplayMode?: CountyDisplayMode;
   showPopulation?: boolean;
+  populationMetric?: PopulationMetric;
   selectedPopulationCountyName?: string | null;
+  showCityPopulation?: boolean;
+  cityPopulationMetric?: PopulationMetric;
+  selectedPopulationCityName?: string | null;
   showCrime?: boolean;
   crimeType?: CrimeType;
   selectedCrimeCountyName?: string | null;
@@ -147,7 +153,11 @@ export default function CaliforniaMap({
   showCounties = false,
   countyDisplayMode = "colored",
   showPopulation = false,
+  populationMetric = "total",
   selectedPopulationCountyName = null,
+  showCityPopulation = false,
+  cityPopulationMetric = "total",
+  selectedPopulationCityName = null,
   showCrime = false,
   crimeType = "total",
   selectedCrimeCountyName = null,
@@ -214,7 +224,7 @@ export default function CaliforniaMap({
 }: CaliforniaMapProps) {
   // Smart zoom for "locate me": city layers → street level, county → county level
   const locateZoom =
-    showCities || showCityCrime || showCityHousing || showCityIncome || showCityEducation || showCityRace || showCityPoverty ? 11 :
+    showCities || showCityCrime || showCityHousing || showCityIncome || showCityEducation || showCityRace || showCityPoverty || showCityPopulation ? 11 :
     showCounties || showPopulation || showCrime || showHousing || showIncome || showEducation || showRace || showPoverty ? 8 :
     showTemperature || showSunshine ? 9 : 10;
 
@@ -241,8 +251,8 @@ export default function CaliforniaMap({
           selectName={selectedCountyName}
         />
       )}
-      {showPopulation && !showCrime && !showHousing && !showIncome && <CountyPopulationLayer overlayOffset={overlayOffset} selectName={selectedPopulationCountyName} />}
-      {showPopulation && !showCrime && !showHousing && !showIncome && <PopulationLegend overlayOffset={overlayOffset} />}
+      {showPopulation && !showCrime && !showHousing && !showIncome && <CountyPopulationLayer overlayOffset={overlayOffset} selectName={selectedPopulationCountyName} populationMetric={populationMetric} />}
+      {showPopulation && !showCrime && !showHousing && !showIncome && <PopulationLegend overlayOffset={overlayOffset} populationMetric={populationMetric} />}
       {showHousing && <CountyHousingLayer housingMetric={housingMetric} overlayOffset={overlayOffset} selectName={selectedHousingCountyName} />}
       {showHousing && <HousingLegend housingMetric={housingMetric} overlayOffset={overlayOffset} />}
       {showIncome && <CountyHousingLayer housingMetric="income" overlayOffset={overlayOffset} selectName={selectedIncomeCountyName} />}
@@ -276,6 +286,8 @@ export default function CaliforniaMap({
       {showPoverty && <PovertyLegend overlayOffset={overlayOffset} />}
       {showCityPoverty && <CityPovertyLayer overlayOffset={overlayOffset} selectName={selectedPovertyCityName} />}
       {showCityPoverty && <CityPovertyLegend overlayOffset={overlayOffset} />}
+      {showCityPopulation && <CityPopulationLayer overlayOffset={overlayOffset} selectName={selectedPopulationCityName} populationMetric={cityPopulationMetric} />}
+      {showCityPopulation && <CityPopulationLegend overlayOffset={overlayOffset} populationMetric={cityPopulationMetric} />}
       {showTemperature && (
         <TemperatureLayer
           metric={tempMetric}
