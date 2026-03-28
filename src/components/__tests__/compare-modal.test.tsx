@@ -103,7 +103,7 @@ describe("CompareModal", () => {
   it("renders category headers", async () => {
     renderModal();
     await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
-    expect(screen.getByText("Crime (per 100k)")).toBeInTheDocument();
+    expect(screen.getByText("Crime")).toBeInTheDocument();
     expect(screen.getByText("Housing & Income")).toBeInTheDocument();
     expect(screen.getByText("Education (%)")).toBeInTheDocument();
     expect(screen.getByText("Race & Ethnicity (%)")).toBeInTheDocument();
@@ -132,9 +132,9 @@ describe("CompareModal", () => {
     await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
 
     expect(screen.getByText("Homicide")).toBeInTheDocument();
-    await user.click(screen.getByText("Crime (per 100k)"));
+    await user.click(screen.getByText("Crime"));
     expect(screen.queryByText("Homicide")).not.toBeInTheDocument();
-    await user.click(screen.getByText("Crime (per 100k)"));
+    await user.click(screen.getByText("Crime"));
     expect(screen.getByText("Homicide")).toBeInTheDocument();
   });
 

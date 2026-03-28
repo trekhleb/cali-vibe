@@ -494,7 +494,7 @@ function AddSearch({
           onFocus={() => query.trim() && setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full rounded-md border border-gray-200 bg-white py-1 pl-7 pr-3 text-xs text-gray-700 placeholder:text-gray-400 focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:outline-none transition-colors"
+          className="w-full rounded-md border border-gray-200 bg-white py-1 pl-7 pr-3 text-[16px] sm:text-xs text-gray-700 placeholder:text-gray-400 focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:outline-none transition-colors"
         />
       </div>
       {isOpen && suggestions.length > 0 && (
