@@ -51,6 +51,7 @@ const CATEGORIES: CategoryDef[] = [
       { key: "crime.homicide", label: "Homicide", format: fmtDec1, polarity: "lower" },
       { key: "crime.robbery", label: "Robbery", format: fmtDec1, polarity: "lower" },
       { key: "crime.aggAssault", label: "Agg. Assault", format: fmtDec1, polarity: "lower" },
+      { key: "crime.rape", label: "Rape", format: fmtDec1, polarity: "lower" },
       { key: "crime.burglary", label: "Burglary", format: fmtDec1, polarity: "lower" },
       { key: "crime.mvTheft", label: "MV Theft", format: fmtDec1, polarity: "lower" },
       { key: "crime.larceny", label: "Larceny", format: fmtDec1, polarity: "lower" },
