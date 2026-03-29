@@ -1,4 +1,4 @@
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import { render, screen, waitFor, cleanup, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import Home from "@/app/page";
@@ -139,9 +139,11 @@ describe("Home page", () => {
     const divider = document.querySelector('.cursor-col-resize');
     expect(divider).toBeInTheDocument();
     if (divider) {
-      divider.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-      document.dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientX: 400 } as any));
-      document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+      act(() => {
+        divider.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+        document.dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientX: 400 } as any));
+        document.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+      });
     }
   });
 
@@ -177,8 +179,10 @@ describe("Home page", () => {
     await user.click(screen.getByRole('button', { name: /Layers/ }));
     expect(screen.getByRole("checkbox", { name: /Cities/i })).toBeChecked();
 
-    favoritesStore.remove({ type: "county", name: "San Francisco" });
-    favoritesStore.remove({ type: "city", name: "Los Angeles" });
+    act(() => {
+      favoritesStore.remove({ type: "county", name: "San Francisco" });
+      favoritesStore.remove({ type: "city", name: "Los Angeles" });
+    });
   });
 
   it("resets 3D terrain view", async () => {

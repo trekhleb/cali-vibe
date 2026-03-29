@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CompareModal from "@/components/compare-modal";
 import type { CompareType, SortConfig } from "@/components/compare-modal";
@@ -193,6 +193,7 @@ describe("CompareModal", () => {
   it("shows empty state with no names", async () => {
     renderModal({ names: [] });
     expect(screen.getByText(/Add counties to compare/)).toBeInTheDocument();
+    await act(async () => {});
   });
 
   it("handles network error", async () => {

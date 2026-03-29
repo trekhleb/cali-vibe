@@ -1564,18 +1564,20 @@ describe("TransitLayer", () => {
 
   // ── Data fetching ──
 
-  it("fetches routes GeoJSON for each system", () => {
+  it("fetches routes GeoJSON for each system", async () => {
     render(<TransitLayer systems={["bart", "caltrain"]} />);
     expect(fetchJsonCached).toHaveBeenCalledWith(expect.stringContaining("bart-routes.geojson"));
     expect(fetchJsonCached).toHaveBeenCalledWith(expect.stringContaining("caltrain-routes.geojson"));
+    await act(async () => {});
   });
 
-  it("fetches stops GeoJSON for each system", () => {
+  it("fetches stops GeoJSON for each system", async () => {
     (fetchJsonCached as ReturnType<typeof vi.fn>).mockImplementation((url: string) => {
       if (url.includes("stops")) return Promise.resolve(mockStopsGeoJSON);
       return Promise.resolve(mockRoutesGeoJSON);
     });
     render(<TransitLayer systems={["bart"]} selectedStopName="Embarcadero" flyToSelected={true} />);
     expect(fetchJsonCached).toHaveBeenCalledWith(expect.stringContaining("bart-stops.geojson"));
+    await act(async () => {});
   });
 });
