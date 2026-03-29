@@ -85,6 +85,16 @@ function renderModal(overrides: Partial<{
   onTypeChange: (t: CompareType) => void;
   onNamesChange: (n: string[]) => void;
   onSortChange: (s: SortConfig) => void;
+  tempMonth: number;
+  tempUnit: "F" | "C";
+  sunMonth: number;
+  sunSource: "nsrdb" | "era5";
+  crimeAbsolute: boolean;
+  onTempMonthChange: (m: number) => void;
+  onTempUnitChange: (u: "F" | "C") => void;
+  onSunMonthChange: (m: number) => void;
+  onSunSourceChange: (s: "nsrdb" | "era5") => void;
+  onCrimeAbsoluteChange: (v: boolean) => void;
 }> = {}) {
   const props = {
     open: true,
@@ -95,6 +105,16 @@ function renderModal(overrides: Partial<{
     onTypeChange: vi.fn(),
     onNamesChange: vi.fn(),
     onSortChange: vi.fn(),
+    tempMonth: 12,
+    tempUnit: "F" as const,
+    sunMonth: 12,
+    sunSource: "nsrdb" as const,
+    crimeAbsolute: false,
+    onTempMonthChange: vi.fn(),
+    onTempUnitChange: vi.fn(),
+    onSunMonthChange: vi.fn(),
+    onSunSourceChange: vi.fn(),
+    onCrimeAbsoluteChange: vi.fn(),
     ...overrides,
   };
   return { ...render(<CompareModal {...props} />), props };
@@ -257,20 +277,16 @@ describe("CompareModal", () => {
   });
 
   it("switches temperature unit to °C", async () => {
-    const user = userEvent.setup();
-    renderModal();
+    renderModal({ tempUnit: "C" });
     await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
-    await user.click(screen.getByRole("button", { name: "°C" }));
     // Annual avg of Alameda tavg: 15.0°C
     expect(screen.getByText("15.0°C")).toBeInTheDocument();
   });
 
   it("switches temperature month", async () => {
-    const user = userEvent.setup();
-    renderModal();
+    renderModal({ tempMonth: 0 });
     await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
-    // Click Jan button — Alameda tavg[0]=9.5°C → 49°F
-    await user.click(screen.getAllByRole("button", { name: "Jan" })[0]);
+    // Jan — Alameda tavg[0]=9.5°C → 49°F
     expect(screen.getByText("49°F")).toBeInTheDocument();
   });
 
@@ -283,22 +299,25 @@ describe("CompareModal", () => {
   });
 
   it("switches sunshine data source to ERA5", async () => {
-    const user = userEvent.setup();
-    renderModal();
+    renderModal({ sunSource: "era5" });
     await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
-    await user.click(screen.getByRole("button", { name: "ERA5" }));
     // Annual avg ERA5 for Alameda: mean of 12 values ≈ 8.3
     expect(screen.getByText("8.3")).toBeInTheDocument();
   });
 
   it("switches sunshine month", async () => {
-    const user = userEvent.setup();
-    renderModal();
+    renderModal({ sunMonth: 6 });
     await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
-    // Click Jul in sunshine section (second set of month buttons)
-    const julButtons = screen.getAllByRole("button", { name: "Jul" });
-    await user.click(julButtons[julButtons.length - 1]);
-    // Alameda sunNsrdb[6] = 11.5
+    // Jul — Alameda sunNsrdb[6] = 11.5
     expect(screen.getByText("11.5")).toBeInTheDocument();
+  });
+
+  it("calls onTempMonthChange and onSunMonthChange when changing temperature month", async () => {
+    const user = userEvent.setup();
+    const { props } = renderModal();
+    await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
+    await user.click(screen.getAllByRole("button", { name: "Jan" })[0]);
+    expect(props.onTempMonthChange).toHaveBeenCalledWith(0);
+    expect(props.onSunMonthChange).toHaveBeenCalledWith(0);
   });
 });

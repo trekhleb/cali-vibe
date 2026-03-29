@@ -170,6 +170,16 @@ export interface CompareModalProps {
   onTypeChange: (type: CompareType) => void;
   onNamesChange: (names: string[]) => void;
   onSortChange: (sort: SortConfig) => void;
+  tempMonth: number;
+  tempUnit: TempUnit;
+  sunMonth: number;
+  sunSource: SunSource;
+  crimeAbsolute: boolean;
+  onTempMonthChange: (m: number) => void;
+  onTempUnitChange: (u: TempUnit) => void;
+  onSunMonthChange: (m: number) => void;
+  onSunSourceChange: (s: SunSource) => void;
+  onCrimeAbsoluteChange: (v: boolean) => void;
 }
 
 // --- Component ---
@@ -183,16 +193,21 @@ export default function CompareModal({
   onTypeChange,
   onNamesChange,
   onSortChange,
+  tempMonth,
+  tempUnit,
+  sunMonth,
+  sunSource,
+  crimeAbsolute,
+  onTempMonthChange,
+  onTempUnitChange,
+  onSunMonthChange,
+  onSunSourceChange,
+  onCrimeAbsoluteChange,
 }: CompareModalProps) {
   const [allData, setAllData] = useState<PlaceData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
-  const [crimeAbsolute, setCrimeAbsolute] = useState(false);
-  const [tempMonth, setTempMonth] = useState(ANNUAL);
-  const [tempUnit, setTempUnit] = useState<TempUnit>("F");
-  const [sunMonth, setSunMonth] = useState(ANNUAL);
-  const [sunSource, setSunSource] = useState<SunSource>("nsrdb");
   const dragItemRef = useRef<string | null>(null);
   const [dragName, setDragName] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<{ name: string; side: "left" | "right" } | null>(null);
@@ -463,28 +478,28 @@ export default function CompareModal({
                     <SmallToggle
                       options={[{ value: "rate", label: "per 100k" }, { value: "abs", label: "absolute" }]}
                       value={crimeAbsolute ? "abs" : "rate"}
-                      onChange={(v) => setCrimeAbsolute(v === "abs")}
+                      onChange={(v) => onCrimeAbsoluteChange(v === "abs")}
                     />
                   );
                 } else if (cat.label === "Temperature") {
                   controls = (
                     <>
-                      <MonthSelector value={tempMonth} onChange={setTempMonth} />
+                      <MonthSelector value={tempMonth} onChange={(m) => { onTempMonthChange(m); onSunMonthChange(m); }} />
                       <SmallToggle
                         options={[{ value: "F", label: "°F" }, { value: "C", label: "°C" }]}
                         value={tempUnit}
-                        onChange={(v) => setTempUnit(v as TempUnit)}
+                        onChange={(v) => onTempUnitChange(v as TempUnit)}
                       />
                     </>
                   );
                 } else if (cat.label === "Sunshine") {
                   controls = (
                     <>
-                      <MonthSelector value={sunMonth} onChange={setSunMonth} />
+                      <MonthSelector value={sunMonth} onChange={(m) => { onSunMonthChange(m); onTempMonthChange(m); }} />
                       <SmallToggle
                         options={[{ value: "nsrdb", label: "NSRDB" }, { value: "era5", label: "ERA5" }]}
                         value={sunSource}
-                        onChange={(v) => setSunSource(v as SunSource)}
+                        onChange={(v) => onSunSourceChange(v as SunSource)}
                       />
                     </>
                   );

@@ -140,6 +140,11 @@ const DEFAULTS = {
   compare: null as CompareType | null,
   cnames: [] as string[],
   csort: null as SortConfig,
+  ctmonth: 12,
+  ctunit: "F" as "F" | "C",
+  csmonth: 12,
+  cssrc: "nsrdb" as "nsrdb" | "era5",
+  ccrime: false,
   about: false,
 };
 
@@ -244,6 +249,21 @@ function readParams() {
       if (!k) return null;
       return { metricKey: k, direction: (d === "asc" ? "asc" : "desc") } as SortConfig;
     })(),
+    ctmonth: (() => {
+      const v = p.get("ctmonth");
+      if (v === null) return DEFAULTS.ctmonth;
+      const n = parseInt(v, 10);
+      return n >= 0 && n <= 12 ? n : DEFAULTS.ctmonth;
+    })(),
+    ctunit: str("ctunit", DEFAULTS.ctunit, ["F", "C"] as const),
+    csmonth: (() => {
+      const v = p.get("csmonth");
+      if (v === null) return DEFAULTS.csmonth;
+      const n = parseInt(v, 10);
+      return n >= 0 && n <= 12 ? n : DEFAULTS.csmonth;
+    })(),
+    cssrc: str("cssrc", DEFAULTS.cssrc, ["nsrdb", "era5"] as const),
+    ccrime: bool("ccrime", DEFAULTS.ccrime),
     about: bool("about", DEFAULTS.about),
   };
 }
@@ -357,6 +377,11 @@ export default function Home() {
   const [compareType, setCompareType] = useState<CompareType | null>(init.compare);
   const [compareNames, setCompareNames] = useState<string[]>(init.cnames);
   const [compareSortConfig, setCompareSortConfig] = useState<SortConfig>(init.csort);
+  const [compareTempMonth, setCompareTempMonth] = useState(init.ctmonth);
+  const [compareTempUnit, setCompareTempUnit] = useState<"F" | "C">(init.ctunit);
+  const [compareSunMonth, setCompareSunMonth] = useState(init.csmonth);
+  const [compareSunSource, setCompareSunSource] = useState<"nsrdb" | "era5">(init.cssrc);
+  const [compareCrimeAbsolute, setCompareCrimeAbsolute] = useState(init.ccrime);
   const [showAbout, setShowAbout] = useState(init.about);
   const isMobile = useIsMobile();
 
@@ -430,12 +455,17 @@ export default function Home() {
         p.set("csort", compareSortConfig.metricKey);
         if (compareSortConfig.direction === "asc") p.set("cdir", "asc");
       }
+      if (compareTempMonth !== DEFAULTS.ctmonth) p.set("ctmonth", String(compareTempMonth));
+      if (compareTempUnit !== DEFAULTS.ctunit) p.set("ctunit", compareTempUnit);
+      if (compareSunMonth !== DEFAULTS.csmonth) p.set("csmonth", String(compareSunMonth));
+      if (compareSunSource !== DEFAULTS.cssrc) p.set("cssrc", compareSunSource);
+      if (compareCrimeAbsolute !== DEFAULTS.ccrime) p.set("ccrime", "1");
     }
     setBool("about", showAbout, DEFAULTS.about);
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showPoverty, showCityPoverty, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, showAbout]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showPoverty, showCityPoverty, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, compareTempMonth, compareTempUnit, compareSunMonth, compareSunSource, compareCrimeAbsolute, showAbout]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -2536,6 +2566,16 @@ export default function Home() {
         onTypeChange={setCompareType}
         onNamesChange={setCompareNames}
         onSortChange={setCompareSortConfig}
+        tempMonth={compareTempMonth}
+        tempUnit={compareTempUnit}
+        sunMonth={compareSunMonth}
+        sunSource={compareSunSource}
+        crimeAbsolute={compareCrimeAbsolute}
+        onTempMonthChange={setCompareTempMonth}
+        onTempUnitChange={setCompareTempUnit}
+        onSunMonthChange={setCompareSunMonth}
+        onSunSourceChange={setCompareSunSource}
+        onCrimeAbsoluteChange={setCompareCrimeAbsolute}
       />
       <TemperatureTableModal
         open={showTempTable}
