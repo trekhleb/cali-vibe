@@ -21,6 +21,14 @@ const mockGeoJson = {
         education: { hsPlus: 88.9, bachPlus: 51.5, gradPlus: 22.8 },
         race: { white: 28.2, hispanic: 23.3, black: 9.6, asian: 32, other: 6.8 },
         poverty: 9.2,
+        climate: {
+          tmin: [5.0, 6.0, 7.0, 8.0, 10.0, 12.0, 13.0, 13.0, 12.0, 10.0, 7.0, 5.0],
+          tmax: [14.0, 16.0, 18.0, 20.0, 23.0, 27.0, 28.0, 28.0, 26.0, 22.0, 17.0, 14.0],
+          tavg: [9.5, 11.0, 12.5, 14.0, 16.5, 19.5, 20.5, 20.5, 19.0, 16.0, 12.0, 9.5],
+          sunNsrdb: [6.0, 7.0, 8.0, 9.5, 10.5, 11.0, 11.5, 11.0, 10.0, 8.5, 7.0, 5.5],
+          sunEra5: [5.5, 6.5, 7.5, 9.0, 10.0, 10.5, 11.0, 10.5, 9.5, 8.0, 6.5, 5.0],
+          hexCount: 7,
+        },
       },
     },
     {
@@ -34,6 +42,14 @@ const mockGeoJson = {
         education: { hsPlus: 90.2, bachPlus: 60.1, gradPlus: 28.5 },
         race: { white: 35.5, hispanic: 15.2, black: 5.1, asian: 34.4, other: 9.8 },
         poverty: 10.5,
+        climate: {
+          tmin: [7.0, 8.0, 8.5, 9.0, 10.0, 11.0, 12.0, 12.5, 12.0, 11.0, 9.0, 7.0],
+          tmax: [13.0, 15.0, 16.0, 17.0, 18.0, 20.0, 20.0, 20.5, 21.0, 19.0, 16.0, 13.0],
+          tavg: [10.0, 11.5, 12.3, 13.0, 14.0, 15.5, 16.0, 16.5, 16.5, 15.0, 12.5, 10.0],
+          sunNsrdb: [5.0, 6.0, 7.5, 9.0, 10.0, 10.5, 9.5, 9.0, 9.5, 8.0, 6.0, 4.5],
+          sunEra5: [4.5, 5.5, 7.0, 8.5, 9.5, 10.0, 9.0, 8.5, 9.0, 7.5, 5.5, 4.0],
+          hexCount: 1,
+        },
       },
     },
     {
@@ -47,6 +63,14 @@ const mockGeoJson = {
         education: { hsPlus: 85.0, bachPlus: 25.0, gradPlus: 10.0 },
         race: { white: 60.0, hispanic: 20.0, black: 1.0, asian: 5.0, other: 14.0 },
         poverty: 15.0,
+        climate: {
+          tmin: [-5.0, -3.0, 0.0, 2.0, 5.0, 8.0, 11.0, 10.0, 7.0, 3.0, -1.0, -5.0],
+          tmax: [4.0, 6.0, 10.0, 14.0, 19.0, 25.0, 29.0, 28.0, 24.0, 17.0, 9.0, 4.0],
+          tavg: [-0.5, 1.5, 5.0, 8.0, 12.0, 16.5, 20.0, 19.0, 15.5, 10.0, 4.0, -0.5],
+          sunNsrdb: [7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 12.5, 12.0, 11.0, 9.5, 8.0, 6.5],
+          sunEra5: [6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.0, 11.5, 10.5, 9.0, 7.5, 6.0],
+          hexCount: 7,
+        },
       },
     },
   ],
@@ -103,6 +127,8 @@ describe("CompareModal", () => {
   it("renders category headers", async () => {
     renderModal();
     await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
+    expect(screen.getByText("Temperature")).toBeInTheDocument();
+    expect(screen.getByText("Sunshine")).toBeInTheDocument();
     expect(screen.getByText("Crime")).toBeInTheDocument();
     expect(screen.getByText("Housing & Income")).toBeInTheDocument();
     expect(screen.getByText("Education (%)")).toBeInTheDocument();
@@ -217,5 +243,61 @@ describe("CompareModal", () => {
     await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
     expect(screen.getByText("Counties")).toBeInTheDocument();
     expect(screen.getByText("Cities")).toBeInTheDocument();
+  });
+
+  it("renders temperature metrics with °F by default (annual avg)", async () => {
+    renderModal();
+    await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
+    expect(screen.getByText("Day High")).toBeInTheDocument();
+    expect(screen.getByText("Average")).toBeInTheDocument();
+    expect(screen.getByText("Night Low")).toBeInTheDocument();
+    // Annual avg of Alameda tavg: mean of 12 values ≈ 15.04°C → 59°F
+    expect(screen.getByText("59°F")).toBeInTheDocument();
+  });
+
+  it("switches temperature unit to °C", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
+    await user.click(screen.getByRole("button", { name: "°C" }));
+    // Annual avg of Alameda tavg: 15.0°C
+    expect(screen.getByText("15.0°C")).toBeInTheDocument();
+  });
+
+  it("switches temperature month", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
+    // Click Jan button — Alameda tavg[0]=9.5°C → 49°F
+    await user.click(screen.getAllByRole("button", { name: "Jan" })[0]);
+    expect(screen.getByText("49°F")).toBeInTheDocument();
+  });
+
+  it("renders sunshine metric with hours/day", async () => {
+    renderModal();
+    await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
+    expect(screen.getByText("Hours/day")).toBeInTheDocument();
+    // Annual avg NSRDB for Alameda: mean of 12 values ≈ 8.8
+    expect(screen.getByText("8.8")).toBeInTheDocument();
+  });
+
+  it("switches sunshine data source to ERA5", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
+    await user.click(screen.getByRole("button", { name: "ERA5" }));
+    // Annual avg ERA5 for Alameda: mean of 12 values ≈ 8.3
+    expect(screen.getByText("8.3")).toBeInTheDocument();
+  });
+
+  it("switches sunshine month", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
+    // Click Jul in sunshine section (second set of month buttons)
+    const julButtons = screen.getAllByRole("button", { name: "Jul" });
+    await user.click(julButtons[julButtons.length - 1]);
+    // Alameda sunNsrdb[6] = 11.5
+    expect(screen.getByText("11.5")).toBeInTheDocument();
   });
 });

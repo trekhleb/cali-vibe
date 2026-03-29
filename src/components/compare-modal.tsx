@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import LegalModal from "@/components/legal-modal";
-import { LuChevronDown, LuX, LuSearch, LuPlus, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown } from "react-icons/lu";
+import { LuChevronDown, LuX, LuSearch, LuPlus, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuThermometer, LuSun, LuGripVertical } from "react-icons/lu";
 import { IoManOutline } from "react-icons/io5";
 import { fetchJsonCached } from "@/utils/fetch-json";
 
@@ -11,7 +11,7 @@ export type SortConfig = { metricKey: string; direction: "asc" | "desc" } | null
 
 // --- Metric definitions ---
 
-type Polarity = "higher" | "lower" | "neutral";
+type Polarity = "higher" | "lower" | "neutral" | "temperature";
 
 interface MetricDef {
   key: string;
@@ -30,8 +30,23 @@ const fmtInt = (v: number) => Math.round(v).toLocaleString("en-US");
 const fmtPct = (v: number) => `${v.toFixed(1)}%`;
 const fmtDec1 = (v: number) => v.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const fmtUsd = (v: number) => `$${Math.round(v).toLocaleString("en-US")}`;
+const fmtSunHrs = (v: number) => (Math.round(v * 10) / 10).toFixed(1);
 
-const CATEGORIES: CategoryDef[] = [
+const ANNUAL = 12;
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Year"];
+
+type TempUnit = "F" | "C";
+type SunSource = "nsrdb" | "era5";
+
+function cToF(c: number): number { return c * 9 / 5 + 32; }
+
+function getClimateMonthVal(arr: number[] | null | undefined, month: number): number | null {
+  if (!arr || !Array.isArray(arr)) return null;
+  if (month === ANNUAL) return arr.reduce((a, b) => a + b, 0) / arr.length;
+  return arr[month] ?? null;
+}
+
+const DEMOGRAPHIC_CATEGORIES: CategoryDef[] = [
   {
     label: "Population",
     icon: <LuUsers className="h-3 w-3" />,
@@ -119,6 +134,13 @@ function hslColor(t: number): string {
   return `hsl(${hue}, 65%, 88%)`;
 }
 
+/** Blue (cold) → orange/red (hot) gradient. t: 0 = coldest, 1 = hottest. */
+function tempColor(t: number): string {
+  // hue 220 (blue) → 30 (orange)
+  const hue = 220 - t * 190;
+  return `hsl(${hue}, 70%, 88%)`;
+}
+
 function getCellColor(value: number, values: (number | null)[], polarity: Polarity): string | undefined {
   if (polarity === "neutral") return undefined;
   const valid = values.filter((v): v is number => v !== null);
@@ -127,6 +149,7 @@ function getCellColor(value: number, values: (number | null)[], polarity: Polari
   const max = Math.max(...valid);
   if (max === min) return undefined;
   const normalized = (value - min) / (max - min);
+  if (polarity === "temperature") return tempColor(normalized);
   const t = polarity === "higher" ? normalized : 1 - normalized;
   return hslColor(t);
 }
@@ -166,7 +189,13 @@ export default function CompareModal({
   const [error, setError] = useState<string | null>(null);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [crimeAbsolute, setCrimeAbsolute] = useState(false);
+  const [tempMonth, setTempMonth] = useState(ANNUAL);
+  const [tempUnit, setTempUnit] = useState<TempUnit>("F");
+  const [sunMonth, setSunMonth] = useState(ANNUAL);
+  const [sunSource, setSunSource] = useState<SunSource>("nsrdb");
   const dragItemRef = useRef<string | null>(null);
+  const [dragName, setDragName] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<{ name: string; side: "left" | "right" } | null>(null);
 
   const dataUrl = DATA_URLS[compareType];
 
@@ -193,11 +222,58 @@ export default function CompareModal({
       .finally(() => setLoading(false));
   }, [open, dataUrl, names]);
 
+  // Hydrate climate data into flat properties based on current controls
+  const hydratedData = useMemo(() => {
+    return allData.map((place) => {
+      const climate = place.properties.climate as
+        | { tmin?: number[]; tmax?: number[]; tavg?: number[]; sunNsrdb?: number[]; sunEra5?: number[] }
+        | undefined;
+      const props = { ...place.properties };
+      if (climate) {
+        const toUnit = (c: number | null) => (c === null ? null : tempUnit === "F" ? cToF(c) : c);
+        props._tmax = toUnit(getClimateMonthVal(climate.tmax, tempMonth));
+        props._tavg = toUnit(getClimateMonthVal(climate.tavg, tempMonth));
+        props._tmin = toUnit(getClimateMonthVal(climate.tmin, tempMonth));
+        const sunArr = sunSource === "nsrdb" ? climate.sunNsrdb : climate.sunEra5;
+        props._sunHrs = getClimateMonthVal(sunArr, sunMonth);
+      }
+      return { ...place, properties: props };
+    });
+  }, [allData, tempMonth, tempUnit, sunMonth, sunSource]);
+
+  // Dynamic climate categories
+  const fmtTemp = useMemo(
+    () => tempUnit === "F"
+      ? (v: number) => `${Math.round(v)}°F`
+      : (v: number) => `${(Math.round(v * 10) / 10).toFixed(1)}°C`,
+    [tempUnit],
+  );
+
+  const allCategories = useMemo<CategoryDef[]>(() => [
+    {
+      label: "Temperature",
+      icon: <LuThermometer className="h-3 w-3" />,
+      metrics: [
+        { key: "_tmax", label: "Day High", format: fmtTemp, polarity: "temperature" as Polarity },
+        { key: "_tavg", label: "Average", format: fmtTemp, polarity: "temperature" as Polarity },
+        { key: "_tmin", label: "Night Low", format: fmtTemp, polarity: "temperature" as Polarity },
+      ],
+    },
+    {
+      label: "Sunshine",
+      icon: <LuSun className="h-3 w-3" />,
+      metrics: [
+        { key: "_sunHrs", label: "Hours/day", format: fmtSunHrs, polarity: "higher" as Polarity },
+      ],
+    },
+    ...DEMOGRAPHIC_CATEGORIES,
+  ], [fmtTemp]);
+
   // Sort places (columns)
   const sortedData = useMemo(() => {
-    if (!sortConfig) return allData;
+    if (!sortConfig) return hydratedData;
     const { metricKey, direction } = sortConfig;
-    return [...allData].sort((a, b) => {
+    return [...hydratedData].sort((a, b) => {
       const va = getNestedValue(a.properties, metricKey);
       const vb = getNestedValue(b.properties, metricKey);
       if (va === null && vb === null) return 0;
@@ -205,27 +281,45 @@ export default function CompareModal({
       if (vb === null) return -1;
       return direction === "asc" ? va - vb : vb - va;
     });
-  }, [allData, sortConfig]);
+  }, [hydratedData, sortConfig]);
 
-  const handleDragStart = useCallback((name: string) => {
+  const handleDragStart = useCallback((name: string, e: React.DragEvent) => {
     dragItemRef.current = name;
+    setDragName(name);
+    e.dataTransfer.effectAllowed = "move";
   }, []);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const handleDragOver = useCallback((targetName: string, e: React.DragEvent) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (!dragItemRef.current || dragItemRef.current === targetName) {
+      setDropTarget(null);
+      return;
+    }
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const side = e.clientX < rect.left + rect.width / 2 ? "left" : "right";
+    setDropTarget({ name: targetName, side });
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    dragItemRef.current = null;
+    setDragName(null);
+    setDropTarget(null);
   }, []);
 
   const handleDrop = useCallback((targetName: string) => {
-    const dragName = dragItemRef.current;
+    const dragged = dragItemRef.current;
     dragItemRef.current = null;
-    if (!dragName || dragName === targetName) return;
+    setDragName(null);
+    setDropTarget(null);
+    if (!dragged || dragged === targetName) return;
     const currentNames = sortedData.map((p) => p.name);
-    const fromIdx = currentNames.indexOf(dragName);
+    const fromIdx = currentNames.indexOf(dragged);
     const toIdx = currentNames.indexOf(targetName);
     if (fromIdx === -1 || toIdx === -1) return;
     const reordered = [...currentNames];
     reordered.splice(fromIdx, 1);
-    reordered.splice(toIdx, 0, dragName);
+    reordered.splice(toIdx, 0, dragged);
     onNamesChange(reordered);
     onSortChange(null);
   }, [sortedData, onNamesChange, onSortChange]);
@@ -325,33 +419,77 @@ export default function CompareModal({
                 <th className="sticky left-0 z-20 bg-gray-50 px-2 py-1.5 text-left font-medium text-gray-500 border-b border-r border-gray-200 min-w-[120px]">
                   Metric
                 </th>
-                {sortedData.map((place) => (
-                  <th
-                    key={place.name}
-                    draggable
-                    onDragStart={() => handleDragStart(place.name)}
-                    onDragOver={handleDragOver}
-                    onDrop={() => handleDrop(place.name)}
-                    className="group px-2 py-1.5 text-center font-semibold text-gray-800 border-b border-gray-200 min-w-[90px] max-w-[120px] cursor-grab active:cursor-grabbing"
-                    title={place.name}
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      <span className="truncate">{place.name}</span>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleRemove(place.name); }}
-                        className="flex-shrink-0 opacity-30 group-hover:opacity-100 hover:text-red-600 transition-opacity"
-                        title={`Remove ${place.name}`}
-                      >
-                        <LuX className="h-3 w-3" />
-                      </button>
-                    </span>
-                  </th>
-                ))}
+                {sortedData.map((place) => {
+                  const isDragging = dragName === place.name;
+                  const dropLeft = dropTarget?.name === place.name && dropTarget.side === "left";
+                  const dropRight = dropTarget?.name === place.name && dropTarget.side === "right";
+                  return (
+                    <th
+                      key={place.name}
+                      draggable
+                      onDragStart={(e) => handleDragStart(place.name, e)}
+                      onDragOver={(e) => handleDragOver(place.name, e)}
+                      onDragEnd={handleDragEnd}
+                      onDragLeave={() => setDropTarget((prev) => prev?.name === place.name ? null : prev)}
+                      onDrop={() => handleDrop(place.name)}
+                      className={`group relative px-2 py-1.5 text-center font-semibold border-b border-gray-200 min-w-[90px] max-w-[120px] cursor-grab active:cursor-grabbing transition-opacity ${isDragging ? "opacity-30" : "text-gray-800"}`}
+                      title={place.name}
+                    >
+                      {dropLeft && <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500 rounded-full" />}
+                      {dropRight && <span className="absolute right-0 top-0 bottom-0 w-0.5 bg-blue-500 rounded-full" />}
+                      <span className="inline-flex items-center gap-0.5">
+                        <LuGripVertical className="h-3 w-3 flex-shrink-0 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <span className="truncate">{place.name}</span>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleRemove(place.name); }}
+                          className="flex-shrink-0 opacity-0 group-hover:opacity-100 hover:text-red-600 transition-opacity"
+                          title={`Remove ${place.name}`}
+                        >
+                          <LuX className="h-3 w-3" />
+                        </button>
+                      </span>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
-              {CATEGORIES.map((cat) => {
+              {allCategories.map((cat) => {
                 const isCollapsed = collapsedCategories.has(cat.label);
+
+                let controls: ReactNode = undefined;
+                if (cat.label === "Crime") {
+                  controls = (
+                    <SmallToggle
+                      options={[{ value: "rate", label: "per 100k" }, { value: "abs", label: "absolute" }]}
+                      value={crimeAbsolute ? "abs" : "rate"}
+                      onChange={(v) => setCrimeAbsolute(v === "abs")}
+                    />
+                  );
+                } else if (cat.label === "Temperature") {
+                  controls = (
+                    <>
+                      <MonthSelector value={tempMonth} onChange={setTempMonth} />
+                      <SmallToggle
+                        options={[{ value: "F", label: "°F" }, { value: "C", label: "°C" }]}
+                        value={tempUnit}
+                        onChange={(v) => setTempUnit(v as TempUnit)}
+                      />
+                    </>
+                  );
+                } else if (cat.label === "Sunshine") {
+                  controls = (
+                    <>
+                      <MonthSelector value={sunMonth} onChange={setSunMonth} />
+                      <SmallToggle
+                        options={[{ value: "nsrdb", label: "NSRDB" }, { value: "era5", label: "ERA5" }]}
+                        value={sunSource}
+                        onChange={(v) => setSunSource(v as SunSource)}
+                      />
+                    </>
+                  );
+                }
+
                 return (
                   <CategoryGroup
                     key={cat.label}
@@ -361,8 +499,10 @@ export default function CompareModal({
                     onToggle={() => toggleCategory(cat.label)}
                     onMetricSort={handleMetricSort}
                     sortIndicator={sortIndicator}
+                    controls={controls}
                     crimeAbsolute={crimeAbsolute}
-                    onCrimeAbsoluteToggle={() => setCrimeAbsolute((v) => !v)}
+                    dragName={dragName}
+                    dropTarget={dropTarget}
                   />
                 );
               })}
@@ -383,7 +523,7 @@ export default function CompareModal({
       </div>
 
       {/* Footer watermark */}
-      <div className="flex-shrink-0 border-t border-gray-100 px-3 py-1.5 text-center text-[10px] text-gray-300">
+      <div className="flex-shrink-0 border-t border-gray-100 px-3 py-1.5 text-center text-[10px] text-gray-400">
         trekhleb.dev/cali-vibe
       </div>
     </LegalModal>
@@ -419,7 +559,7 @@ function AddSearch({
           .sort((a: string, b: string) => a.localeCompare(b));
         setAllNames(loaded);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [dataUrl]);
 
   const existingSet = useMemo(() => new Set(existingNames), [existingNames]);
@@ -507,9 +647,8 @@ function AddSearch({
               key={name}
               onMouseDown={(e) => { e.preventDefault(); selectItem(name); }}
               onMouseEnter={() => setActiveIndex(index)}
-              className={`cursor-pointer px-3 py-1.5 text-xs transition-colors flex items-center gap-1.5 ${
-                index === activeIndex ? "bg-gray-100 text-black" : "text-gray-700"
-              }`}
+              className={`cursor-pointer px-3 py-1.5 text-xs transition-colors flex items-center gap-1.5 ${index === activeIndex ? "bg-gray-100 text-black" : "text-gray-700"
+                }`}
             >
               <LuPlus className="h-3 w-3 text-gray-400 flex-shrink-0" />
               <span><HighlightMatch text={name} query={lowerQuery} /></span>
@@ -541,8 +680,10 @@ function CategoryGroup({
   onToggle,
   onMetricSort,
   sortIndicator,
+  controls,
   crimeAbsolute,
-  onCrimeAbsoluteToggle,
+  dragName,
+  dropTarget,
 }: {
   category: CategoryDef;
   places: PlaceData[];
@@ -550,8 +691,10 @@ function CategoryGroup({
   onToggle: () => void;
   onMetricSort: (key: string) => void;
   sortIndicator: (key: string) => string;
+  controls?: ReactNode;
   crimeAbsolute?: boolean;
-  onCrimeAbsoluteToggle?: () => void;
+  dragName?: string | null;
+  dropTarget?: { name: string; side: "left" | "right" } | null;
 }) {
   const isCrime = category.label === "Crime";
 
@@ -565,30 +708,14 @@ function CategoryGroup({
           colSpan={places.length + 1}
           className="sticky left-0 px-2 py-1.5 font-semibold text-gray-700 bg-gray-100 border-b border-gray-200 text-[11px] uppercase tracking-wide"
         >
-          <span className="inline-flex items-center gap-1">
-            <LuChevronDown className={`h-3 w-3 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
-            {category.icon}
-            {category.label}
-            {isCrime && onCrimeAbsoluteToggle && (
-              <span
-                className="inline-flex rounded border border-gray-300 text-[9px] font-medium overflow-hidden ml-1 normal-case tracking-normal"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  onClick={onCrimeAbsoluteToggle}
-                  className={`px-1.5 py-0.5 transition-colors ${!crimeAbsolute ? "bg-gray-700 text-white" : "bg-white text-gray-500 hover:bg-gray-100"}`}
-                >
-                  per 100k
-                </button>
-                <button
-                  onClick={onCrimeAbsoluteToggle}
-                  className={`px-1.5 py-0.5 transition-colors border-l border-gray-300 ${crimeAbsolute ? "bg-gray-700 text-white" : "bg-white text-gray-500 hover:bg-gray-100"}`}
-                >
-                  absolute
-                </button>
-              </span>
-            )}
-          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="inline-flex items-center gap-1">
+              <LuChevronDown className={`h-3 w-3 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
+              {category.icon}
+              {category.label}
+            </span>
+            {controls && <div className="flex items-center gap-1 flex-wrap" onClick={(e) => e.stopPropagation()}>{controls}</div>}
+          </div>
         </td>
       </tr>
       {!collapsed &&
@@ -600,9 +727,47 @@ function CategoryGroup({
             onSort={() => onMetricSort(metric.key)}
             sortLabel={sortIndicator(metric.key)}
             crimeAbsolute={isCrime ? crimeAbsolute : undefined}
+            dragName={dragName}
+            dropTarget={dropTarget}
           />
         ))}
     </>
+  );
+}
+
+// --- Reusable controls ---
+
+function MonthSelector({ value, onChange }: { value: number; onChange: (m: number) => void }) {
+  return (
+    <div className="inline-flex flex-wrap gap-px">
+      {MONTH_LABELS.map((label, idx) => (
+        <button
+          key={idx}
+          onClick={() => onChange(idx)}
+          className={`px-1 py-0.5 text-[9px] font-medium rounded-sm transition-colors ${value === idx ? "bg-gray-700 text-white" : "text-gray-500 hover:bg-gray-200"
+            }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SmallToggle({ options, value, onChange }: { options: { value: string; label: string }[]; value: string; onChange: (v: string) => void }) {
+  return (
+    <span className="inline-flex rounded border border-gray-300 text-[9px] font-medium overflow-hidden normal-case tracking-normal">
+      {options.map((opt, i) => (
+        <button
+          key={opt.value}
+          onClick={() => onChange(opt.value)}
+          className={`px-1.5 py-0.5 transition-colors ${i > 0 ? "border-l border-gray-300" : ""} ${value === opt.value ? "bg-gray-700 text-white" : "bg-white text-gray-500 hover:bg-gray-100"
+            }`}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </span>
   );
 }
 
@@ -614,23 +779,27 @@ function MetricRow({
   onSort,
   sortLabel,
   crimeAbsolute,
+  dragName,
+  dropTarget,
 }: {
   metric: MetricDef;
   places: PlaceData[];
   onSort: () => void;
   sortLabel: string;
   crimeAbsolute?: boolean;
+  dragName?: string | null;
+  dropTarget?: { name: string; side: "left" | "right" } | null;
 }) {
   const rawValues = places.map((p) => getNestedValue(p.properties, metric.key));
 
   // When crimeAbsolute is on, convert per-100k rates to absolute counts
   const values = crimeAbsolute
     ? rawValues.map((val, i) => {
-        if (val === null) return null;
-        const pop = getNestedValue(places[i].properties, "population");
-        if (pop === null) return null;
-        return Math.round(val * pop / 100000);
-      })
+      if (val === null) return null;
+      const pop = getNestedValue(places[i].properties, "population");
+      if (pop === null) return null;
+      return Math.round(val * pop / 100000);
+    })
     : rawValues;
 
   const fmt = crimeAbsolute ? fmtInt : metric.format;
@@ -647,12 +816,17 @@ function MetricRow({
       </td>
       {values.map((val, i) => {
         const bg = val !== null ? getCellColor(val, values, metric.polarity) : undefined;
+        const isDragging = dragName === places[i].name;
+        const dropLeft = dropTarget?.name === places[i].name && dropTarget.side === "left";
+        const dropRight = dropTarget?.name === places[i].name && dropTarget.side === "right";
         return (
           <td
             key={places[i].name}
-            className="px-2 py-1 text-center border-b border-gray-100 tabular-nums"
+            className={`relative px-2 py-1 text-center border-b border-gray-100 tabular-nums ${isDragging ? "opacity-30" : ""}`}
             style={bg ? { backgroundColor: bg } : undefined}
           >
+            {dropLeft && <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500 rounded-full" />}
+            {dropRight && <span className="absolute right-0 top-0 bottom-0 w-0.5 bg-blue-500 rounded-full" />}
             {val !== null ? fmt(val) : <span className="text-gray-300">—</span>}
           </td>
         );
