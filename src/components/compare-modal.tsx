@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import LegalModal from "@/components/legal-modal";
-import { LuChevronDown, LuX, LuSearch, LuPlus, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuThermometer, LuSun, LuGripVertical } from "react-icons/lu";
+import { LuChevronDown, LuX, LuSearch, LuPlus, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuThermometer, LuSun, LuGripVertical, LuCalendarDays } from "react-icons/lu";
 import { IoManOutline } from "react-icons/io5";
 import { fetchJsonCached } from "@/utils/fetch-json";
 
@@ -99,6 +99,17 @@ const DEMOGRAPHIC_CATEGORIES: CategoryDef[] = [
       { key: "race.black", label: "Black", format: fmtPct, polarity: "neutral" },
       { key: "race.asian", label: "Asian", format: fmtPct, polarity: "neutral" },
       { key: "race.other", label: "Other", format: fmtPct, polarity: "neutral" },
+    ],
+  },
+  {
+    label: "Age Distribution",
+    icon: <LuCalendarDays className="h-3 w-3" />,
+    metrics: [
+      { key: "age.medianAge", label: "Median Age", format: fmtDec1, polarity: "neutral" },
+      { key: "age.under18", label: "Under 18", format: fmtPct, polarity: "neutral" },
+      { key: "age.age18_34", label: "18–34", format: fmtPct, polarity: "neutral" },
+      { key: "age.age35_64", label: "35–64", format: fmtPct, polarity: "neutral" },
+      { key: "age.age65plus", label: "65+", format: fmtPct, polarity: "neutral" },
     ],
   },
   {

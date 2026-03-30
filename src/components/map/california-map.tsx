@@ -38,6 +38,11 @@ import CountyRaceLayer, {
   type RaceMetric,
 } from "./layers/county-race-layer";
 import CityRaceLayer, { CityRaceLegend } from "./layers/city-race-layer";
+import CountyAgeLayer, {
+  AgeLegend,
+  type AgeMetric,
+} from "./layers/county-age-layer";
+import CityAgeLayer, { CityAgeLegend } from "./layers/city-age-layer";
 import CountyPovertyLayer, {
   PovertyLegend,
 } from "./layers/county-poverty-layer";
@@ -107,6 +112,12 @@ interface CaliforniaMapProps {
   showCityRace?: boolean;
   cityRaceMetric?: RaceMetric;
   selectedRaceCityName?: string | null;
+  showAge?: boolean;
+  ageMetric?: AgeMetric;
+  selectedAgeCountyName?: string | null;
+  showCityAge?: boolean;
+  cityAgeMetric?: AgeMetric;
+  selectedAgeCityName?: string | null;
   showPoverty?: boolean;
   selectedPovertyCountyName?: string | null;
   showCityPoverty?: boolean;
@@ -183,6 +194,12 @@ export default function CaliforniaMap({
   showCityRace = false,
   cityRaceMetric = "white",
   selectedRaceCityName = null,
+  showAge = false,
+  ageMetric = "medianAge",
+  selectedAgeCountyName = null,
+  showCityAge = false,
+  cityAgeMetric = "medianAge",
+  selectedAgeCityName = null,
   showPoverty = false,
   selectedPovertyCountyName = null,
   showCityPoverty = false,
@@ -224,8 +241,8 @@ export default function CaliforniaMap({
 }: CaliforniaMapProps) {
   // Smart zoom for "locate me": city layers → street level, county → county level
   const locateZoom =
-    showCities || showCityCrime || showCityHousing || showCityIncome || showCityEducation || showCityRace || showCityPoverty || showCityPopulation ? 11 :
-    showCounties || showPopulation || showCrime || showHousing || showIncome || showEducation || showRace || showPoverty ? 8 :
+    showCities || showCityCrime || showCityHousing || showCityIncome || showCityEducation || showCityRace || showCityAge || showCityPoverty || showCityPopulation ? 11 :
+    showCounties || showPopulation || showCrime || showHousing || showIncome || showEducation || showRace || showAge || showPoverty ? 8 :
     showTemperature || showSunshine ? 9 : 10;
 
   return (
@@ -282,6 +299,10 @@ export default function CaliforniaMap({
       {showCityEducation && <CityEducationLegend educationMetric={cityEducationMetric} overlayOffset={overlayOffset} />}
       {showCityRace && <CityRaceLayer raceMetric={cityRaceMetric} overlayOffset={overlayOffset} selectName={selectedRaceCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
       {showCityRace && <CityRaceLegend raceMetric={cityRaceMetric} overlayOffset={overlayOffset} />}
+      {showAge && <CountyAgeLayer ageMetric={ageMetric} overlayOffset={overlayOffset} selectName={selectedAgeCountyName} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
+      {showAge && <AgeLegend ageMetric={ageMetric} overlayOffset={overlayOffset} />}
+      {showCityAge && <CityAgeLayer ageMetric={cityAgeMetric} overlayOffset={overlayOffset} selectName={selectedAgeCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
+      {showCityAge && <CityAgeLegend ageMetric={cityAgeMetric} overlayOffset={overlayOffset} />}
       {showPoverty && <CountyPovertyLayer overlayOffset={overlayOffset} selectName={selectedPovertyCountyName} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
       {showPoverty && <PovertyLegend overlayOffset={overlayOffset} />}
       {showCityPoverty && <CityPovertyLayer overlayOffset={overlayOffset} selectName={selectedPovertyCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}

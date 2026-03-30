@@ -13,23 +13,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>CaliVibe — Interactive California Map: Housing, Income, Education, Race, Poverty, Crime, Temperature, Transit</title>
-    <meta name="description" content="Explore California on one interactive map. Compare counties and cities side by side across housing costs, household income, educational attainment, race/ethnicity breakdown, poverty rates, crime rates, population, density, temperature, sunshine hours, 18 transit systems, and 3D terrain." />
-    <meta name="keywords" content="California map, California housing cost, California city housing, California household income, California city income, California education, California educational attainment, California race, California ethnicity, California demographics, California poverty rate, California poverty, California crime rate, California temperature, California sunshine hours, California transit map, BART map, LA Metro map, California population, California population density, California counties, California cities, compare California counties, compare California cities, compare California counties by crime, compare California cities by income, compare California cities by housing, side by side comparison, interactive map" />
+    <title>CaliVibe — Interactive California Map: Housing, Income, Education, Race, Age, Poverty, Crime, Temperature, Transit</title>
+    <meta name="description" content="Explore California on one interactive map. Compare counties and cities side by side across housing costs, household income, educational attainment, race/ethnicity breakdown, age distribution, poverty rates, crime rates, population, density, temperature, sunshine hours, 18 transit systems, and 3D terrain." />
+    <meta name="keywords" content="California map, California housing cost, California city housing, California household income, California city income, California education, California educational attainment, California race, California ethnicity, California demographics, California age distribution, California median age, California poverty rate, California poverty, California crime rate, California temperature, California sunshine hours, California transit map, BART map, LA Metro map, California population, California population density, California counties, California cities, compare California counties, compare California cities, compare California counties by crime, compare California cities by income, compare California cities by housing, side by side comparison, interactive map" />
 
     <!-- Open Graph (Facebook, LinkedIn, etc.) -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://trekhleb.dev/cali-vibe/" />
-    <meta property="og:title" content="CaliVibe — Interactive California Map: Housing, Income, Education, Race, Poverty, Crime, Temperature, Transit" />
-    <meta property="og:description" content="Explore California on one interactive map. Compare counties and cities side by side across housing costs, household income, educational attainment, race/ethnicity breakdown, poverty rates, crime rates, population, density, temperature, sunshine hours, 18 transit systems, and 3D terrain." />
+    <meta property="og:title" content="CaliVibe — Interactive California Map: Housing, Income, Education, Race, Age, Poverty, Crime, Temperature, Transit" />
+    <meta property="og:description" content="Explore California on one interactive map. Compare counties and cities side by side across housing costs, household income, educational attainment, race/ethnicity breakdown, age distribution, poverty rates, crime rates, population, density, temperature, sunshine hours, 18 transit systems, and 3D terrain." />
     <meta property="og:image" content="https://trekhleb.dev/cali-vibe/demo/00-preview-md.jpg" />
     <meta property="og:image:width" content="1800" />
     <meta property="og:image:height" content="1224" />
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CaliVibe — Interactive California Map: Housing, Income, Education, Race, Poverty, Crime, Temperature, Transit" />
-    <meta name="twitter:description" content="Explore California on one interactive map. Compare counties and cities side by side across housing costs, household income, educational attainment, race/ethnicity breakdown, poverty rates, crime rates, population, density, temperature, sunshine hours, 18 transit systems, and 3D terrain." />
+    <meta name="twitter:title" content="CaliVibe — Interactive California Map: Housing, Income, Education, Race, Age, Poverty, Crime, Temperature, Transit" />
+    <meta name="twitter:description" content="Explore California on one interactive map. Compare counties and cities side by side across housing costs, household income, educational attainment, race/ethnicity breakdown, age distribution, poverty rates, crime rates, population, density, temperature, sunshine hours, 18 transit systems, and 3D terrain." />
     <meta name="twitter:image" content="https://trekhleb.dev/cali-vibe/demo/00-preview-md.jpg" />
 
     <!-- Structured data -->
@@ -39,7 +39,7 @@
       "@type": "WebApplication",
       "name": "CaliVibe",
       "url": "https://trekhleb.dev/cali-vibe/",
-      "description": "Interactive California map. Compare counties and cities side by side across housing costs, household income, educational attainment, race/ethnicity, poverty rates, crime rates, population, density, temperature, sunshine hours, transit routes, and 3D terrain.",
+      "description": "Interactive California map. Compare counties and cities side by side across housing costs, household income, educational attainment, race/ethnicity, age distribution, poverty rates, crime rates, population, density, temperature, sunshine hours, transit routes, and 3D terrain.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Any",
       "offers": {
@@ -53,7 +53,7 @@
         "url": "https://trekhleb.dev"
       },
       "screenshot": "https://trekhleb.dev/cali-vibe/demo/00-preview-xl.png",
-      "featureList": "Housing cost map, Household income map, Educational attainment map, Race/ethnicity map, Poverty rate map, Crime rate map, Population map, Population density map, Temperature map, Sunshine hours map, Transit route map, 3D terrain, Compare counties and cities side by side, Color-coded comparison across all metrics, Sortable data tables, Shareable URLs"
+      "featureList": "Housing cost map, Household income map, Educational attainment map, Race/ethnicity map, Age distribution map, Poverty rate map, Crime rate map, Population map, Population density map, Temperature map, Sunshine hours map, Transit route map, 3D terrain, Compare counties and cities side by side, Color-coded comparison across all metrics, Sortable data tables, Shareable URLs"
     }
     </script>
 
@@ -67,14 +67,15 @@
     <div id="root"></div>
     <noscript>
       <h1>CaliVibe — Interactive California Map</h1>
-      <p>Explore California on a single interactive map: compare counties and cities side by side across housing costs, household income, educational attainment, race/ethnicity breakdown, poverty rates, crime rates, population, density, temperature, sunshine hours, transit routes, and 3D terrain.</p>
+      <p>Explore California on a single interactive map: compare counties and cities side by side across housing costs, household income, educational attainment, race/ethnicity breakdown, age distribution, poverty rates, crime rates, population, density, temperature, sunshine hours, transit routes, and 3D terrain.</p>
       <h2>What you can explore</h2>
       <ul>
-        <li><strong>Compare</strong> — Compare any California counties or cities side by side across all metrics including population, crime, housing, income, education, race/ethnicity, and poverty with color-coded rankings</li>
+        <li><strong>Compare</strong> — Compare any California counties or cities side by side across all metrics including population, crime, housing, income, education, race/ethnicity, age distribution, and poverty with color-coded rankings</li>
         <li><strong>Housing Cost</strong> — Median home value and median gross rent for all 58 California counties and 482 cities (Census ACS 2019–2023)</li>
         <li><strong>Household Income</strong> — Median household income for all 58 California counties and 482 cities (Census ACS 2019–2023)</li>
         <li><strong>Educational Attainment</strong> — Bachelor's degree+, high school diploma+, and graduate degree+ rates for all 58 counties and 482 cities (Census ACS 2019–2023, Table B15003)</li>
         <li><strong>Race/Ethnicity Breakdown</strong> — White, Hispanic/Latino, Black, Asian, and Other race/ethnicity percentages for all 58 counties and 482 cities (Census ACS 2019–2023, Table B03002)</li>
+        <li><strong>Age Distribution</strong> — Under 18, 18–34, 35–64, 65+, and median age for all 58 counties and 482 cities (Census ACS 2019–2023, Tables B01001 &amp; B01002)</li>
         <li><strong>Poverty Rate</strong> — Percentage of population below the poverty level for all 58 counties and 482 cities (Census ACS 2019–2023, Table B17001)</li>
         <li><strong>Crime Rates</strong> — 10 crime categories per 100,000 residents for counties and cities (CA DOJ 2023)</li>
         <li><strong>Population &amp; Density</strong> — 2024 county and city population estimates with population density per square mile (CA Dept. of Finance)</li>

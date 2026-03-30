@@ -41,11 +41,12 @@ export default function MapFooter({ overlayOffset = 0, initialModal = null, onMo
 
         <h3 className="mt-4 text-sm font-semibold text-gray-900">What you can explore</h3>
         <ul className="mt-2 space-y-2 text-sm">
-          <li><strong>Compare</strong> &mdash; Compare any California counties or cities side by side across all metrics including population, crime, housing, income, education, race/ethnicity, and poverty with color-coded rankings.</li>
+          <li><strong>Compare</strong> &mdash; Compare any California counties or cities side by side across all metrics including population, crime, housing, income, education, race/ethnicity, age distribution, and poverty with color-coded rankings.</li>
           <li><strong>Housing Cost</strong> &mdash; Median home value and median gross rent for all 58 California counties and 482 cities (Census ACS 2019&ndash;2023).</li>
           <li><strong>Household Income</strong> &mdash; Median household income for all 58 California counties and 482 cities (Census ACS 2019&ndash;2023).</li>
           <li><strong>Educational Attainment</strong> &mdash; Bachelor&rsquo;s degree+, high school diploma+, and graduate degree+ rates for all 58 counties and 482 cities (Census ACS 2019&ndash;2023).</li>
           <li><strong>Race/Ethnicity Breakdown</strong> &mdash; White, Hispanic/Latino, Black, Asian, and Other race/ethnicity percentages for all 58 counties and 482 cities (Census ACS 2019&ndash;2023).</li>
+          <li><strong>Age Distribution</strong> &mdash; Under 18, 18&ndash;34, 35&ndash;64, 65+, and median age for all 58 counties and 482 cities (Census ACS 2019&ndash;2023).</li>
           <li><strong>Poverty Rate</strong> &mdash; Percentage of population below the poverty level for all 58 counties and 482 cities (Census ACS 2019&ndash;2023).</li>
           <li><strong>Crime Rates</strong> &mdash; 10 crime categories per 100,000 residents for counties and cities (CA DOJ 2023).</li>
           <li><strong>Population &amp; Density</strong> &mdash; 2024 county and city population estimates with population density per square mile (CA Dept. of Finance).</li>
@@ -141,6 +142,13 @@ export default function MapFooter({ overlayOffset = 0, initialModal = null, onMo
             <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">US Census Bureau</a>
             <br />
             <span className="text-gray-500">ACS 5-Year Estimates (2019–2023). Table B03002 &mdash; Hispanic or Latino Origin by Race. White, Hispanic, Black, Asian, Other by county and city.</span>
+          </li>
+          <li>
+            <strong>Age Distribution</strong>
+            <br />
+            <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">US Census Bureau</a>
+            <br />
+            <span className="text-gray-500">ACS 5-Year Estimates (2019–2023). Table B01001 &mdash; Sex by Age, Table B01002 &mdash; Median Age. Under 18, 18&ndash;34, 35&ndash;64, 65+, median age by county and city.</span>
           </li>
           <li>
             <strong>Poverty Rate</strong>

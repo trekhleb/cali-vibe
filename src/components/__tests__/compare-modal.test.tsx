@@ -20,6 +20,7 @@ const mockGeoJson = {
         housing: { homeValue: 1057400, rent: 2318, income: 126240 },
         education: { hsPlus: 88.9, bachPlus: 51.5, gradPlus: 22.8 },
         race: { white: 28.2, hispanic: 23.3, black: 9.6, asian: 32, other: 6.8 },
+        age: { under18: 20.0, age18_34: 23.7, age35_64: 41.3, age65plus: 14.9, medianAge: 38.7 },
         poverty: 9.2,
         climate: {
           tmin: [5.0, 6.0, 7.0, 8.0, 10.0, 12.0, 13.0, 13.0, 12.0, 10.0, 7.0, 5.0],
@@ -41,6 +42,7 @@ const mockGeoJson = {
         housing: { homeValue: 1325000, rent: 2800, income: 140000 },
         education: { hsPlus: 90.2, bachPlus: 60.1, gradPlus: 28.5 },
         race: { white: 35.5, hispanic: 15.2, black: 5.1, asian: 34.4, other: 9.8 },
+        age: { under18: 13.7, age18_34: 27.5, age35_64: 40.1, age65plus: 18.7, medianAge: 39.7 },
         poverty: 10.5,
         climate: {
           tmin: [7.0, 8.0, 8.5, 9.0, 10.0, 11.0, 12.0, 12.5, 12.0, 11.0, 9.0, 7.0],
@@ -62,6 +64,7 @@ const mockGeoJson = {
         housing: { homeValue: 350000, rent: 900, income: 65000 },
         education: { hsPlus: 85.0, bachPlus: 25.0, gradPlus: 10.0 },
         race: { white: 60.0, hispanic: 20.0, black: 1.0, asian: 5.0, other: 14.0 },
+        age: { under18: 22.6, age18_34: 18.0, age35_64: 37.6, age65plus: 21.8, medianAge: 41.1 },
         poverty: 15.0,
         climate: {
           tmin: [-5.0, -3.0, 0.0, 2.0, 5.0, 8.0, 11.0, 10.0, 7.0, 3.0, -1.0, -5.0],
@@ -153,6 +156,7 @@ describe("CompareModal", () => {
     expect(screen.getByText("Housing & Income")).toBeInTheDocument();
     expect(screen.getByText("Education (%)")).toBeInTheDocument();
     expect(screen.getByText("Race & Ethnicity (%)")).toBeInTheDocument();
+    expect(screen.getByText("Age Distribution")).toBeInTheDocument();
   });
 
   it("renders metric labels as row headers", async () => {
@@ -162,6 +166,9 @@ describe("CompareModal", () => {
     expect(screen.getByText("Poverty Rate")).toBeInTheDocument();
     expect(screen.getByText("Bachelor's+")).toBeInTheDocument();
     expect(screen.getByText("Home Value")).toBeInTheDocument();
+    expect(screen.getByText("Median Age")).toBeInTheDocument();
+    expect(screen.getByText("Under 18")).toBeInTheDocument();
+    expect(screen.getByText("65+")).toBeInTheDocument();
   });
 
   it("displays formatted metric values", async () => {

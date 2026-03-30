@@ -21,12 +21,14 @@ import PopulationTableModal from "@/components/population-table-modal";
 import HousingTableModal from "@/components/housing-table-modal";
 import EducationTableModal from "@/components/education-table-modal";
 import RaceTableModal from "@/components/race-table-modal";
+import AgeTableModal from "@/components/age-table-modal";
 import PovertyTableModal from "@/components/poverty-table-modal";
 import CompareModal, { type CompareType, type SortConfig } from "@/components/compare-modal";
 import { POPULATION_LABELS, type PopulationMetric } from "@/components/map/layers/county-population-layer";
 import { HOUSING_LABELS, type HousingMetric } from "@/components/map/layers/county-housing-layer";
 import { EDUCATION_LABELS, type EducationMetric } from "@/components/map/layers/county-education-layer";
 import { RACE_LABELS, type RaceMetric } from "@/components/map/layers/county-race-layer";
+import { AGE_LABELS, ageMetricIds, type AgeMetric } from "@/components/map/layers/county-age-layer";
 import TemperatureTableModal from "@/components/temperature-table-modal";
 import SunshineTableModal from "@/components/sunshine-table-modal";
 import { ANNUAL_MONTH, type HexResolution as SunshineHexResolution, type SunshineDataSource } from "@/components/map/layers/sunshine-layer";
@@ -61,6 +63,7 @@ import {
   LuWallet,
   LuGraduationCap,
   LuTrendingDown,
+  LuCalendarDays,
   LuColumns3,
 } from "react-icons/lu";
 import { IoManOutline } from "react-icons/io5";
@@ -119,6 +122,10 @@ const DEFAULTS = {
   rmetric: "hispanic" as RaceMetric,
   cityRace: false,
   crmetric: "hispanic" as RaceMetric,
+  age: false,
+  ametric: "medianAge" as AgeMetric,
+  cityAge: false,
+  cametric: "medianAge" as AgeMetric,
   pov: false,
   cityPov: false,
   style: "light" as MapStyleId,
@@ -186,6 +193,10 @@ function readParams() {
     rmetric: str("rmetric", DEFAULTS.rmetric, raceMetricIds),
     cityRace: bool("cityRace", DEFAULTS.cityRace),
     crmetric: str("crmetric", DEFAULTS.crmetric, raceMetricIds),
+    age: bool("age", DEFAULTS.age),
+    ametric: str("ametric", DEFAULTS.ametric, ageMetricIds),
+    cityAge: bool("cityAge", DEFAULTS.cityAge),
+    cametric: str("cametric", DEFAULTS.cametric, ageMetricIds),
     pov: bool("pov", DEFAULTS.pov),
     cityPov: bool("cityPov", DEFAULTS.cityPov),
     temp: bool("temp", DEFAULTS.temp),
@@ -308,6 +319,14 @@ export default function Home() {
   const [selectedRaceCountyName, setSelectedRaceCountyName] = useState<string | null>(null);
   const [showCityRaceTable, setShowCityRaceTable] = useState(false);
   const [selectedRaceCityName, setSelectedRaceCityName] = useState<string | null>(null);
+  const [showAge, setShowAge] = useState(init.age);
+  const [ageMetric, setAgeMetric] = useState<AgeMetric>(init.ametric);
+  const [showCityAge, setShowCityAge] = useState(init.cityAge);
+  const [cityAgeMetric, setCityAgeMetric] = useState<AgeMetric>(init.cametric);
+  const [showAgeTable, setShowAgeTable] = useState(false);
+  const [selectedAgeCountyName, setSelectedAgeCountyName] = useState<string | null>(null);
+  const [showCityAgeTable, setShowCityAgeTable] = useState(false);
+  const [selectedAgeCityName, setSelectedAgeCityName] = useState<string | null>(null);
   const [showPoverty, setShowPoverty] = useState(init.pov);
   const [showCityPoverty, setShowCityPoverty] = useState(init.cityPov);
   const [showPovertyTable, setShowPovertyTable] = useState(false);
@@ -428,6 +447,10 @@ export default function Home() {
     setStr("rmetric", raceMetric, DEFAULTS.rmetric);
     setBool("cityRace", showCityRace, DEFAULTS.cityRace);
     setStr("crmetric", cityRaceMetric, DEFAULTS.crmetric);
+    setBool("age", showAge, DEFAULTS.age);
+    setStr("ametric", ageMetric, DEFAULTS.ametric);
+    setBool("cityAge", showCityAge, DEFAULTS.cityAge);
+    setStr("cametric", cityAgeMetric, DEFAULTS.cametric);
     setBool("pov", showPoverty, DEFAULTS.pov);
     setBool("cityPov", showCityPoverty, DEFAULTS.cityPov);
     setBool("temp", showTemperature, DEFAULTS.temp);
@@ -465,7 +488,7 @@ export default function Home() {
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showPoverty, showCityPoverty, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, compareTempMonth, compareTempUnit, compareSunMonth, compareSunSource, compareCrimeAbsolute, showAbout]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showAge, ageMetric, showCityAge, cityAgeMetric, showPoverty, showCityPoverty, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, compareTempMonth, compareTempUnit, compareSunMonth, compareSunSource, compareCrimeAbsolute, showAbout]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -500,8 +523,8 @@ export default function Home() {
   // --- Mutually exclusive toggle helpers ---
   const clearOverlays = () => {
     setShowCounties(false); setShowPopulation(false); setShowCrime(false);
-    setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowPoverty(false);
-    setShowCityPopulation(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false);
+    setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowAge(false); setShowPoverty(false);
+    setShowCityPopulation(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityAge(false); setShowCityPoverty(false);
     setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false);
     setShowRelief(false);
   };
@@ -545,6 +568,14 @@ export default function Home() {
     if (on) { clearOverlays(); setShowCities(false); }
     setShowCityPopulation(on);
   };
+  const toggleAge = (on: boolean) => {
+    if (on) clearOverlays();
+    setShowAge(on);
+  };
+  const toggleCityAge = (on: boolean) => {
+    if (on) { clearOverlays(); setShowCities(false); }
+    setShowCityAge(on);
+  };
   const togglePoverty = (on: boolean) => {
     if (on) clearOverlays();
     setShowPoverty(on);
@@ -575,7 +606,7 @@ export default function Home() {
   };
   const toggleCities = (on: boolean) => {
     setShowCities(on);
-    if (on) { setShowCityPopulation(false); setShowCityCrime(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCityPopulation(false); setShowCityCrime(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityAge(false); setShowCityPoverty(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleTerrain3d = (on: boolean) => {
     setTerrain3d(on);
@@ -618,6 +649,10 @@ export default function Home() {
     setRaceMetric("hispanic");
     setShowCityRace(false);
     setCityRaceMetric("hispanic");
+    setShowAge(false);
+    setAgeMetric("medianAge");
+    setShowCityAge(false);
+    setCityAgeMetric("medianAge");
     setShowPoverty(false);
     setShowCityPoverty(false);
     setShowTemperature(DEFAULTS.temp);
@@ -670,6 +705,8 @@ export default function Home() {
     setSelectedEducationCityName(null);
     setSelectedRaceCountyName(null);
     setSelectedRaceCityName(null);
+    setSelectedAgeCountyName(null);
+    setSelectedAgeCityName(null);
   }, []);
 
   const goToFavoriteCounty = useCallback((name: string) => {
@@ -681,12 +718,14 @@ export default function Home() {
     setShowIncome(false);
     setShowEducation(false);
     setShowRace(false);
+    setShowAge(false);
     setShowPoverty(false);
     setShowCityPopulation(false);
     setShowCityHousing(false);
     setShowCityIncome(false);
     setShowCityEducation(false);
     setShowCityRace(false);
+    setShowCityAge(false);
     setShowCityPoverty(false);
     setShowCityCrime(false);
     setShowTemperature(false);
@@ -705,12 +744,14 @@ export default function Home() {
     setShowIncome(false);
     setShowEducation(false);
     setShowRace(false);
+    setShowAge(false);
     setShowPoverty(false);
     setShowCityPopulation(false);
     setShowCityHousing(false);
     setShowCityIncome(false);
     setShowCityEducation(false);
     setShowCityRace(false);
+    setShowCityAge(false);
     setShowCityPoverty(false);
     setShowCityCrime(false);
     setShowTemperature(false);
@@ -758,6 +799,14 @@ export default function Home() {
 
   const goToRaceCity = useCallback((name: string) => {
     setSelectedRaceCityName(name);
+  }, []);
+
+  const goToAgeCounty = useCallback((name: string) => {
+    setSelectedAgeCountyName(name);
+  }, []);
+
+  const goToAgeCity = useCallback((name: string) => {
+    setSelectedAgeCityName(name);
   }, []);
 
   const goToPopulationCity = useCallback((name: string) => {
@@ -862,6 +911,12 @@ export default function Home() {
                 showCityRace={showCityRace}
                 cityRaceMetric={cityRaceMetric}
                 selectedRaceCityName={selectedRaceCityName}
+                showAge={showAge}
+                ageMetric={ageMetric}
+                selectedAgeCountyName={selectedAgeCountyName}
+                showCityAge={showCityAge}
+                cityAgeMetric={cityAgeMetric}
+                selectedAgeCityName={selectedAgeCityName}
                 showPoverty={showPoverty}
                 selectedPovertyCountyName={selectedPovertyCountyName}
                 showCityPoverty={showCityPoverty}
@@ -1941,6 +1996,52 @@ export default function Home() {
                   )}
                 </div>
 
+                {/* County age distribution toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showAge ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showAge} onChange={toggleAge} />
+                    <LuCalendarDays className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">County Age</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Sex by Age (Table B01001) &amp; Median Age (B01002).
+                    </InfoTooltip>
+                  </label>
+                  {showAge && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={ageMetric}
+                          onChange={(e) => setAgeMetric(e.target.value as AgeMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {ageMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {AGE_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowAgeTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 {/* County poverty toggle */}
                 <div className={`-mx-2 rounded-lg p-2 transition-colors ${showPoverty ? "bg-gray-100/80" : ""}`}>
                   <label className="flex cursor-pointer items-center gap-3">
@@ -2275,6 +2376,52 @@ export default function Home() {
                   )}
                 </div>
 
+                {/* City age distribution toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityAge ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCityAge} onChange={toggleCityAge} />
+                    <LuCalendarDays className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Age</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        US Census Bureau
+                      </a>
+                      <br />
+                      ACS 5-Year Estimates (2019–2023).
+                      <br />
+                      Sex by Age (Table B01001) &amp; Median Age (B01002).
+                    </InfoTooltip>
+                  </label>
+                  {showCityAge && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={cityAgeMetric}
+                          onChange={(e) => setCityAgeMetric(e.target.value as AgeMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {ageMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {AGE_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowCityAgeTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 {/* City poverty toggle */}
                 <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCityPoverty ? "bg-gray-100/80" : ""}`}>
                   <label className="flex cursor-pointer items-center gap-3">
@@ -2540,6 +2687,24 @@ export default function Home() {
         nameLabel="City"
         activeRaceMetric={cityRaceMetric}
         onSelectName={goToRaceCity}
+      />
+      <AgeTableModal
+        open={showAgeTable}
+        onClose={() => setShowAgeTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-county-labels.geojson`}
+        title="County Age Distribution (ACS 2019–2023)"
+        nameLabel="County"
+        activeAgeMetric={ageMetric}
+        onSelectName={goToAgeCounty}
+      />
+      <AgeTableModal
+        open={showCityAgeTable}
+        onClose={() => setShowCityAgeTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-city-labels.geojson`}
+        title="City Age Distribution (ACS 2019–2023)"
+        nameLabel="City"
+        activeAgeMetric={cityAgeMetric}
+        onSelectName={goToAgeCity}
       />
       <PovertyTableModal
         open={showPovertyTable}

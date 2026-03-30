@@ -1,6 +1,6 @@
 # CaliVibe — Interactive California Map
 
-> Explore and compare California counties and cities on a single interactive map: housing costs, income, education, race/ethnicity, poverty, crime rates, population, temperature, sunshine hours, transit routes, and 3D terrain.
+> Explore and compare California counties and cities on a single interactive map: housing costs, income, education, race/ethnicity, age distribution, poverty, crime rates, population, temperature, sunshine hours, transit routes, and 3D terrain.
 
 **[Open the live map](https://trekhleb.dev/cali-vibe)**
 
@@ -14,7 +14,7 @@ Researching California neighborhoods usually means jumping between Census tables
 
 ### Compare counties and cities
 
-Compare any California counties or cities side by side across all metrics — population, crime, housing, income, education, race/ethnicity, and poverty. Color-coded cells highlight the best and worst values. Sortable columns, drag-to-reorder, and shareable via URL.
+Compare any California counties or cities side by side across all metrics — population, crime, housing, income, education, race/ethnicity, age distribution, and poverty. Color-coded cells highlight the best and worst values. Sortable columns, drag-to-reorder, and shareable via URL.
 
 ![California cities/counties comparison](./public/demo/15-california-city-county-comparison.gif)
 
@@ -78,7 +78,7 @@ Rotatable raised-relief view of California with labeled mountain peaks (feet or 
 
 ### Other features
 
-- **Compare** — compare any counties or cities side by side across all metrics with color-coded rankings, shareable via URL
+- **Compare** — compare any counties or cities side by side across all metrics (including age distribution) with color-coded rankings, shareable via URL
 - **Favorites** — save and reorder locations with drag-and-drop, persisted in local storage
 - **Shareable state** — every toggle, metric, comparison, and view is encoded in the URL so you can bookmark or share exact map views
 - **Mobile-friendly** — responsive layout with collapsible sidebar
@@ -91,6 +91,7 @@ React, TypeScript, Vite, MapLibre GL JS, Tailwind CSS. H3 hexagonal grid for cli
 
 | Layer | Source | Year |
 |---|---|---|
+| Age distribution | [US Census Bureau ACS](https://data.census.gov/) — B01001, B01002 | 2019–2023 |
 | Housing cost | [US Census Bureau ACS](https://data.census.gov/) — B25077, B25064 | 2019–2023 |
 | County crime | [CA DOJ OpenJustice](https://openjustice.doj.ca.gov/data) | 2023 |
 | City crime | [CA DOJ OpenJustice](https://openjustice.doj.ca.gov/data) | 2023 |

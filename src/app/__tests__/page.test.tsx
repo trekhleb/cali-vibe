@@ -103,6 +103,12 @@ describe("Home page", () => {
 
     // Turn on sunshine
     await user.click(screen.getByRole("checkbox", { name: /Sunshine/i }));
+
+    // Turn on county age
+    await user.click(screen.getByRole("checkbox", { name: /County Age/i }));
+
+    // Turn on city age
+    await user.click(screen.getByRole("checkbox", { name: /City Age/i }));
   });
 
   it("interacts with tables", async () => {
