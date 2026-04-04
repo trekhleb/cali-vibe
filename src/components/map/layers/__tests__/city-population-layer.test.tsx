@@ -84,6 +84,18 @@ describe("CityPopulationLayer", () => {
     );
   });
 
+  it("shows popup for CDP with population and density", () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
+      activeName: "Fallbrook",
+      activeProperties: { population: 32467, density: 1844.7, placeType: "cdp" },
+    });
+
+    render(<CityPopulationLayer />);
+    expect(screen.getByText("Fallbrook")).toBeInTheDocument();
+    expect(screen.getByText(/32,467/)).toBeInTheDocument();
+    expect(screen.getByText(/1,844\.7/)).toBeInTheDocument();
+  });
+
   it("accepts populationMetric prop", () => {
     vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({ activeName: null });
     render(<CityPopulationLayer populationMetric="density" />);

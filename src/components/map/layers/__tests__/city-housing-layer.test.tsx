@@ -147,6 +147,17 @@ describe("CityHousingLayer", () => {
     );
   });
 
+  it("shows popup for CDP with housing data", () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
+      activeName: "Fallbrook",
+      activeProperties: { housing: { homeValue: 713000, rent: 1675, income: 87293 }, placeType: "cdp" },
+    });
+
+    render(<CityHousingLayer housingMetric="homeValue" />);
+    expect(screen.getByText("Fallbrook")).toBeInTheDocument();
+    expect(screen.getByText(/\$713K/)).toBeInTheDocument();
+  });
+
   it("does not show popup when activeName is null even with properties", () => {
     vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
       activeName: null,

@@ -8,6 +8,7 @@ const mockGeoJson = {
     { properties: { name: "San Diego", population: 3000000, area: 4260.9, density: 704.1 } },
     { properties: { name: "San Jose", population: 1000000, area: 180.5, density: 5540.2 } },
     { properties: { name: "No Pop" } },
+    { properties: { name: "Fallbrook", population: 32467, area: 17.6, density: 1844.7, placeType: "cdp" } },
   ],
 };
 
@@ -135,8 +136,8 @@ describe("PopulationTableModal", () => {
       <PopulationTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Population" nameLabel="County" />
     );
     await waitFor(() => expect(screen.getByText("Los Angeles")).toBeInTheDocument());
-    // Los Angeles is 10M out of 14M total = ~71.4%
-    expect(screen.getByText("71.4%")).toBeInTheDocument();
+    // Los Angeles is 10M out of 14,032,467 total = ~71.3%
+    expect(screen.getByText("71.3%")).toBeInTheDocument();
   });
 
   it("renders names as clickable links when onSelectName is provided", async () => {
@@ -171,6 +172,17 @@ describe("PopulationTableModal", () => {
     await waitFor(() => expect(screen.getByText("Los Angeles")).toBeInTheDocument());
 
     expect(screen.queryByRole("button", { name: "Los Angeles" })).toBeNull();
+  });
+
+  it("includes CDPs with population in the table", async () => {
+    render(
+      <PopulationTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Population" nameLabel="City" />
+    );
+    await waitFor(() => expect(screen.getByText("Los Angeles")).toBeInTheDocument());
+    // CDPs with population should appear in the population table
+    expect(screen.getByText("Fallbrook")).toBeInTheDocument();
+    expect(screen.getByText("32,467")).toBeInTheDocument();
+    expect(screen.getByText("1,845")).toBeInTheDocument(); // density rounded
   });
 
   it("handles missing area and density gracefully", async () => {

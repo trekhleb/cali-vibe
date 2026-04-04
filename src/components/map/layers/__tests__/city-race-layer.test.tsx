@@ -84,6 +84,16 @@ describe("CityRaceLayer", () => {
       expect.objectContaining({ selectName: "San Jose" }),
     );
   });
+
+  it("shows popup for CDP with race data", () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
+      activeName: "Fallbrook",
+      activeProperties: { race: { white: 37.1, hispanic: 53.5, black: 2.3, asian: 3.4, other: 3.7 }, placeType: "cdp" },
+    });
+    render(<CityRaceLayer raceMetric="hispanic" />);
+    expect(screen.getByText("Fallbrook")).toBeInTheDocument();
+    expect(screen.getByText(/53\.5%/)).toBeInTheDocument();
+  });
 });
 
 describe("CityRaceLegend", () => {

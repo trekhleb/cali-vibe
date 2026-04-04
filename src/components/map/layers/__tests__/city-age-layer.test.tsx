@@ -86,6 +86,17 @@ describe("CityAgeLayer", () => {
     expect(popup).toHaveStyle({ left: "124px", top: "24px" });
   });
 
+  it("shows popup for CDP with age data", () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
+      activeName: "Fallbrook",
+      activeProperties: { age: { under18: 26.0, age18_34: 25.1, age35_64: 31.8, age65plus: 17.1, medianAge: 34.4 }, placeType: "cdp" },
+    });
+
+    render(<CityAgeLayer ageMetric="medianAge" />);
+    expect(screen.getByText("Fallbrook")).toBeInTheDocument();
+    expect(screen.getByText(/34\.4/)).toBeInTheDocument();
+  });
+
   it("passes selectName to useMapInteraction", () => {
     const spy = vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({ activeName: null });
     render(<CityAgeLayer ageMetric="medianAge" selectName="San Jose" />);

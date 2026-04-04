@@ -7,6 +7,8 @@ const mockGeoJson = {
     { properties: { name: "County A", population: 100000, crime: { total: 500, violentTotal: 100, propertyTotal: 400, homicide: 5, rape: 10, robbery: 20, aggAssault: 65, burglary: 100, mvTheft: 100, larceny: 200 } } },
     { properties: { name: "County B", population: 200000, crime: { total: 300, violentTotal: 50, propertyTotal: 250, homicide: 2, rape: 5, robbery: 10, aggAssault: 33, burglary: 50, mvTheft: 80, larceny: 120 } } },
     { properties: { name: "No Crime", population: 50000 } },
+    { properties: { name: "Fallbrook", population: 32467, placeType: "cdp", housing: { homeValue: 713000, rent: 1675, income: 87293 } } },
+    { properties: { name: "Castro Valley", population: 65389, placeType: "cdp", housing: { homeValue: 900000, rent: 2100, income: 120000 } } },
   ],
 };
 
@@ -141,6 +143,19 @@ describe("CrimeTableModal", () => {
 
     // Should not be a button
     expect(screen.queryByRole("button", { name: "County A" })).toBeNull();
+  });
+
+  it("excludes CDPs without crime data from table rows", async () => {
+    render(
+      <CrimeTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Crime" nameLabel="City" activeCrimeType="total" />
+    );
+    await waitFor(() => expect(screen.getByText("County A")).toBeInTheDocument());
+    expect(screen.getByText("County B")).toBeInTheDocument();
+    // CDPs without crime data should not appear in the table
+    expect(screen.queryByText("Fallbrook")).not.toBeInTheDocument();
+    expect(screen.queryByText("Castro Valley")).not.toBeInTheDocument();
+    // The "No Crime" entry without crime should also be excluded
+    expect(screen.queryByText("No Crime")).not.toBeInTheDocument();
   });
 
   it("handles crime data as string (JSON parse)", async () => {

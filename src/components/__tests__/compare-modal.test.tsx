@@ -56,6 +56,28 @@ const mockGeoJson = {
     },
     {
       properties: {
+        name: "Fallbrook",
+        population: 32467,
+        density: 1844.7,
+        area: 17.6,
+        placeType: "cdp",
+        housing: { homeValue: 713000, rent: 1675, income: 87293 },
+        education: { hsPlus: 82.7, bachPlus: 27.3, gradPlus: 10.3 },
+        race: { white: 37.1, hispanic: 53.5, black: 2.3, asian: 3.4, other: 3.7 },
+        age: { under18: 26.0, age18_34: 25.1, age35_64: 31.8, age65plus: 17.1, medianAge: 34.4 },
+        poverty: 14.8,
+        climate: {
+          tmin: [5.0, 6.0, 7.0, 8.0, 10.0, 12.0, 13.0, 13.0, 12.0, 10.0, 7.0, 5.0],
+          tmax: [17.0, 18.0, 20.0, 22.0, 25.0, 29.0, 32.0, 32.0, 30.0, 25.0, 20.0, 17.0],
+          tavg: [11.0, 12.0, 13.5, 15.0, 17.5, 20.5, 22.5, 22.5, 21.0, 17.5, 13.5, 11.0],
+          sunNsrdb: [7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 12.5, 12.0, 11.0, 9.0, 7.5, 6.5],
+          sunEra5: [6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.0, 11.5, 10.5, 8.5, 7.0, 6.0],
+          hexCount: 3,
+        },
+      },
+    },
+    {
+      properties: {
         name: "Alpine",
         population: 1120,
         density: 1.5,
@@ -317,6 +339,26 @@ describe("CompareModal", () => {
     await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
     // Jul — Alameda sunNsrdb[6] = 11.5
     expect(screen.getByText("11.5")).toBeInTheDocument();
+  });
+
+  it("shows dashes for crime metrics when comparing CDP without crime data", async () => {
+    renderModal({ names: ["Alameda", "Fallbrook"] });
+    await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
+    expect(screen.getByText("Fallbrook")).toBeInTheDocument();
+    // Fallbrook (CDP) has no crime data — its crime cells should show "—"
+    const dashes = screen.getAllByText("—");
+    expect(dashes.length).toBeGreaterThan(0);
+  });
+
+  it("displays non-crime metrics for CDP correctly", async () => {
+    renderModal({ names: ["Alameda", "Fallbrook"] });
+    await waitFor(() => expect(screen.getByText("Alameda")).toBeInTheDocument());
+    // Fallbrook population
+    expect(screen.getByText("32,467")).toBeInTheDocument();
+    // Fallbrook poverty
+    expect(screen.getByText("14.8%")).toBeInTheDocument();
+    // Fallbrook home value
+    expect(screen.getByText("$713,000")).toBeInTheDocument();
   });
 
   it("calls onTempMonthChange and onSunMonthChange when changing temperature month", async () => {

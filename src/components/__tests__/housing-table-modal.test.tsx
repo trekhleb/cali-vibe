@@ -9,6 +9,7 @@ const mockGeoJson = {
     { properties: { name: "Alameda", housing: { homeValue: 1057400, rent: 2318, income: 126240 } } },
     { properties: { name: "Alpine", housing: { homeValue: 466100, rent: null, income: 110781 } } },
     { properties: { name: "No Housing" } },
+    { properties: { name: "Fallbrook", placeType: "cdp", housing: { homeValue: 713000, rent: 1675, income: 87293 } } },
   ],
 };
 
@@ -260,8 +261,16 @@ describe("HousingTableModal", () => {
       <HousingTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Housing" nameLabel="County" activeHousingMetric="homeValue" />
     );
     await waitFor(() => expect(screen.getByText("San Mateo")).toBeInTheDocument());
-    // Row numbers 1-4 (4 rows with housing data)
+    // Row numbers 1-5 (5 rows with housing data, including CDP)
     const cells = screen.getAllByText("1");
     expect(cells.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("includes CDPs with housing data in the table", async () => {
+    render(
+      <HousingTableModal open={true} onClose={() => {}} dataUrl="/data.json" title="Housing" nameLabel="City" activeHousingMetric="homeValue" />
+    );
+    await waitFor(() => expect(screen.getByText("San Mateo")).toBeInTheDocument());
+    expect(screen.getByText("Fallbrook")).toBeInTheDocument();
   });
 });

@@ -84,6 +84,16 @@ describe("CityEducationLayer", () => {
       expect.objectContaining({ selectName: "San Jose" }),
     );
   });
+
+  it("shows popup for CDP with education data", () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
+      activeName: "Fallbrook",
+      activeProperties: { education: { hsPlus: 82.7, bachPlus: 27.3, gradPlus: 10.3 }, placeType: "cdp" },
+    });
+    render(<CityEducationLayer educationMetric="bachPlus" />);
+    expect(screen.getByText("Fallbrook")).toBeInTheDocument();
+    expect(screen.getByText(/27\.3%/)).toBeInTheDocument();
+  });
 });
 
 describe("CityEducationLegend", () => {

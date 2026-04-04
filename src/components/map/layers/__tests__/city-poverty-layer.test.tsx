@@ -81,6 +81,16 @@ describe("CityPovertyLayer", () => {
       expect.objectContaining({ selectName: "San Jose" }),
     );
   });
+
+  it("shows popup for CDP with poverty data", () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
+      activeName: "Fallbrook",
+      activeProperties: { poverty: 14.8, placeType: "cdp" },
+    });
+    render(<CityPovertyLayer />);
+    expect(screen.getByText("Fallbrook")).toBeInTheDocument();
+    expect(screen.getByText(/14\.8%/)).toBeInTheDocument();
+  });
 });
 
 describe("CityPovertyLegend", () => {

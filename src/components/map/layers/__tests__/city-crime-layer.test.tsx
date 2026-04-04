@@ -48,6 +48,26 @@ describe("CityCrimeLayer", () => {
     render(<CityCrimeLayer crimeType={"unknown" as any} />);
     expect(screen.getByTestId("Layer-city-crime-fill")).toBeInTheDocument();
   });
+
+  it("does not show popup for CDP with no crime data", () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
+      activeName: "Fallbrook",
+      activeProperties: { name: "Fallbrook", population: 32467, placeType: "cdp" },
+    });
+    render(<CityCrimeLayer crimeType="total" />);
+    // parseCrimeRate returns null when crime property is absent
+    expect(screen.queryByText("Fallbrook")).not.toBeInTheDocument();
+    expect(screen.queryByText(/per 100K/)).not.toBeInTheDocument();
+  });
+
+  it("does not show popup for CDP with null crime property", () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
+      activeName: "Castro Valley",
+      activeProperties: { name: "Castro Valley", population: 65389, placeType: "cdp", crime: null },
+    });
+    render(<CityCrimeLayer crimeType="total" />);
+    expect(screen.queryByText("Castro Valley")).not.toBeInTheDocument();
+  });
 });
 
 describe("CityCrimeLegend", () => {

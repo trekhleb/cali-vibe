@@ -64,4 +64,32 @@ describe("CityBordersLayer", () => {
     expect(screen.getByText("Los Angeles")).toBeInTheDocument();
     expect(screen.queryByTestId("HeartButton")).not.toBeInTheDocument();
   });
+
+  it("shows popup for CDP (no crime, placeType=cdp)", () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({
+      activeName: "Fallbrook",
+      activeProperties: { name: "Fallbrook", population: 32467, placeType: "cdp" },
+    });
+    render(<CityBordersLayer />);
+    expect(screen.getByText("Fallbrook")).toBeInTheDocument();
+  });
+
+  it("shows popup and handles favorites for CDP", async () => {
+    vi.spyOn(useMapInteractionModule, "useMapInteraction").mockReturnValue({ activeName: "Castro Valley" });
+    const onToggleFavorite = vi.fn();
+
+    render(
+      <CityBordersLayer
+        displayMode="borders"
+        activeName="Castro Valley"
+        onToggleFavorite={onToggleFavorite}
+        isFavorite={() => false}
+      />
+    );
+
+    expect(screen.getByText("Castro Valley")).toBeInTheDocument();
+    const btn = screen.getByTestId("HeartButton");
+    await userEvent.click(btn);
+    expect(onToggleFavorite).toHaveBeenCalledWith("Castro Valley");
+  });
 });

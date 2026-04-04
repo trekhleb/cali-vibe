@@ -13,6 +13,9 @@ const mockData = {
     { properties: { name: "San Jose" } },
     { properties: { name: "Santa Cruz" } },
     { properties: { name: "Los Angeles" } },
+    { properties: { name: "Fallbrook", placeType: "cdp" } },
+    { properties: { name: "Castro Valley", placeType: "cdp" } },
+    { properties: { name: "East Los Angeles", placeType: "cdp" } },
   ],
 };
 
@@ -130,6 +133,58 @@ describe("GeoSearch", () => {
     fireEvent.mouseDown(items[1]);
     
     expect(onSelect).toHaveBeenCalledWith("San Jose");
+  });
+
+  it("includes CDPs in search results", async () => {
+    render(<GeoSearch dataUrl="/data.json" onSelect={onSelect} placeholder="Search..." />);
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 10));
+    });
+
+    const input = screen.getByPlaceholderText("Search...");
+    await userEvent.type(input, "Fall");
+
+    await waitFor(() => {
+      expect(screen.getByRole("list")).toBeInTheDocument();
+    });
+    const items = screen.getAllByRole("listitem");
+    expect(items.length).toBe(1);
+    expect(items[0]).toHaveTextContent("Fallbrook");
+  });
+
+  it("selects a CDP via keyboard", async () => {
+    render(<GeoSearch dataUrl="/data.json" onSelect={onSelect} placeholder="Search..." />);
+    await waitFor(() => expect(fetchJsonCached).toHaveBeenCalled());
+
+    const input = screen.getByPlaceholderText("Search...");
+    await userEvent.type(input, "Castro");
+
+    await waitFor(() => expect(screen.getByRole("list")).toBeInTheDocument());
+
+    await userEvent.keyboard("{ArrowDown}");
+    await userEvent.keyboard("{Enter}");
+    expect(onSelect).toHaveBeenCalledWith("Castro Valley");
+  });
+
+  it("shows CDPs in mixed results with cities", async () => {
+    render(<GeoSearch dataUrl="/data.json" onSelect={onSelect} placeholder="Search..." />);
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 10));
+    });
+
+    const input = screen.getByPlaceholderText("Search...");
+    // "Los" should match both "Los Angeles" (city) and "East Los Angeles" (CDP)
+    await userEvent.type(input, "Los");
+
+    await waitFor(() => {
+      expect(screen.getByRole("list")).toBeInTheDocument();
+    });
+    const items = screen.getAllByRole("listitem");
+    const names = items.map((i) => i.textContent);
+    expect(names).toContain("Los Angeles");
+    expect(names).toContain("East Los Angeles");
   });
 
   it("ignores failed fetch gracefully", async () => {
