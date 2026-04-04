@@ -66,7 +66,7 @@ Routes and stations for all major California rail and light rail systems: BART, 
 
 ### County and city boundaries
 
-All 58 California counties and 482 incorporated cities with color-coded or outline borders.
+All 58 California counties and 697 places (482 cities + 215 CDPs) with color-coded or outline borders.
 
 ![California counties and cities map](./public/demo/03-framed.png)
 

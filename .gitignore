@@ -22,6 +22,7 @@
 
 # data build caches
 public/data/.*-cache-*.json
+.tmp-tiger/
 
 # debug
 npm-debug.log*

@@ -2093,7 +2093,7 @@ export default function Home() {
                       <br />
                       TIGER/Line Places, 2024.
                       <br />
-                      482 incorporated cities.
+                      482 incorporated cities (self-governing municipalities) + 215 CDPs (Census-Designated Places — unincorporated communities recognized by the US Census Bureau for statistical purposes).
                     </InfoTooltip>
                   </label>
                   {showCities && (
