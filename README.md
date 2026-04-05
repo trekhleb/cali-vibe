@@ -2,7 +2,7 @@
 
 > Explore and compare California counties and cities on a single interactive map: housing costs, income, education, race/ethnicity, age distribution, poverty, crime rates, population, temperature, sunshine hours, transit routes, and 3D terrain.
 
-**[Open the live map](https://trekhleb.dev/cali-vibe)**
+**[Open the live map: Compare California counties and cities](https://trekhleb.dev/cali-vibe)**
 
 ![CaliVibe — Interactive California Map](./public/demo/00-preview-xl.png)
 
@@ -11,6 +11,8 @@
 Researching California neighborhoods usually means jumping between Census tables, DOJ crime reports, climate databases, and transit schedules. CaliVibe puts it all on a single interactive map so you can compare counties and cities side-by-side without switching tabs.
 
 ## What you can explore
+
+[![CaliVibe Demo](https://img.youtube.com/vi/1hLrH-K0fII/maxresdefault.jpg)](https://www.youtube.com/watch?v=1hLrH-K0fII)
 
 ### Compare counties and cities
 
