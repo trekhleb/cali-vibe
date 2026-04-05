@@ -12,7 +12,9 @@ Researching California neighborhoods usually means jumping between Census tables
 
 ## What you can explore
 
-[![CaliVibe Demo](https://img.youtube.com/vi/1hLrH-K0fII/maxresdefault.jpg)](https://www.youtube.com/watch?v=1hLrH-K0fII)
+[🎬 Demo on YouTube](https://www.youtube.com/watch?v=1hLrH-K0fII)
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/1hLrH-K0fII?si=v0IjcYYoxrF4PuKl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ### Compare counties and cities
 
