@@ -12,7 +12,7 @@ Researching California neighborhoods usually means jumping between Census tables
 
 ## What you can explore
 
-[🎬 Demo on YouTube](https://www.youtube.com/watch?v=1hLrH-K0fII)
+▶️ [Demo on YouTube](https://www.youtube.com/watch?v=1hLrH-K0fII)
 
 ### Compare counties and cities
 
