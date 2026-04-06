@@ -40,6 +40,18 @@ Median home value and median gross rent for all 58 California counties, based on
 
 Average ELA and Math scores (Distance from Standard), graduation rates, and school counts aggregated by county and city from CDE Dashboard Indicators (2025). Individual school locations (11,600+ public schools) can be displayed as colored dots based on their Dashboard rating, ELA score, or Math score. Filter by school level (Elementary, Middle, High).
 
+County schools stats:
+
+![County schools](./public/demo/17-schools-counties.png)
+
+City schools stats:
+
+![City schools](./public/demo/17-schools-cities.png)
+
+Schools by rating:
+
+![Schools by rating](./public/demo/17-schools-points.png)
+
 ### Population by county
 
 2024 population estimates for every county, color-coded choropleth with sortable data table. Source: CA Department of Finance E-6 estimates.
