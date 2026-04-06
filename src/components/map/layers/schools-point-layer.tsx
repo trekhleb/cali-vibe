@@ -116,14 +116,17 @@ interface SchoolsPointLayerProps {
   colorBy?: SchoolPointColor;
   levelFilter?: SchoolLevelFilter;
   overlayOffset?: number;
+  selectName?: string | null;
 }
 
 export default function SchoolsPointLayer({
   colorBy = "rating",
   levelFilter = "all",
   overlayOffset = 0,
+  selectName = null,
 }: SchoolsPointLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, CIRCLE_LAYER_ID, {
+    selectName,
     geojsonUrl: GEOJSON_URL,
     flyToMaxZoom: 15,
   });

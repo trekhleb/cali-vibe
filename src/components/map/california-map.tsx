@@ -144,6 +144,7 @@ interface CaliforniaMapProps {
   showSchoolPoints?: boolean;
   schoolPointColor?: SchoolPointColor;
   schoolLevelFilter?: SchoolLevelFilter;
+  selectedSchoolPointName?: string | null;
   showTemperature?: boolean;
   tempMetric?: TempMetric;
   tempMonth?: number;
@@ -235,6 +236,7 @@ export default function CaliforniaMap({
   showSchoolPoints = false,
   schoolPointColor = "rating",
   schoolLevelFilter = "all",
+  selectedSchoolPointName = null,
   showTemperature = false,
   tempMetric = "tavg",
   tempMonth = 6,
@@ -342,7 +344,7 @@ export default function CaliforniaMap({
       {showSchools && <SchoolsLegend schoolMetric={schoolMetric} overlayOffset={overlayOffset} />}
       {showCitySchools && <CitySchoolsLayer schoolMetric={citySchoolMetric} overlayOffset={overlayOffset} selectName={selectedSchoolsCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
       {showCitySchools && <CitySchoolsLegend schoolMetric={citySchoolMetric} overlayOffset={overlayOffset} />}
-      {showSchoolPoints && <SchoolsPointLayer colorBy={schoolPointColor} levelFilter={schoolLevelFilter} overlayOffset={overlayOffset} />}
+      {showSchoolPoints && <SchoolsPointLayer colorBy={schoolPointColor} levelFilter={schoolLevelFilter} overlayOffset={overlayOffset} selectName={selectedSchoolPointName} />}
       {showSchoolPoints && <SchoolPointsLegend colorBy={schoolPointColor} overlayOffset={overlayOffset} />}
       {showTemperature && (
         <TemperatureLayer

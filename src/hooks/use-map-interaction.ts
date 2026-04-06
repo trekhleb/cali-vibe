@@ -127,7 +127,9 @@ export function useMapInteraction(
       for (const feature of geojson.features) {
         if (feature.properties?.name !== selectName) continue;
         const geom = feature.geometry;
-        if (geom.type === "Polygon") {
+        if (geom.type === "Point") {
+          bounds.extend(geom.coordinates as [number, number]);
+        } else if (geom.type === "Polygon") {
           for (const ring of geom.coordinates) {
             for (const coord of ring) bounds.extend(coord as [number, number]);
           }

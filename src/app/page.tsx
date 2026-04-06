@@ -24,6 +24,7 @@ import RaceTableModal from "@/components/race-table-modal";
 import AgeTableModal from "@/components/age-table-modal";
 import PovertyTableModal from "@/components/poverty-table-modal";
 import SchoolsTableModal from "@/components/schools-table-modal";
+import SchoolPointsTableModal from "@/components/school-points-table-modal";
 import CompareModal, { type CompareType, type SortConfig } from "@/components/compare-modal";
 import { POPULATION_LABELS, type PopulationMetric } from "@/components/map/layers/county-population-layer";
 import { HOUSING_LABELS, type HousingMetric } from "@/components/map/layers/county-housing-layer";
@@ -365,6 +366,8 @@ export default function Home() {
   const [showSchoolPoints, setShowSchoolPoints] = useState(init.schPts);
   const [schoolPointColor, setSchoolPointColor] = useState<SchoolPointColor>(init.spcolor);
   const [schoolLevelFilter, setSchoolLevelFilter] = useState<SchoolLevelFilter>(init.splevel);
+  const [showSchoolPointsTable, setShowSchoolPointsTable] = useState(false);
+  const [selectedSchoolPointName, setSelectedSchoolPointName] = useState<string | null>(null);
   const [showTemperature, setShowTemperature] = useState(init.temp);
   const [tempMetric, setTempMetric] = useState<TempMetric>(init.tmetric);
   const [tempMonth, setTempMonth] = useState(init.tmonth);
@@ -714,6 +717,7 @@ export default function Home() {
     setShowSchoolPoints(false);
     setSchoolPointColor("rating");
     setSchoolLevelFilter("all");
+    setSelectedSchoolPointName(null);
     setShowTemperature(DEFAULTS.temp);
     setTempMetric(DEFAULTS.tmetric);
     setTempMonth(new Date().getMonth());
@@ -888,6 +892,27 @@ export default function Home() {
     setSelectedSchoolsCityName(name);
   }, []);
 
+  const goToSchoolPoint = useCallback((name: string) => {
+    setSelectedSchoolPointName(name);
+  }, []);
+
+  const goToSchoolPointCounty = useCallback((name: string) => {
+    // Navigate to county schools layer and select the county
+    clearOverlays();
+    setShowSchools(true);
+    setSelectedSchoolsCountyName(name);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const goToSchoolPointCity = useCallback((name: string) => {
+    // Navigate to city schools layer and select the city
+    clearOverlays();
+    setShowCities(false);
+    setShowCitySchools(true);
+    setSelectedSchoolsCityName(name);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const hasAnyFavorites = favorites.length > 0;
 
   // --- Resizable panel ---
@@ -1000,6 +1025,7 @@ export default function Home() {
                 showSchoolPoints={showSchoolPoints}
                 schoolPointColor={schoolPointColor}
                 schoolLevelFilter={schoolLevelFilter}
+                selectedSchoolPointName={selectedSchoolPointName}
                 showTemperature={showTemperature}
                 tempMetric={tempMetric}
                 tempMonth={tempMonth}
@@ -1832,6 +1858,13 @@ export default function Home() {
                           <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
                         </div>
                       </div>
+                      <button
+                        onClick={() => setShowSchoolPointsTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
                     </div>
                   )}
                 </div>
@@ -2976,6 +3009,16 @@ export default function Home() {
         nameLabel="City"
         activeSchoolMetric={citySchoolMetric}
         onSelectName={goToSchoolsCity}
+      />
+      <SchoolPointsTableModal
+        open={showSchoolPointsTable}
+        onClose={() => setShowSchoolPointsTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-schools.geojson`}
+        activeColorBy={schoolPointColor}
+        activeLevelFilter={schoolLevelFilter}
+        onSelectSchool={goToSchoolPoint}
+        onSelectCounty={goToSchoolPointCounty}
+        onSelectCity={goToSchoolPointCity}
       />
       <CompareModal
         open={compareType !== null}
