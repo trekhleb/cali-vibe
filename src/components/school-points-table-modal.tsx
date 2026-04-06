@@ -111,7 +111,13 @@ export default function SchoolPointsTableModal({
 
   // Reset scroll on filter/sort change
   useEffect(() => {
-    scrollRef.current?.scrollTo(0, 0);
+    if (scrollRef.current) {
+      if (typeof scrollRef.current.scrollTo === "function") {
+        scrollRef.current.scrollTo(0, 0);
+      } else {
+        scrollRef.current.scrollTop = 0;
+      }
+    }
     setScrollTop(0);
   }, [debouncedSearch, levelFilter, sortKey, sortDir]);
 
