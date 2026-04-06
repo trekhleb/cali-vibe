@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import LegalModal from "@/components/legal-modal";
-import { LuChevronDown, LuX, LuSearch, LuPlus, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuThermometer, LuSun, LuGripVertical, LuCalendarDays } from "react-icons/lu";
+import { LuChevronDown, LuX, LuSearch, LuPlus, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuThermometer, LuSun, LuGripVertical, LuCalendarDays, LuSchool } from "react-icons/lu";
 import { IoManOutline } from "react-icons/io5";
 import { fetchJsonCached } from "@/utils/fetch-json";
 
@@ -117,6 +117,16 @@ const DEMOGRAPHIC_CATEGORIES: CategoryDef[] = [
     icon: <LuTrendingDown className="h-3 w-3" />,
     metrics: [
       { key: "poverty", label: "Poverty Rate", format: fmtPct, polarity: "lower" },
+    ],
+  },
+  {
+    label: "Schools (CDE)",
+    icon: <LuSchool className="h-3 w-3" />,
+    metrics: [
+      { key: "schools.ela", label: "Avg ELA (DFS)", format: (v: number) => v >= 0 ? `+${v.toFixed(1)}` : v.toFixed(1), polarity: "higher" },
+      { key: "schools.math", label: "Avg Math (DFS)", format: (v: number) => v >= 0 ? `+${v.toFixed(1)}` : v.toFixed(1), polarity: "higher" },
+      { key: "schools.graduationRate", label: "Avg Graduation Rate", format: fmtPct, polarity: "higher" },
+      { key: "schools.schoolCount", label: "School Count", format: fmtInt, polarity: "neutral" },
     ],
   },
 ];

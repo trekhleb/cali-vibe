@@ -1,6 +1,6 @@
 # CaliVibe — Interactive California Map
 
-> Explore and compare California counties and cities on a single interactive map: housing costs, income, education, race/ethnicity, age distribution, poverty, crime rates, population, temperature, sunshine hours, transit routes, and 3D terrain.
+> Explore and compare California counties and cities on a single interactive map: housing costs, income, education, school performance, race/ethnicity, age distribution, poverty, crime rates, population, temperature, sunshine hours, transit routes, and 3D terrain.
 
 **[Open the live map: Compare California counties and cities](https://trekhleb.dev/cali-vibe)**
 
@@ -16,7 +16,7 @@ Researching California neighborhoods usually means jumping between Census tables
 
 ### Compare counties and cities
 
-Compare any California counties or cities side by side across all metrics — population, crime, housing, income, education, race/ethnicity, age distribution, and poverty. Color-coded cells highlight the best and worst values. Sortable columns, drag-to-reorder, and shareable via URL.
+Compare any California counties or cities side by side across all metrics — population, crime, housing, income, education, school performance, race/ethnicity, age distribution, and poverty. Color-coded cells highlight the best and worst values. Sortable columns, drag-to-reorder, and shareable via URL.
 
 ![California cities/counties comparison](./public/demo/15-california-city-county-comparison.gif)
 
@@ -35,6 +35,10 @@ Median home value and median gross rent for all 58 California counties, based on
 ![California crime rate map by county](./public/demo/05-framed.png)
 
 ![California county crime statistics table](./public/demo/06-framed.png)
+
+### School performance by county and city
+
+Average ELA and Math scores (Distance from Standard), graduation rates, and school counts aggregated by county and city from CDE Dashboard Indicators (2025). Individual school locations (11,600+ public schools) can be displayed as colored dots based on their Dashboard rating, ELA score, or Math score. Filter by school level (Elementary, Middle, High).
 
 ### Population by county
 
@@ -80,7 +84,7 @@ Rotatable raised-relief view of California with labeled mountain peaks (feet or 
 
 ### Other features
 
-- **Compare** — compare any counties or cities side by side across all metrics (including age distribution) with color-coded rankings, shareable via URL
+- **Compare** — compare any counties or cities side by side across all metrics (including school performance and age distribution) with color-coded rankings, shareable via URL
 - **Favorites** — save and reorder locations with drag-and-drop, persisted in local storage
 - **Shareable state** — every toggle, metric, comparison, and view is encoded in the URL so you can bookmark or share exact map views
 - **Mobile-friendly** — responsive layout with collapsible sidebar
@@ -97,6 +101,7 @@ React, TypeScript, Vite, MapLibre GL JS, Tailwind CSS. H3 hexagonal grid for cli
 | Housing cost | [US Census Bureau ACS](https://data.census.gov/) — B25077, B25064 | 2019–2023 |
 | County crime | [CA DOJ OpenJustice](https://openjustice.doj.ca.gov/data) | 2023 |
 | City crime | [CA DOJ OpenJustice](https://openjustice.doj.ca.gov/data) | 2023 |
+| School performance | [CA Dept. of Education](https://www.cde.ca.gov/ta/ac/cm/) Dashboard Indicators | 2025 |
 | Population | [CA Dept. of Finance](https://dof.ca.gov/forecasting/demographics/estimates-e1/) E-1 / E-6 | 2024 |
 | Temperature | [ERA5 Reanalysis](https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5) via [Open-Meteo](https://open-meteo.com/) | 2014–2023 |
 | Sunshine | [NSRDB GOES TMY](https://nsrdb.nrel.gov/) (NREL) / ERA5 | 2014–2023 |

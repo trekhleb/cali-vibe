@@ -60,6 +60,16 @@ import SunshineLayer, {
 } from "./layers/sunshine-layer";
 import CityPopulationLayer, { CityPopulationLegend } from "./layers/city-population-layer";
 import type { PopulationMetric } from "./layers/county-population-layer";
+import CountySchoolsLayer, {
+  SchoolsLegend,
+  type SchoolMetric,
+} from "./layers/county-schools-layer";
+import CitySchoolsLayer, { CitySchoolsLegend } from "./layers/city-schools-layer";
+import SchoolsPointLayer, {
+  SchoolPointsLegend,
+  type SchoolPointColor,
+  type SchoolLevelFilter,
+} from "./layers/schools-point-layer";
 import TransitLayer, { type TransitSystem, type ActiveColorMap } from "./layers/transit-layer";
 import LocateControl from "./locate-control";
 
@@ -125,6 +135,15 @@ interface CaliforniaMapProps {
   showCityCrime?: boolean;
   cityCrimeType?: CrimeType;
   selectedCrimeCityName?: string | null;
+  showSchools?: boolean;
+  schoolMetric?: SchoolMetric;
+  selectedSchoolsCountyName?: string | null;
+  showCitySchools?: boolean;
+  citySchoolMetric?: SchoolMetric;
+  selectedSchoolsCityName?: string | null;
+  showSchoolPoints?: boolean;
+  schoolPointColor?: SchoolPointColor;
+  schoolLevelFilter?: SchoolLevelFilter;
   showTemperature?: boolean;
   tempMetric?: TempMetric;
   tempMonth?: number;
@@ -207,6 +226,15 @@ export default function CaliforniaMap({
   showCityCrime = false,
   cityCrimeType = "total",
   selectedCrimeCityName = null,
+  showSchools = false,
+  schoolMetric = "ela",
+  selectedSchoolsCountyName = null,
+  showCitySchools = false,
+  citySchoolMetric = "ela",
+  selectedSchoolsCityName = null,
+  showSchoolPoints = false,
+  schoolPointColor = "rating",
+  schoolLevelFilter = "all",
   showTemperature = false,
   tempMetric = "tavg",
   tempMonth = 6,
@@ -241,8 +269,9 @@ export default function CaliforniaMap({
 }: CaliforniaMapProps) {
   // Smart zoom for "locate me": city layers → street level, county → county level
   const locateZoom =
-    showCities || showCityCrime || showCityHousing || showCityIncome || showCityEducation || showCityRace || showCityAge || showCityPoverty || showCityPopulation ? 11 :
-    showCounties || showPopulation || showCrime || showHousing || showIncome || showEducation || showRace || showAge || showPoverty ? 8 :
+    showSchoolPoints ? 12 :
+    showCities || showCityCrime || showCityHousing || showCityIncome || showCityEducation || showCityRace || showCityAge || showCityPoverty || showCityPopulation || showCitySchools ? 11 :
+    showCounties || showPopulation || showCrime || showHousing || showIncome || showEducation || showRace || showAge || showPoverty || showSchools ? 8 :
     showTemperature || showSunshine ? 9 : 10;
 
   return (
@@ -309,6 +338,12 @@ export default function CaliforniaMap({
       {showCityPoverty && <CityPovertyLegend overlayOffset={overlayOffset} />}
       {showCityPopulation && <CityPopulationLayer overlayOffset={overlayOffset} selectName={selectedPopulationCityName} populationMetric={cityPopulationMetric} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
       {showCityPopulation && <CityPopulationLegend overlayOffset={overlayOffset} populationMetric={cityPopulationMetric} />}
+      {showSchools && <CountySchoolsLayer schoolMetric={schoolMetric} overlayOffset={overlayOffset} selectName={selectedSchoolsCountyName} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
+      {showSchools && <SchoolsLegend schoolMetric={schoolMetric} overlayOffset={overlayOffset} />}
+      {showCitySchools && <CitySchoolsLayer schoolMetric={citySchoolMetric} overlayOffset={overlayOffset} selectName={selectedSchoolsCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
+      {showCitySchools && <CitySchoolsLegend schoolMetric={citySchoolMetric} overlayOffset={overlayOffset} />}
+      {showSchoolPoints && <SchoolsPointLayer colorBy={schoolPointColor} levelFilter={schoolLevelFilter} overlayOffset={overlayOffset} />}
+      {showSchoolPoints && <SchoolPointsLegend colorBy={schoolPointColor} overlayOffset={overlayOffset} />}
       {showTemperature && (
         <TemperatureLayer
           metric={tempMetric}

@@ -41,7 +41,7 @@ export default function MapFooter({ overlayOffset = 0, initialModal = null, onMo
 
         <h3 className="mt-4 text-sm font-semibold text-gray-900">What you can explore</h3>
         <ul className="mt-2 space-y-2 text-sm">
-          <li><strong>Compare</strong> &mdash; Compare any California counties or cities side by side across all metrics including population, crime, housing, income, education, race/ethnicity, age distribution, and poverty with color-coded rankings.</li>
+          <li><strong>Compare</strong> &mdash; Compare any California counties or cities side by side across all metrics including population, crime, housing, income, education, school performance, race/ethnicity, age distribution, and poverty with color-coded rankings.</li>
           <li><strong>Housing Cost</strong> &mdash; Median home value and median gross rent for all 58 California counties and 697 cities/CDPs (Census ACS 2019&ndash;2023).</li>
           <li><strong>Household Income</strong> &mdash; Median household income for all 58 California counties and 697 cities/CDPs (Census ACS 2019&ndash;2023).</li>
           <li><strong>Educational Attainment</strong> &mdash; Bachelor&rsquo;s degree+, high school diploma+, and graduate degree+ rates for all 58 counties and 697 cities/CDPs (Census ACS 2019&ndash;2023).</li>
@@ -54,6 +54,7 @@ export default function MapFooter({ overlayOffset = 0, initialModal = null, onMo
           <li><strong>Sunshine Hours</strong> &mdash; Average daily sunshine hours by month, satellite-derived (NREL NSRDB).</li>
           <li><strong>Transit</strong> &mdash; 18 California rail systems: BART, Caltrain, LA Metro, Muni Metro, VTA, SMART, Metrolink, San Diego Trolley, Coaster, Sprinter, Sacramento RT, ACE, Capitol Corridor, Pacific Surfliner, San Joaquins, Coast Starlight, California Zephyr, Southwest Chief.</li>
           <li><strong>3D Terrain</strong> &mdash; Raised-relief view with labeled mountain peaks.</li>
+          <li><strong>School Performance</strong> &mdash; Average ELA and Math scores (Distance from Standard), graduation rates, and school counts aggregated by county and city. Plus 11,600+ individual school locations colored by Dashboard rating (CDE 2025).</li>
           <li><strong>County &amp; City Boundaries</strong> &mdash; 58 counties and 697 places (482 cities + 215 CDPs).</li>
         </ul>
 
@@ -156,6 +157,13 @@ export default function MapFooter({ overlayOffset = 0, initialModal = null, onMo
             <a href="https://data.census.gov/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">US Census Bureau</a>
             <br />
             <span className="text-gray-500">ACS 5-Year Estimates (2019–2023). Table B17001 &mdash; Poverty Status in the Past 12 Months. % below poverty level by county and city.</span>
+          </li>
+          <li>
+            <strong>School Performance</strong>
+            <br />
+            <a href="https://www.cde.ca.gov/ta/ac/cm/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">CA Department of Education</a>
+            <br />
+            <span className="text-gray-500">Dashboard Academic Indicators (2025). ELA &amp; Math Distance from Standard, 4-year graduation rate. School directory with coordinates for 11,600+ public schools.</span>
           </li>
           <li>
             <strong>County Boundaries</strong>

@@ -23,10 +23,13 @@ import EducationTableModal from "@/components/education-table-modal";
 import RaceTableModal from "@/components/race-table-modal";
 import AgeTableModal from "@/components/age-table-modal";
 import PovertyTableModal from "@/components/poverty-table-modal";
+import SchoolsTableModal from "@/components/schools-table-modal";
 import CompareModal, { type CompareType, type SortConfig } from "@/components/compare-modal";
 import { POPULATION_LABELS, type PopulationMetric } from "@/components/map/layers/county-population-layer";
 import { HOUSING_LABELS, type HousingMetric } from "@/components/map/layers/county-housing-layer";
 import { EDUCATION_LABELS, type EducationMetric } from "@/components/map/layers/county-education-layer";
+import { SCHOOL_LABELS, SCHOOL_METRIC_DESCRIPTIONS, type SchoolMetric } from "@/components/map/layers/county-schools-layer";
+import { SCHOOL_POINT_COLOR_LABELS, SCHOOL_LEVEL_LABELS, type SchoolPointColor, type SchoolLevelFilter } from "@/components/map/layers/schools-point-layer";
 import { RACE_LABELS, type RaceMetric } from "@/components/map/layers/county-race-layer";
 import { AGE_LABELS, ageMetricIds, type AgeMetric } from "@/components/map/layers/county-age-layer";
 import TemperatureTableModal from "@/components/temperature-table-modal";
@@ -65,6 +68,7 @@ import {
   LuTrendingDown,
   LuCalendarDays,
   LuColumns3,
+  LuSchool,
 } from "react-icons/lu";
 import { IoManOutline } from "react-icons/io5";
 import { RiFocus3Line, RiFocus3Fill } from "react-icons/ri";
@@ -77,6 +81,9 @@ const populationMetricIds = Object.keys(POPULATION_LABELS) as PopulationMetric[]
 const housingMetricIds = (Object.keys(HOUSING_LABELS) as HousingMetric[]).filter((id) => id !== "income");
 const educationMetricIds = Object.keys(EDUCATION_LABELS) as EducationMetric[];
 const raceMetricIds = Object.keys(RACE_LABELS) as RaceMetric[];
+const schoolMetricIds = Object.keys(SCHOOL_LABELS) as SchoolMetric[];
+const schoolPointColorIds = Object.keys(SCHOOL_POINT_COLOR_LABELS) as SchoolPointColor[];
+const schoolLevelFilterIds = Object.keys(SCHOOL_LEVEL_LABELS) as SchoolLevelFilter[];
 
 const CaliforniaMap = lazy(() => import("@/components/map/california-map"));
 const California3DTerrain = lazy(() => import("@/components/map/terrain-3d/california-3d-terrain"));
@@ -128,6 +135,13 @@ const DEFAULTS = {
   cametric: "medianAge" as AgeMetric,
   pov: false,
   cityPov: false,
+  schools: false,
+  smetric: "ela" as SchoolMetric,
+  citySchools: false,
+  csmetric: "ela" as SchoolMetric,
+  schPts: false,
+  spcolor: "rating" as SchoolPointColor,
+  splevel: "all" as SchoolLevelFilter,
   style: "light" as MapStyleId,
   temp: true,
   tmetric: "tmax" as TempMetric,
@@ -199,6 +213,13 @@ function readParams() {
     cametric: str("cametric", DEFAULTS.cametric, ageMetricIds),
     pov: bool("pov", DEFAULTS.pov),
     cityPov: bool("cityPov", DEFAULTS.cityPov),
+    schools: bool("schools", DEFAULTS.schools),
+    smetric: str("smetric", DEFAULTS.smetric, schoolMetricIds),
+    citySchools: bool("citySchools", DEFAULTS.citySchools),
+    csmetric: str("csmetric", DEFAULTS.csmetric, schoolMetricIds),
+    schPts: bool("schPts", DEFAULTS.schPts),
+    spcolor: str("spcolor", DEFAULTS.spcolor, schoolPointColorIds),
+    splevel: str("splevel", DEFAULTS.splevel, schoolLevelFilterIds),
     temp: bool("temp", DEFAULTS.temp),
     tmetric: str("tmetric", DEFAULTS.tmetric, tempMetricIds),
     tmonth: (() => {
@@ -333,6 +354,17 @@ export default function Home() {
   const [selectedPovertyCountyName, setSelectedPovertyCountyName] = useState<string | null>(null);
   const [showCityPovertyTable, setShowCityPovertyTable] = useState(false);
   const [selectedPovertyCityName, setSelectedPovertyCityName] = useState<string | null>(null);
+  const [showSchools, setShowSchools] = useState(init.schools);
+  const [schoolMetric, setSchoolMetric] = useState<SchoolMetric>(init.smetric);
+  const [showCitySchools, setShowCitySchools] = useState(init.citySchools);
+  const [citySchoolMetric, setCitySchoolMetric] = useState<SchoolMetric>(init.csmetric);
+  const [showSchoolsTable, setShowSchoolsTable] = useState(false);
+  const [selectedSchoolsCountyName, setSelectedSchoolsCountyName] = useState<string | null>(null);
+  const [showCitySchoolsTable, setShowCitySchoolsTable] = useState(false);
+  const [selectedSchoolsCityName, setSelectedSchoolsCityName] = useState<string | null>(null);
+  const [showSchoolPoints, setShowSchoolPoints] = useState(init.schPts);
+  const [schoolPointColor, setSchoolPointColor] = useState<SchoolPointColor>(init.spcolor);
+  const [schoolLevelFilter, setSchoolLevelFilter] = useState<SchoolLevelFilter>(init.splevel);
   const [showTemperature, setShowTemperature] = useState(init.temp);
   const [tempMetric, setTempMetric] = useState<TempMetric>(init.tmetric);
   const [tempMonth, setTempMonth] = useState(init.tmonth);
@@ -453,6 +485,13 @@ export default function Home() {
     setStr("cametric", cityAgeMetric, DEFAULTS.cametric);
     setBool("pov", showPoverty, DEFAULTS.pov);
     setBool("cityPov", showCityPoverty, DEFAULTS.cityPov);
+    setBool("schools", showSchools, DEFAULTS.schools);
+    setStr("smetric", schoolMetric, DEFAULTS.smetric);
+    setBool("citySchools", showCitySchools, DEFAULTS.citySchools);
+    setStr("csmetric", citySchoolMetric, DEFAULTS.csmetric);
+    setBool("schPts", showSchoolPoints, DEFAULTS.schPts);
+    setStr("spcolor", schoolPointColor, DEFAULTS.spcolor);
+    setStr("splevel", schoolLevelFilter, DEFAULTS.splevel);
     setBool("temp", showTemperature, DEFAULTS.temp);
     setStr("tmetric", tempMetric, DEFAULTS.tmetric);
     if (tempMonth !== DEFAULTS.tmonth) p.set("tmonth", String(tempMonth));
@@ -488,7 +527,7 @@ export default function Home() {
     const qs = p.toString();
     const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, "", url);
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showAge, ageMetric, showCityAge, cityAgeMetric, showPoverty, showCityPoverty, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, compareTempMonth, compareTempUnit, compareSunMonth, compareSunSource, compareCrimeAbsolute, showAbout]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showAge, ageMetric, showCityAge, cityAgeMetric, showPoverty, showCityPoverty, showSchools, schoolMetric, showCitySchools, citySchoolMetric, showSchoolPoints, schoolPointColor, schoolLevelFilter, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, compareTempMonth, compareTempUnit, compareSunMonth, compareSunSource, compareCrimeAbsolute, showAbout]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -524,6 +563,7 @@ export default function Home() {
   const clearOverlays = () => {
     setShowCounties(false); setShowPopulation(false); setShowCrime(false);
     setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowAge(false); setShowPoverty(false);
+    setShowSchools(false); setShowCitySchools(false); setShowSchoolPoints(false);
     setShowCityPopulation(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityAge(false); setShowCityPoverty(false);
     setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false);
     setShowRelief(false);
@@ -584,6 +624,18 @@ export default function Home() {
     if (on) { clearOverlays(); setShowCities(false); }
     setShowCityPoverty(on);
   };
+  const toggleSchools = (on: boolean) => {
+    if (on) clearOverlays();
+    setShowSchools(on);
+  };
+  const toggleCitySchools = (on: boolean) => {
+    if (on) { clearOverlays(); setShowCities(false); }
+    setShowCitySchools(on);
+  };
+  const toggleSchoolPoints = (on: boolean) => {
+    if (on) clearOverlays();
+    setShowSchoolPoints(on);
+  };
   const toggleCityHousing = (on: boolean) => {
     if (on) { clearOverlays(); setShowCities(false); }
     setShowCityHousing(on);
@@ -606,7 +658,7 @@ export default function Home() {
   };
   const toggleCities = (on: boolean) => {
     setShowCities(on);
-    if (on) { setShowCityPopulation(false); setShowCityCrime(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityAge(false); setShowCityPoverty(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
+    if (on) { setShowCityPopulation(false); setShowCityCrime(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityAge(false); setShowCityPoverty(false); setShowCitySchools(false); setShowTemperature(false); setShowSunshine(false); setShowRelief(false); }
   };
   const toggleTerrain3d = (on: boolean) => {
     setTerrain3d(on);
@@ -618,7 +670,7 @@ export default function Home() {
   };
   const toggleRelief = (on: boolean) => {
     setShowRelief(on);
-    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowPoverty(false); setShowCityPopulation(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); setShowPeaks(true); }
+    if (on) { setShowCounties(false); setShowPopulation(false); setShowCrime(false); setShowHousing(false); setShowIncome(false); setShowEducation(false); setShowRace(false); setShowPoverty(false); setShowSchools(false); setShowCitySchools(false); setShowSchoolPoints(false); setShowCityPopulation(false); setShowCityHousing(false); setShowCityIncome(false); setShowCityEducation(false); setShowCityRace(false); setShowCityPoverty(false); setShowCityCrime(false); setShowTemperature(false); setShowSunshine(false); setShowCities(false); setShowTransit(false); setTerrain3d(false); setShowPeaks(true); }
   };
 
   const resetAll = useCallback(() => {
@@ -655,6 +707,13 @@ export default function Home() {
     setCityAgeMetric("medianAge");
     setShowPoverty(false);
     setShowCityPoverty(false);
+    setShowSchools(false);
+    setSchoolMetric("ela");
+    setShowCitySchools(false);
+    setCitySchoolMetric("ela");
+    setShowSchoolPoints(false);
+    setSchoolPointColor("rating");
+    setSchoolLevelFilter("all");
     setShowTemperature(DEFAULTS.temp);
     setTempMetric(DEFAULTS.tmetric);
     setTempMonth(new Date().getMonth());
@@ -821,6 +880,14 @@ export default function Home() {
     setSelectedPovertyCityName(name);
   }, []);
 
+  const goToSchoolsCounty = useCallback((name: string) => {
+    setSelectedSchoolsCountyName(name);
+  }, []);
+
+  const goToSchoolsCity = useCallback((name: string) => {
+    setSelectedSchoolsCityName(name);
+  }, []);
+
   const hasAnyFavorites = favorites.length > 0;
 
   // --- Resizable panel ---
@@ -924,6 +991,15 @@ export default function Home() {
                 showCityCrime={showCityCrime}
                 cityCrimeType={cityCrimeType}
                 selectedCrimeCityName={selectedCrimeCityName}
+                showSchools={showSchools}
+                schoolMetric={schoolMetric}
+                selectedSchoolsCountyName={selectedSchoolsCountyName}
+                showCitySchools={showCitySchools}
+                citySchoolMetric={citySchoolMetric}
+                selectedSchoolsCityName={selectedSchoolsCityName}
+                showSchoolPoints={showSchoolPoints}
+                schoolPointColor={schoolPointColor}
+                schoolLevelFilter={schoolLevelFilter}
                 showTemperature={showTemperature}
                 tempMetric={tempMetric}
                 tempMonth={tempMonth}
@@ -1703,6 +1779,63 @@ export default function Home() {
                   )}
                 </div>
 
+                {/* School points toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showSchoolPoints ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showSchoolPoints} onChange={toggleSchoolPoints} />
+                    <LuSchool className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">School Locations</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://www.cde.ca.gov/ds/si/ds/pubschls.asp" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        CA Dept. of Education
+                      </a>
+                      <br />
+                      Public Schools Directory &amp; Dashboard (2025).
+                      <br />
+                      Individual school locations colored by rating.
+                      <br />
+                      Zoom in to see schools (visible at zoom 9+).
+                    </InfoTooltip>
+                  </label>
+                  {showSchoolPoints && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={schoolPointColor}
+                          onChange={(e) => setSchoolPointColor(e.target.value as SchoolPointColor)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {schoolPointColorIds.map((id) => (
+                            <option key={id} value={id}>
+                              {SCHOOL_POINT_COLOR_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={schoolLevelFilter}
+                          onChange={(e) => setSchoolLevelFilter(e.target.value as SchoolLevelFilter)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {schoolLevelFilterIds.map((id) => (
+                            <option key={id} value={id}>
+                              {SCHOOL_LEVEL_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="my-1 border-t border-gray-300">
                   <div className="mt-1 text-[10px] font-medium uppercase tracking-widest text-gray-400">Counties</div>
                 </div>
@@ -2066,6 +2199,57 @@ export default function Home() {
                     <div className="mt-2 ml-14 flex flex-col gap-2">
                       <button
                         onClick={() => setShowPovertyTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* County schools toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showSchools ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showSchools} onChange={toggleSchools} />
+                    <LuSchool className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">County Schools</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://www.cde.ca.gov/ta/ac/cm/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        CA Dept. of Education
+                      </a>
+                      <br />
+                      Dashboard Indicators (2025).
+                      <br />
+                      ELA/Math: Distance from Standard.
+                      <br />
+                      Graduation: 4-year cohort rate.
+                    </InfoTooltip>
+                  </label>
+                  {showSchools && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={schoolMetric}
+                          onChange={(e) => setSchoolMetric(e.target.value as SchoolMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {schoolMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {SCHOOL_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500 leading-tight px-0.5">
+                        {SCHOOL_METRIC_DESCRIPTIONS[schoolMetric]}
+                      </div>
+                      <button
+                        onClick={() => setShowSchoolsTable(true)}
                         className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
                       >
                         <LuTable className="h-4 w-4 text-gray-900" />
@@ -2454,6 +2638,59 @@ export default function Home() {
                     </div>
                   )}
                 </div>
+
+                {/* City schools toggle */}
+                <div className={`-mx-2 rounded-lg p-2 transition-colors ${showCitySchools ? "bg-gray-100/80" : ""}`}>
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <Toggle checked={showCitySchools} onChange={toggleCitySchools} />
+                    <LuSchool className="h-4 w-4 text-gray-900" />
+                    <span className="text-sm font-medium">City Schools</span>
+                    <InfoTooltip>
+                      Source:{" "}
+                      <a href="https://www.cde.ca.gov/ta/ac/cm/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                        CA Dept. of Education
+                      </a>
+                      <br />
+                      Dashboard Indicators (2025).
+                      <br />
+                      ELA/Math: Distance from Standard.
+                      <br />
+                      Graduation: 4-year cohort rate.
+                    </InfoTooltip>
+                  </label>
+                  {showCitySchools && (
+                    <div className="mt-2 ml-14 flex flex-col gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={citySchoolMetric}
+                          onChange={(e) => setCitySchoolMetric(e.target.value as SchoolMetric)}
+                          className="appearance-none block w-full rounded-md border border-gray-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-gray-700 shadow-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none cursor-pointer hover:bg-gray-50 transition-colors z-10"
+                        >
+                          {schoolMetricIds.map((id) => (
+                            <option key={id} value={id}>
+                              {SCHOOL_LABELS[id]}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-20">
+                          <LuChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500 leading-tight px-0.5">
+                        {SCHOOL_METRIC_DESCRIPTIONS[citySchoolMetric]}
+                      </div>
+                      <button
+                        onClick={() => setShowCitySchoolsTable(true)}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 self-start"
+                      >
+                        <LuTable className="h-4 w-4 text-gray-900" />
+                        View Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+
               </div>
             )}
 
@@ -2721,6 +2958,24 @@ export default function Home() {
         title="City Poverty Rate (ACS 2019–2023)"
         nameLabel="City"
         onSelectName={goToPovertyCity}
+      />
+      <SchoolsTableModal
+        open={showSchoolsTable}
+        onClose={() => setShowSchoolsTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-county-labels.geojson`}
+        title="County School Performance (CDE Dashboard 2025)"
+        nameLabel="County"
+        activeSchoolMetric={schoolMetric}
+        onSelectName={goToSchoolsCounty}
+      />
+      <SchoolsTableModal
+        open={showCitySchoolsTable}
+        onClose={() => setShowCitySchoolsTable(false)}
+        dataUrl={`${import.meta.env.BASE_URL}data/california-city-labels.geojson`}
+        title="City School Performance (CDE Dashboard 2025)"
+        nameLabel="City"
+        activeSchoolMetric={citySchoolMetric}
+        onSelectName={goToSchoolsCity}
       />
       <CompareModal
         open={compareType !== null}

@@ -148,6 +148,83 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- County Schools: ELA (default) -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?schools=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- County Schools: Math -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?schools=1&amp;smetric=math&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- County Schools: Graduation Rate -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?schools=1&amp;smetric=graduationRate&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- County Schools: School Count -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?schools=1&amp;smetric=schoolCount&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- City Schools: ELA (default) -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?citySchools=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- City Schools: Math -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?citySchools=1&amp;csmetric=math&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- City Schools: Graduation Rate -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?citySchools=1&amp;csmetric=graduationRate&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- City Schools: School Count -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?citySchools=1&amp;csmetric=schoolCount&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- School Locations (individual school points) -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?schPts=1&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- School Locations: colored by ELA -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?schPts=1&amp;spcolor=ela&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- School Locations: colored by Math -->
+  <url>
+    <loc>https://trekhleb.dev/cali-vibe/?schPts=1&amp;spcolor=math&amp;relief=0</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- County crime: All Crime -->
   <url>
     <loc>https://trekhleb.dev/cali-vibe/?crime=1&amp;relief=0</loc>
