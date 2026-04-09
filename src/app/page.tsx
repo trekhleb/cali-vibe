@@ -75,6 +75,7 @@ import { IoManOutline } from "react-icons/io5";
 import { RiFocus3Line, RiFocus3Fill } from "react-icons/ri";
 import { FaGithub } from "react-icons/fa";
 import type { California3DTerrainRef } from "@/components/map/terrain-3d/california-3d-terrain";
+import { pathToParams, paramsToPath, LAYER_PARAM_KEYS } from "@/utils/route-catalog";
 
 const crimeTypeIds = Object.keys(CRIME_LABELS) as CrimeType[];
 const tempMetricIds = Object.keys(METRIC_LABELS) as TempMetric[];
@@ -172,11 +173,22 @@ const DEFAULTS = {
 
 function readParams() {
   const p = new URLSearchParams(window.location.search);
+  const pathResult = pathToParams(window.location.pathname, import.meta.env.BASE_URL);
+
   const bool = (key: string, def: boolean) => {
+    // Path mode: layer booleans come from path (absent = off)
+    if (pathResult && LAYER_PARAM_KEYS.has(key)) {
+      return pathResult.layers[key] === true;
+    }
     const v = p.get(key);
     return v === null ? def : v === "1";
   };
   const str = <T extends string>(key: string, def: T, valid: readonly T[]) => {
+    // Path mode: metric values from path take precedence
+    if (pathResult) {
+      const pathVal = pathResult.layers[key] as T | undefined;
+      if (pathVal !== undefined && valid.includes(pathVal)) return pathVal;
+    }
     const v = p.get(key) as T | null;
     return v !== null && valid.includes(v) ? v : def;
   };
@@ -250,6 +262,12 @@ function readParams() {
     ssrc: str("ssrc", DEFAULTS.ssrc, ["nsrdb", "era5"] as const),
     transit: bool("transit", DEFAULTS.transit),
     tsys: (() => {
+      if (pathResult?.transitSystem) {
+        const allIds = TRANSIT_SYSTEMS.map((s) => s.id) as string[];
+        if (allIds.includes(pathResult.transitSystem)) {
+          return [pathResult.transitSystem] as TransitSystem[];
+        }
+      }
       const v = p.get("tsys");
       if (v === null) return [...DEFAULT_TRANSIT_SYSTEMS];
       const allIds = TRANSIT_SYSTEMS.map((s) => s.id) as string[];
@@ -446,73 +464,89 @@ export default function Home() {
 
   const terrainRef = useRef<California3DTerrainRef>(null);
 
-  // Sync state to URL search params
+  // Sync state to URL (path-based for layers, query params for display prefs)
   useEffect(() => {
-    const p = new URLSearchParams();
-    const setBool = (key: string, val: boolean, def: boolean) => {
-      if (val !== def) p.set(key, val ? "1" : "0");
+    const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+    // Layer state → path segment
+    const layerState: Record<string, any> = {
+      terrain3d,
+      counties: showCounties,
+      pop: showPopulation, pmetric: populationMetric,
+      cityPop: showCityPopulation, cpmetric: cityPopulationMetric,
+      cities: showCities,
+      housing: showHousing, hmetric: housingMetric,
+      income: showIncome,
+      cityHousing: showCityHousing, chmetric: cityHousingMetric,
+      cityIncome: showCityIncome,
+      crime: showCrime, ctype: crimeType,
+      cityCrime: showCityCrime, cictype: cityCrimeType,
+      edu: showEducation, emetric: educationMetric,
+      cityEdu: showCityEducation, cemetric: cityEducationMetric,
+      schools: showSchools, smetric: schoolMetric,
+      citySchools: showCitySchools, csmetric: citySchoolMetric,
+      schPts: showSchoolPoints, spcolor: schoolPointColor,
+      race: showRace, rmetric: raceMetric,
+      cityRace: showCityRace, crmetric: cityRaceMetric,
+      age: showAge, ametric: ageMetric,
+      cityAge: showCityAge, cametric: cityAgeMetric,
+      pov: showPoverty,
+      cityPov: showCityPoverty,
+      temp: showTemperature, tmetric: tempMetric,
+      shine: showSunshine,
+      transit: showTransit,
     };
-    const setStr = (key: string, val: string, def: string) => {
+
+    let { path, transitInPath } = paramsToPath(layerState, transitSystems as string[]);
+
+    // Preserve root URL for default state (only temp on with default metric)
+    const atRoot = window.location.pathname.replace(/\/$/, "") === basePath;
+    if (atRoot && path === "temperature") {
+      path = "";
+      transitInPath = false;
+    }
+
+    // Display preferences → query params
+    const p = new URLSearchParams();
+    const setQ = (key: string, val: string, def: string) => {
       if (val !== def) p.set(key, val);
     };
-    setBool("terrain3d", terrain3d, DEFAULTS.terrain3d);
-    setBool("counties", showCounties, DEFAULTS.counties);
-    setStr("cmode", countyDisplayMode, DEFAULTS.cmode);
-    setBool("pop", showPopulation, DEFAULTS.pop);
-    setStr("pmetric", populationMetric, DEFAULTS.pmetric);
-    setBool("cityPop", showCityPopulation, DEFAULTS.cityPop);
-    setStr("cpmetric", cityPopulationMetric, DEFAULTS.cpmetric);
-    setBool("cities", showCities, DEFAULTS.cities);
-    setStr("cimode", cityDisplayMode, DEFAULTS.cimode);
-    setBool("crime", showCrime, DEFAULTS.crime);
-    setStr("ctype", crimeType, DEFAULTS.ctype);
-    setBool("housing", showHousing, DEFAULTS.housing);
-    setStr("hmetric", housingMetric, DEFAULTS.hmetric);
-    setBool("income", showIncome, DEFAULTS.income);
-    setBool("cityHousing", showCityHousing, DEFAULTS.cityHousing);
-    setStr("chmetric", cityHousingMetric, DEFAULTS.chmetric);
-    setBool("cityIncome", showCityIncome, DEFAULTS.cityIncome);
-    setBool("cityCrime", showCityCrime, DEFAULTS.cityCrime);
-    setStr("cictype", cityCrimeType, DEFAULTS.cictype);
-    setBool("edu", showEducation, DEFAULTS.edu);
-    setStr("emetric", educationMetric, DEFAULTS.emetric);
-    setBool("cityEdu", showCityEducation, DEFAULTS.cityEdu);
-    setStr("cemetric", cityEducationMetric, DEFAULTS.cemetric);
-    setBool("race", showRace, DEFAULTS.race);
-    setStr("rmetric", raceMetric, DEFAULTS.rmetric);
-    setBool("cityRace", showCityRace, DEFAULTS.cityRace);
-    setStr("crmetric", cityRaceMetric, DEFAULTS.crmetric);
-    setBool("age", showAge, DEFAULTS.age);
-    setStr("ametric", ageMetric, DEFAULTS.ametric);
-    setBool("cityAge", showCityAge, DEFAULTS.cityAge);
-    setStr("cametric", cityAgeMetric, DEFAULTS.cametric);
-    setBool("pov", showPoverty, DEFAULTS.pov);
-    setBool("cityPov", showCityPoverty, DEFAULTS.cityPov);
-    setBool("schools", showSchools, DEFAULTS.schools);
-    setStr("smetric", schoolMetric, DEFAULTS.smetric);
-    setBool("citySchools", showCitySchools, DEFAULTS.citySchools);
-    setStr("csmetric", citySchoolMetric, DEFAULTS.csmetric);
-    setBool("schPts", showSchoolPoints, DEFAULTS.schPts);
-    setStr("spcolor", schoolPointColor, DEFAULTS.spcolor);
-    setStr("splevel", schoolLevelFilter, DEFAULTS.splevel);
-    setBool("temp", showTemperature, DEFAULTS.temp);
-    setStr("tmetric", tempMetric, DEFAULTS.tmetric);
+    const setBoolQ = (key: string, val: boolean, def: boolean) => {
+      if (val !== def) p.set(key, val ? "1" : "0");
+    };
+
+    // Blank map fallback: all layers off differs from defaults (temp=true)
+    if (!path && !atRoot) {
+      // Navigated from a path URL and all layers are now off
+      const hasAny = Object.entries(layerState).some(
+        ([, v]) => v === true,
+      );
+      if (!hasAny) p.set("temp", "0");
+    }
+
+    setQ("cmode", countyDisplayMode, DEFAULTS.cmode);
+    setQ("cimode", cityDisplayMode, DEFAULTS.cimode);
     if (tempMonth !== DEFAULTS.tmonth) p.set("tmonth", String(tempMonth));
-    setStr("tunit", tempUnit, DEFAULTS.tunit);
+    setQ("tunit", tempUnit, DEFAULTS.tunit);
     if (tempResolution !== DEFAULTS.tres) p.set("tres", String(tempResolution));
-    setBool("shine", showSunshine, DEFAULTS.shine);
     if (sunshineMonth !== DEFAULTS.smonth) p.set("smonth", String(sunshineMonth));
     if (sunshineResolution !== DEFAULTS.sres) p.set("sres", String(sunshineResolution));
-    if (sunshineDataSource !== DEFAULTS.ssrc) p.set("ssrc", sunshineDataSource);
-    setBool("transit", showTransit, DEFAULTS.transit);
-    const isDefaultSystems = DEFAULT_TRANSIT_SYSTEMS.length === transitSystems.length && DEFAULT_TRANSIT_SYSTEMS.every((id) => transitSystems.includes(id));
-    if (!isDefaultSystems) p.set("tsys", transitSystems.join(","));
-    setStr("style", mapStyleId, DEFAULTS.style);
-    setBool("relief", showRelief, DEFAULTS.relief);
-    setBool("peaks", showPeaks, DEFAULTS.peaks);
-    setStr("punit", peakUnit, DEFAULTS.punit);
-    setStr("tab", activeTab, DEFAULTS.tab);
-    setBool("drawer", isDrawerOpen, !window.matchMedia("(max-width: 767px)").matches);
+    setQ("ssrc", sunshineDataSource, DEFAULTS.ssrc);
+    setQ("splevel", schoolLevelFilter, DEFAULTS.splevel);
+
+    // Transit systems as query param (if not encoded in path and not default)
+    if (showTransit && !transitInPath) {
+      const isDefaultSystems = DEFAULT_TRANSIT_SYSTEMS.length === transitSystems.length && DEFAULT_TRANSIT_SYSTEMS.every((id) => transitSystems.includes(id));
+      if (!isDefaultSystems) p.set("tsys", transitSystems.join(","));
+    }
+
+    setQ("style", mapStyleId, DEFAULTS.style);
+    setBoolQ("relief", showRelief, DEFAULTS.relief);
+    setBoolQ("peaks", showPeaks, DEFAULTS.peaks);
+    setQ("punit", peakUnit, DEFAULTS.punit);
+    setQ("tab", activeTab, DEFAULTS.tab);
+    setBoolQ("drawer", isDrawerOpen, !window.matchMedia("(max-width: 767px)").matches);
+
     if (compareType) {
       p.set("compare", compareType);
       if (compareNames.length > 0) p.set("cnames", compareNames.map(encodeURIComponent).join(","));
@@ -526,10 +560,19 @@ export default function Home() {
       if (compareSunSource !== DEFAULTS.cssrc) p.set("cssrc", compareSunSource);
       if (compareCrimeAbsolute !== DEFAULTS.ccrime) p.set("ccrime", "1");
     }
-    setBool("about", showAbout, DEFAULTS.about);
+    setBoolQ("about", showAbout, DEFAULTS.about);
+
+    // Build final URL
     const qs = p.toString();
-    const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    const pathname = path ? `${basePath}/${path}` : `${basePath}/`;
+    const url = qs ? `${pathname}?${qs}` : pathname;
     window.history.replaceState(null, "", url);
+
+    // Update canonical URL
+    const canonical = path
+      ? `https://trekhleb.dev${basePath}/${path}`
+      : `https://trekhleb.dev${basePath}/`;
+    document.querySelector('link[rel="canonical"]')?.setAttribute("href", canonical);
   }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showAge, ageMetric, showCityAge, cityAgeMetric, showPoverty, showCityPoverty, showSchools, schoolMetric, showCitySchools, citySchoolMetric, showSchoolPoints, schoolPointColor, schoolLevelFilter, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, compareTempMonth, compareTempUnit, compareSunMonth, compareSunSource, compareCrimeAbsolute, showAbout]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();

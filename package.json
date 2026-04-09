@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && cp dist/index.html dist/404.html",
+    "build": "tsc && vite build && node scripts/build-html-routes.mjs",
     "preview": "vite preview",
     "lint": "eslint",
     "test": "vitest run",
