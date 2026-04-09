@@ -56,7 +56,10 @@ describe("Home page", () => {
   const user = userEvent.setup();
 
   beforeEach(() => {
-    window.history.replaceState(null, "", window.location.pathname);
+    // Reset to root so readParams() always starts with default state.
+    // Using only window.location.pathname would preserve the previous test's
+    // path-based route (e.g. /cali-vibe/sunshine), causing unexpected initial state.
+    window.history.replaceState(null, "", "/cali-vibe/");
   });
 
   afterEach(() => {

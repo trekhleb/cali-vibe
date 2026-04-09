@@ -9,16 +9,18 @@
  * Run after `vite build`: node scripts/build-html-routes.mjs
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const DIST = "dist";
-const BASE = "/cali-vibe";
-const ORIGIN = "https://trekhleb.dev";
+
+export const BASE = "/cali-vibe";
+export const ORIGIN = "https://trekhleb.dev";
 
 // ── SEO metadata per route slug ──────────────────────────────────────
 
-const ROUTES = [
+export const ROUTES = [
   // --- County data layers ---
   { slug: "housing", title: "California County Housing Costs Map", desc: "Interactive map of median home values across all 58 California counties. Census ACS 2019–2023 data.", priority: 0.9, freq: "yearly" },
   { slug: "housing/rent", title: "California County Rent Prices Map", desc: "Interactive map of median gross rent across all 58 California counties. Census ACS 2019–2023 data.", priority: 0.9, freq: "yearly" },
@@ -112,16 +114,19 @@ const ROUTES = [
 
 // ── Template helpers ─────────────────────────────────────────────────
 
-const template = readFileSync(join(DIST, "index.html"), "utf-8");
-
-function replaceTag(html, regex, replacement) {
+/**
+ * Replace a meta/tag pattern in HTML with a new value.
+ */
+export function replaceTag(html, regex, replacement) {
   return html.replace(regex, replacement);
 }
 
-function generateHtml(route) {
+/**
+ * Generate route-specific HTML from a template and route metadata.
+ */
+export function generateHtml(template, route, origin = ORIGIN, base = BASE) {
   const fullTitle = `${route.title} | CaliVibe`;
-  const canonicalUrl = `${ORIGIN}${BASE}/${route.slug}`;
-  const ogImage = `${ORIGIN}${BASE}/demo/00-preview-md.jpg`;
+  const canonicalUrl = `${origin}${base}/${route.slug}`;
 
   let html = template;
 
@@ -187,42 +192,49 @@ function generateHtml(route) {
   return html;
 }
 
-// ── Generate per-route HTML files ────────────────────────────────────
+/**
+ * Build sitemap XML content from routes.
+ */
+export function buildSitemapXml(routes, origin = ORIGIN, base = BASE) {
+  const sitemapEntries = [
+    // Root
+    `  <url>\n    <loc>${origin}${base}/</loc>\n    <changefreq>monthly</changefreq>\n    <priority>1.0</priority>\n  </url>`,
+    // All routes
+    ...routes.map(
+      (r) =>
+        `  <url>\n    <loc>${origin}${base}/${r.slug}</loc>\n    <changefreq>${r.freq}</changefreq>\n    <priority>${r.priority}</priority>\n  </url>`,
+    ),
+  ];
 
-let generated = 0;
-
-for (const route of ROUTES) {
-  const html = generateHtml(route);
-  const dir = join(DIST, route.slug);
-  mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, "index.html"), html);
-  generated++;
-}
-
-// ── 404.html (SPA fallback — generic meta tags) ─────────────────────
-
-writeFileSync(join(DIST, "404.html"), template);
-
-// ── sitemap.xml ──────────────────────────────────────────────────────
-
-const sitemapEntries = [
-  // Root
-  `  <url>\n    <loc>${ORIGIN}${BASE}/</loc>\n    <changefreq>monthly</changefreq>\n    <priority>1.0</priority>\n  </url>`,
-  // All routes
-  ...ROUTES.map(
-    (r) =>
-      `  <url>\n    <loc>${ORIGIN}${BASE}/${r.slug}</loc>\n    <changefreq>${r.freq}</changefreq>\n    <priority>${r.priority}</priority>\n  </url>`,
-  ),
-];
-
-const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 ${sitemapEntries.join("\n\n")}
 
 </urlset>
 `;
+}
 
-writeFileSync(join(DIST, "sitemap.xml"), sitemap);
+// ── Main (only runs when executed directly) ──────────────────────────
 
-console.log(`Generated ${generated} route HTML files, 404.html, and sitemap.xml (${ROUTES.length + 1} URLs)`);
+const __filename = fileURLToPath(import.meta.url);
+if (process.argv[1] === __filename) {
+  const template = readFileSync(join(DIST, "index.html"), "utf-8");
+  let generated = 0;
+
+  for (const route of ROUTES) {
+    const html = generateHtml(template, route);
+    const dir = join(DIST, route.slug);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, "index.html"), html);
+    generated++;
+  }
+
+  // 404.html (SPA fallback — generic meta tags)
+  writeFileSync(join(DIST, "404.html"), template);
+
+  // sitemap.xml
+  writeFileSync(join(DIST, "sitemap.xml"), buildSitemapXml(ROUTES));
+
+  console.log(`Generated ${generated} route HTML files, 404.html, and sitemap.xml (${ROUTES.length + 1} URLs)`);
+}
