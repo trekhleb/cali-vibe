@@ -128,12 +128,57 @@ ${sitemapEntries.join("\n\n")}
 
 // ── Main (only runs when executed directly) ──────────────────────────
 
+// ── Place (county/city) detail route helpers ─────────────────────────
+
+function nameToSlug(name) {
+  return name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+}
+
+function buildPlaceRoutes(type, names) {
+  return names.map((name) => {
+    const slug = `${type}/${nameToSlug(name)}`;
+    const displayName = type === "county" ? `${name} County` : name;
+    return {
+      slug,
+      title: `${displayName}, California — Demographics, Housing, Crime & More`,
+      desc: `Explore ${displayName} demographics, housing costs, crime rates, education, schools, and more on the interactive CaliVibe California map.`,
+      priority: type === "county" ? 0.6 : 0.5,
+      freq: "yearly",
+    };
+  });
+}
+
+function loadPlaceNames(geojsonPath) {
+  const geo = JSON.parse(readFileSync(geojsonPath, "utf-8"));
+  return geo.features.map((f) => f.properties.name).filter(Boolean).sort();
+}
+
+// ── Main (only runs when executed directly) ──────────────────────────
+
 const __filename = fileURLToPath(import.meta.url);
 if (process.argv[1] === __filename) {
   const template = readFileSync(join(DIST, "index.html"), "utf-8");
   let generated = 0;
 
+  // Layer routes (from seo-routes.json)
   for (const route of ROUTES) {
+    const html = generateHtml(template, route);
+    const dir = join(DIST, route.slug);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, "index.html"), html);
+    generated++;
+  }
+
+  // County/city detail routes (from GeoJSON data)
+  const dataDir = join(DIST, "data");
+  const countyNames = loadPlaceNames(join(dataDir, "california-county-labels.geojson"));
+  const cityNames = loadPlaceNames(join(dataDir, "california-city-labels.geojson"));
+  const placeRoutes = [
+    ...buildPlaceRoutes("county", countyNames),
+    ...buildPlaceRoutes("city", cityNames),
+  ];
+
+  for (const route of placeRoutes) {
     const html = generateHtml(template, route);
     const dir = join(DIST, route.slug);
     mkdirSync(dir, { recursive: true });
@@ -144,8 +189,9 @@ if (process.argv[1] === __filename) {
   // 404.html (SPA fallback — generic meta tags)
   writeFileSync(join(DIST, "404.html"), template);
 
-  // sitemap.xml
-  writeFileSync(join(DIST, "sitemap.xml"), buildSitemapXml(ROUTES));
+  // sitemap.xml (includes all routes: layer + place detail)
+  const allRoutes = [...ROUTES, ...placeRoutes];
+  writeFileSync(join(DIST, "sitemap.xml"), buildSitemapXml(allRoutes));
 
-  console.log(`Generated ${generated} route HTML files, 404.html, and sitemap.xml (${ROUTES.length + 1} URLs)`);
+  console.log(`Generated ${generated} route HTML files (${ROUTES.length} layer + ${placeRoutes.length} place detail), 404.html, and sitemap.xml (${allRoutes.length + 1} URLs)`);
 }

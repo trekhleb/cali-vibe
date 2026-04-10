@@ -7,6 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 import HeartButton from "@/components/heart-button";
+import DetailLinkButton from "@/components/detail-link-button";
 
 const SOURCE_ID = "counties-poverty";
 const LABEL_SOURCE_ID = "county-poverty-labels-source";
@@ -59,6 +60,7 @@ interface CountyPovertyLayerProps {
   overlayOffset?: number;
   selectName?: string | null;
   onToggleFavorite?: (name: string) => void;
+  onViewDetail?: (name: string) => void;
   isFavorite?: (name: string) => boolean;
 }
 
@@ -83,7 +85,7 @@ export function PovertyLegend({ overlayOffset = 0 }: { overlayOffset?: number })
   );
 }
 
-export default function CountyPovertyLayer({ overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CountyPovertyLayerProps) {
+export default function CountyPovertyLayer({ overlayOffset = 0, selectName = null, onToggleFavorite, onViewDetail, isFavorite }: CountyPovertyLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,

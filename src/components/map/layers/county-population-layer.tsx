@@ -7,6 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 import HeartButton from "@/components/heart-button";
+import DetailLinkButton from "@/components/detail-link-button";
 
 export type PopulationMetric = "total" | "density";
 export const POPULATION_LABELS: Record<PopulationMetric, string> = {
@@ -157,7 +158,8 @@ export function PopulationLegend({ overlayOffset = 0, populationMetric = "total"
   );
 }
 
-export default function CountyPopulationLayer({ overlayOffset = 0, selectName = null, populationMetric = "total" as PopulationMetric, onToggleFavorite, isFavorite }: { overlayOffset?: number; selectName?: string | null; populationMetric?: PopulationMetric; onToggleFavorite?: (name: string) => void; isFavorite?: (name: string) => boolean }) {
+export default function CountyPopulationLayer({ overlayOffset = 0, selectName = null, populationMetric = "total" as PopulationMetric, onToggleFavorite, onViewDetail, isFavorite }: { overlayOffset?: number; selectName?: string | null; populationMetric?: PopulationMetric; onToggleFavorite?: (name: string) => void;
+  onViewDetail?: (name: string) => void; isFavorite?: (name: string) => boolean }) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,

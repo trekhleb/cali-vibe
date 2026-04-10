@@ -7,6 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 import HeartButton from "@/components/heart-button";
+import DetailLinkButton from "@/components/detail-link-button";
 
 const SOURCE_ID = "counties-housing";
 const LABEL_SOURCE_ID = "county-housing-labels-source";
@@ -95,6 +96,7 @@ interface CountyHousingLayerProps {
   overlayOffset?: number;
   selectName?: string | null;
   onToggleFavorite?: (name: string) => void;
+  onViewDetail?: (name: string) => void;
   isFavorite?: (name: string) => boolean;
 }
 
@@ -125,7 +127,7 @@ export function HousingLegend({ housingMetric, overlayOffset = 0 }: { housingMet
   );
 }
 
-export default function CountyHousingLayer({ housingMetric, overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CountyHousingLayerProps) {
+export default function CountyHousingLayer({ housingMetric, overlayOffset = 0, selectName = null, onToggleFavorite, onViewDetail, isFavorite }: CountyHousingLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,

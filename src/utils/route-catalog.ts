@@ -211,3 +211,28 @@ export function paramsToPath(
 export function getLayerByParamKey(paramKey: string): LayerDef | undefined {
   return _paramKeyToLayer.get(paramKey);
 }
+
+// ── Detail route (county/city pages) ─────────────────────────────────
+
+export interface DetailRoute {
+  type: "county" | "city";
+  slug: string;
+}
+
+/**
+ * Parse a URL pathname to see if it matches a county/city detail route.
+ * Pattern: {base}/county/{slug} or {base}/city/{slug}
+ * Returns null if no match.
+ */
+export function parseDetailRoute(pathname: string, basePath: string): DetailRoute | null {
+  const base = basePath.replace(/\/$/, "");
+  let suffix = pathname.replace(/\/$/, "");
+  if (suffix.startsWith(base)) {
+    suffix = suffix.slice(base.length);
+  }
+  suffix = suffix.replace(/^\//, "");
+
+  const match = suffix.match(/^(county|city)\/(.+)$/);
+  if (!match) return null;
+  return { type: match[1] as "county" | "city", slug: match[2] };
+}

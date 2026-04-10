@@ -7,6 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 import HeartButton from "@/components/heart-button";
+import DetailLinkButton from "@/components/detail-link-button";
 
 const SOURCE_ID = "counties-age";
 const LABEL_SOURCE_ID = "county-age-labels-source";
@@ -108,6 +109,7 @@ interface CountyAgeLayerProps {
   overlayOffset?: number;
   selectName?: string | null;
   onToggleFavorite?: (name: string) => void;
+  onViewDetail?: (name: string) => void;
   isFavorite?: (name: string) => boolean;
 }
 
@@ -133,7 +135,7 @@ export function AgeLegend({ ageMetric, overlayOffset = 0 }: { ageMetric: AgeMetr
   );
 }
 
-export default function CountyAgeLayer({ ageMetric, overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CountyAgeLayerProps) {
+export default function CountyAgeLayer({ ageMetric, overlayOffset = 0, selectName = null, onToggleFavorite, onViewDetail, isFavorite }: CountyAgeLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,

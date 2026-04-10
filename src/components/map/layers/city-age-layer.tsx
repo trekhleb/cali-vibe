@@ -7,6 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 import HeartButton from "@/components/heart-button";
+import DetailLinkButton from "@/components/detail-link-button";
 import {
   AGE_LABELS,
   type AgeMetric,
@@ -100,6 +101,7 @@ interface CityAgeLayerProps {
   overlayOffset?: number;
   selectName?: string | null;
   onToggleFavorite?: (name: string) => void;
+  onViewDetail?: (name: string) => void;
   isFavorite?: (name: string) => boolean;
 }
 
@@ -125,7 +127,7 @@ export function CityAgeLegend({ ageMetric, overlayOffset = 0 }: { ageMetric: Age
   );
 }
 
-export default function CityAgeLayer({ ageMetric, overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CityAgeLayerProps) {
+export default function CityAgeLayer({ ageMetric, overlayOffset = 0, selectName = null, onToggleFavorite, onViewDetail, isFavorite }: CityAgeLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,

@@ -7,6 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 import HeartButton from "@/components/heart-button";
+import DetailLinkButton from "@/components/detail-link-button";
 import { CRIME_LABELS, type CrimeType } from "./county-crime-layer";
 
 const SOURCE_ID = "cities-crime";
@@ -92,6 +93,7 @@ interface CityCrimeLayerProps {
   overlayOffset?: number;
   selectName?: string | null;
   onToggleFavorite?: (name: string) => void;
+  onViewDetail?: (name: string) => void;
   isFavorite?: (name: string) => boolean;
 }
 
@@ -119,7 +121,7 @@ export function CityCrimeLegend({ crimeType, overlayOffset = 0 }: { crimeType: C
   );
 }
 
-export default function CityCrimeLayer({ crimeType, overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CityCrimeLayerProps) {
+export default function CityCrimeLayer({ crimeType, overlayOffset = 0, selectName = null, onToggleFavorite, onViewDetail, isFavorite }: CityCrimeLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,

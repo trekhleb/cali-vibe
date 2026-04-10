@@ -164,8 +164,10 @@ interface CaliforniaMapProps {
   cityDisplayMode?: CityDisplayMode;
   onToggleCountyFavorite?: (name: string) => void;
   isCountyFavorite?: (name: string) => boolean;
+  onViewCountyDetail?: (name: string) => void;
   onToggleCityFavorite?: (name: string) => void;
   isCityFavorite?: (name: string) => boolean;
+  onViewCityDetail?: (name: string) => void;
   overlayOffset?: number;
   showTransit?: boolean;
   transitSystems?: TransitSystem[];
@@ -256,8 +258,10 @@ export default function CaliforniaMap({
   cityDisplayMode = "borders",
   onToggleCountyFavorite,
   isCountyFavorite,
+  onViewCountyDetail,
   onToggleCityFavorite,
   isCityFavorite,
+  onViewCityDetail,
   showTransit = false,
   transitSystems = [],
   activeColorMap = {},
@@ -294,55 +298,57 @@ export default function CaliforniaMap({
         <CountyBordersLayer
           displayMode={countyDisplayMode}
           onToggleFavorite={onToggleCountyFavorite}
+          onViewDetail={onViewCountyDetail}
           isFavorite={isCountyFavorite}
           overlayOffset={overlayOffset}
           selectName={selectedCountyName}
         />
       )}
-      {showPopulation && !showCrime && !showHousing && !showIncome && <CountyPopulationLayer overlayOffset={overlayOffset} selectName={selectedPopulationCountyName} populationMetric={populationMetric} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
+      {showPopulation && !showCrime && !showHousing && !showIncome && <CountyPopulationLayer overlayOffset={overlayOffset} selectName={selectedPopulationCountyName} populationMetric={populationMetric} onToggleFavorite={onToggleCountyFavorite} onViewDetail={onViewCountyDetail} isFavorite={isCountyFavorite} />}
       {showPopulation && !showCrime && !showHousing && !showIncome && <PopulationLegend overlayOffset={overlayOffset} populationMetric={populationMetric} />}
-      {showHousing && <CountyHousingLayer housingMetric={housingMetric} overlayOffset={overlayOffset} selectName={selectedHousingCountyName} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
+      {showHousing && <CountyHousingLayer housingMetric={housingMetric} overlayOffset={overlayOffset} selectName={selectedHousingCountyName} onToggleFavorite={onToggleCountyFavorite} onViewDetail={onViewCountyDetail} isFavorite={isCountyFavorite} />}
       {showHousing && <HousingLegend housingMetric={housingMetric} overlayOffset={overlayOffset} />}
-      {showIncome && <CountyHousingLayer housingMetric="income" overlayOffset={overlayOffset} selectName={selectedIncomeCountyName} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
+      {showIncome && <CountyHousingLayer housingMetric="income" overlayOffset={overlayOffset} selectName={selectedIncomeCountyName} onToggleFavorite={onToggleCountyFavorite} onViewDetail={onViewCountyDetail} isFavorite={isCountyFavorite} />}
       {showIncome && <HousingLegend housingMetric="income" overlayOffset={overlayOffset} />}
-      {showEducation && <CountyEducationLayer educationMetric={educationMetric} overlayOffset={overlayOffset} selectName={selectedEducationCountyName} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
+      {showEducation && <CountyEducationLayer educationMetric={educationMetric} overlayOffset={overlayOffset} selectName={selectedEducationCountyName} onToggleFavorite={onToggleCountyFavorite} onViewDetail={onViewCountyDetail} isFavorite={isCountyFavorite} />}
       {showEducation && <EducationLegend educationMetric={educationMetric} overlayOffset={overlayOffset} />}
       {showCities && (
         <CityBordersLayer
           displayMode={cityDisplayMode}
           onToggleFavorite={onToggleCityFavorite}
+          onViewDetail={onViewCityDetail}
           isFavorite={isCityFavorite}
           overlayOffset={overlayOffset}
           selectName={selectedCityName}
         />
       )}
-      {showCrime && <CountyCrimeLayer crimeType={crimeType} overlayOffset={overlayOffset} selectName={selectedCrimeCountyName} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
+      {showCrime && <CountyCrimeLayer crimeType={crimeType} overlayOffset={overlayOffset} selectName={selectedCrimeCountyName} onToggleFavorite={onToggleCountyFavorite} onViewDetail={onViewCountyDetail} isFavorite={isCountyFavorite} />}
       {showCrime && <CrimeLegend crimeType={crimeType} overlayOffset={overlayOffset} />}
-      {showCityCrime && <CityCrimeLayer crimeType={cityCrimeType} overlayOffset={overlayOffset} selectName={selectedCrimeCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
+      {showCityCrime && <CityCrimeLayer crimeType={cityCrimeType} overlayOffset={overlayOffset} selectName={selectedCrimeCityName} onToggleFavorite={onToggleCityFavorite} onViewDetail={onViewCityDetail} isFavorite={isCityFavorite} />}
       {showCityCrime && <CityCrimeLegend crimeType={cityCrimeType} overlayOffset={overlayOffset} />}
-      {showCityHousing && <CityHousingLayer housingMetric={cityHousingMetric} overlayOffset={overlayOffset} selectName={selectedHousingCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
+      {showCityHousing && <CityHousingLayer housingMetric={cityHousingMetric} overlayOffset={overlayOffset} selectName={selectedHousingCityName} onToggleFavorite={onToggleCityFavorite} onViewDetail={onViewCityDetail} isFavorite={isCityFavorite} />}
       {showCityHousing && <CityHousingLegend housingMetric={cityHousingMetric} overlayOffset={overlayOffset} />}
-      {showCityIncome && <CityHousingLayer housingMetric="income" overlayOffset={overlayOffset} selectName={selectedIncomeCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
+      {showCityIncome && <CityHousingLayer housingMetric="income" overlayOffset={overlayOffset} selectName={selectedIncomeCityName} onToggleFavorite={onToggleCityFavorite} onViewDetail={onViewCityDetail} isFavorite={isCityFavorite} />}
       {showCityIncome && <CityHousingLegend housingMetric="income" overlayOffset={overlayOffset} />}
-      {showRace && <CountyRaceLayer raceMetric={raceMetric} overlayOffset={overlayOffset} selectName={selectedRaceCountyName} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
+      {showRace && <CountyRaceLayer raceMetric={raceMetric} overlayOffset={overlayOffset} selectName={selectedRaceCountyName} onToggleFavorite={onToggleCountyFavorite} onViewDetail={onViewCountyDetail} isFavorite={isCountyFavorite} />}
       {showRace && <RaceLegend raceMetric={raceMetric} overlayOffset={overlayOffset} />}
-      {showCityEducation && <CityEducationLayer educationMetric={cityEducationMetric} overlayOffset={overlayOffset} selectName={selectedEducationCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
+      {showCityEducation && <CityEducationLayer educationMetric={cityEducationMetric} overlayOffset={overlayOffset} selectName={selectedEducationCityName} onToggleFavorite={onToggleCityFavorite} onViewDetail={onViewCityDetail} isFavorite={isCityFavorite} />}
       {showCityEducation && <CityEducationLegend educationMetric={cityEducationMetric} overlayOffset={overlayOffset} />}
-      {showCityRace && <CityRaceLayer raceMetric={cityRaceMetric} overlayOffset={overlayOffset} selectName={selectedRaceCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
+      {showCityRace && <CityRaceLayer raceMetric={cityRaceMetric} overlayOffset={overlayOffset} selectName={selectedRaceCityName} onToggleFavorite={onToggleCityFavorite} onViewDetail={onViewCityDetail} isFavorite={isCityFavorite} />}
       {showCityRace && <CityRaceLegend raceMetric={cityRaceMetric} overlayOffset={overlayOffset} />}
-      {showAge && <CountyAgeLayer ageMetric={ageMetric} overlayOffset={overlayOffset} selectName={selectedAgeCountyName} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
+      {showAge && <CountyAgeLayer ageMetric={ageMetric} overlayOffset={overlayOffset} selectName={selectedAgeCountyName} onToggleFavorite={onToggleCountyFavorite} onViewDetail={onViewCountyDetail} isFavorite={isCountyFavorite} />}
       {showAge && <AgeLegend ageMetric={ageMetric} overlayOffset={overlayOffset} />}
-      {showCityAge && <CityAgeLayer ageMetric={cityAgeMetric} overlayOffset={overlayOffset} selectName={selectedAgeCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
+      {showCityAge && <CityAgeLayer ageMetric={cityAgeMetric} overlayOffset={overlayOffset} selectName={selectedAgeCityName} onToggleFavorite={onToggleCityFavorite} onViewDetail={onViewCityDetail} isFavorite={isCityFavorite} />}
       {showCityAge && <CityAgeLegend ageMetric={cityAgeMetric} overlayOffset={overlayOffset} />}
-      {showPoverty && <CountyPovertyLayer overlayOffset={overlayOffset} selectName={selectedPovertyCountyName} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
+      {showPoverty && <CountyPovertyLayer overlayOffset={overlayOffset} selectName={selectedPovertyCountyName} onToggleFavorite={onToggleCountyFavorite} onViewDetail={onViewCountyDetail} isFavorite={isCountyFavorite} />}
       {showPoverty && <PovertyLegend overlayOffset={overlayOffset} />}
-      {showCityPoverty && <CityPovertyLayer overlayOffset={overlayOffset} selectName={selectedPovertyCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
+      {showCityPoverty && <CityPovertyLayer overlayOffset={overlayOffset} selectName={selectedPovertyCityName} onToggleFavorite={onToggleCityFavorite} onViewDetail={onViewCityDetail} isFavorite={isCityFavorite} />}
       {showCityPoverty && <CityPovertyLegend overlayOffset={overlayOffset} />}
-      {showCityPopulation && <CityPopulationLayer overlayOffset={overlayOffset} selectName={selectedPopulationCityName} populationMetric={cityPopulationMetric} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
+      {showCityPopulation && <CityPopulationLayer overlayOffset={overlayOffset} selectName={selectedPopulationCityName} populationMetric={cityPopulationMetric} onToggleFavorite={onToggleCityFavorite} onViewDetail={onViewCityDetail} isFavorite={isCityFavorite} />}
       {showCityPopulation && <CityPopulationLegend overlayOffset={overlayOffset} populationMetric={cityPopulationMetric} />}
-      {showSchools && <CountySchoolsLayer schoolMetric={schoolMetric} overlayOffset={overlayOffset} selectName={selectedSchoolsCountyName} onToggleFavorite={onToggleCountyFavorite} isFavorite={isCountyFavorite} />}
+      {showSchools && <CountySchoolsLayer schoolMetric={schoolMetric} overlayOffset={overlayOffset} selectName={selectedSchoolsCountyName} onToggleFavorite={onToggleCountyFavorite} onViewDetail={onViewCountyDetail} isFavorite={isCountyFavorite} />}
       {showSchools && <SchoolsLegend schoolMetric={schoolMetric} overlayOffset={overlayOffset} />}
-      {showCitySchools && <CitySchoolsLayer schoolMetric={citySchoolMetric} overlayOffset={overlayOffset} selectName={selectedSchoolsCityName} onToggleFavorite={onToggleCityFavorite} isFavorite={isCityFavorite} />}
+      {showCitySchools && <CitySchoolsLayer schoolMetric={citySchoolMetric} overlayOffset={overlayOffset} selectName={selectedSchoolsCityName} onToggleFavorite={onToggleCityFavorite} onViewDetail={onViewCityDetail} isFavorite={isCityFavorite} />}
       {showCitySchools && <CitySchoolsLegend schoolMetric={citySchoolMetric} overlayOffset={overlayOffset} />}
       {showSchoolPoints && <SchoolsPointLayer colorBy={schoolPointColor} levelFilter={schoolLevelFilter} overlayOffset={overlayOffset} selectName={selectedSchoolPointName} />}
       {showSchoolPoints && <SchoolPointsLegend colorBy={schoolPointColor} overlayOffset={overlayOffset} />}

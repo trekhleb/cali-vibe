@@ -20,6 +20,7 @@ interface SortableFavoriteListProps {
   items: string[];
   onReorder: (names: string[]) => void;
   onClickItem: (name: string) => void;
+  onViewDetail: (name: string) => void;
   onRemoveItem: (name: string) => void;
 }
 
@@ -27,6 +28,7 @@ export default function SortableFavoriteList({
   items,
   onReorder,
   onClickItem,
+  onViewDetail,
   onRemoveItem,
 }: SortableFavoriteListProps) {
   const sensors = useSensors(
@@ -59,6 +61,7 @@ export default function SortableFavoriteList({
               key={name}
               id={name}
               onClickItem={onClickItem}
+              onViewDetail={onViewDetail}
               onRemoveItem={onRemoveItem}
             />
           ))}

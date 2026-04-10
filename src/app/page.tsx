@@ -26,6 +26,11 @@ import PovertyTableModal from "@/components/poverty-table-modal";
 import SchoolsTableModal from "@/components/schools-table-modal";
 import SchoolPointsTableModal from "@/components/school-points-table-modal";
 import CompareModal, { type CompareType, type SortConfig } from "@/components/compare-modal";
+import PlaceDetailModal from "@/components/place-detail-modal";
+import PlaceBrowseModal from "@/components/place-browse-modal";
+import type { PlaceType } from "@/utils/place-slugs";
+import { nameToSlug, slugToName, detailPath } from "@/utils/place-slugs";
+import { parseDetailRoute } from "@/utils/route-catalog";
 import { POPULATION_LABELS, type PopulationMetric } from "@/components/map/layers/county-population-layer";
 import { HOUSING_LABELS, type HousingMetric } from "@/components/map/layers/county-housing-layer";
 import { EDUCATION_LABELS, type EducationMetric } from "@/components/map/layers/county-education-layer";
@@ -70,6 +75,7 @@ import {
   LuCalendarDays,
   LuColumns3,
   LuSchool,
+  LuCompass,
 } from "react-icons/lu";
 import { IoManOutline } from "react-icons/io5";
 import { RiFocus3Line, RiFocus3Fill } from "react-icons/ri";
@@ -170,11 +176,34 @@ const DEFAULTS = {
   cssrc: "nsrdb" as "nsrdb" | "era5",
   ccrime: false,
   about: false,
+  detailType: null as PlaceType | null,
+  detailName: null as string | null,
+  browseType: null as PlaceType | null,
 };
+
+// County/city name lists for slug resolution (loaded lazily)
+let _countyNamesCache: string[] | null = null;
+let _cityNamesCache: string[] | null = null;
+
+async function loadPlaceNames(type: PlaceType): Promise<string[]> {
+  const cache = type === "county" ? _countyNamesCache : _cityNamesCache;
+  if (cache) return cache;
+  const url = `${import.meta.env.BASE_URL}data/california-${type === "county" ? "county" : "city"}-labels.geojson`;
+  const res = await fetch(url);
+  const geo = await res.json();
+  const names: string[] = geo.features.map((f: { properties: { name: string } }) => f.properties.name).filter(Boolean);
+  if (type === "county") _countyNamesCache = names;
+  else _cityNamesCache = names;
+  return names;
+}
 
 function readParams() {
   const p = new URLSearchParams(window.location.search);
-  const pathResult = pathToParams(window.location.pathname, import.meta.env.BASE_URL);
+
+  // Check for detail route first: /county/{slug} or /city/{slug}
+  const detailRoute = parseDetailRoute(window.location.pathname, import.meta.env.BASE_URL);
+
+  const pathResult = detailRoute ? null : pathToParams(window.location.pathname, import.meta.env.BASE_URL);
 
   const bool = (key: string, def: boolean) => {
     // Path mode: layer booleans come from path (absent = off)
@@ -317,6 +346,9 @@ function readParams() {
     cssrc: str("cssrc", DEFAULTS.cssrc, ["nsrdb", "era5"] as const),
     ccrime: bool("ccrime", DEFAULTS.ccrime),
     about: bool("about", DEFAULTS.about),
+    detailType: detailRoute?.type ?? null,
+    detailSlug: detailRoute?.slug ?? null,
+    browseType: null as PlaceType | null,
   };
 }
 
@@ -461,7 +493,20 @@ export default function Home() {
   const [compareSunSource, setCompareSunSource] = useState<"nsrdb" | "era5">(init.cssrc);
   const [compareCrimeAbsolute, setCompareCrimeAbsolute] = useState(init.ccrime);
   const [showAbout, setShowAbout] = useState(init.about);
+  const [detailType, setDetailType] = useState<PlaceType | null>(init.detailType);
+  const [detailName, setDetailName] = useState<string | null>(null);
+  const [browseType, setBrowseType] = useState<PlaceType | null>(init.browseType);
   const isMobile = useIsMobile();
+
+  // Resolve detail slug → name on initial load
+  useEffect(() => {
+    if (!init.detailType || !init.detailSlug) return;
+    loadPlaceNames(init.detailType).then((names) => {
+      const name = slugToName(init.detailSlug!, names);
+      if (name) setDetailName(name);
+      else { setDetailType(null); setDetailName(null); }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const tempHexUrl = `${import.meta.env.BASE_URL}data/california-temperature-h3-res${tempResolution}.geojson`;
   const sunshineHexUrl = `${import.meta.env.BASE_URL}data/california-sunshine-${sunshineDataSource}-h3-res${sunshineResolution}.geojson`;
@@ -541,6 +586,18 @@ export default function Home() {
       setCompareSunSource(s.cssrc);
       setCompareCrimeAbsolute(s.ccrime);
       setShowAbout(s.about);
+      // Detail route
+      if (s.detailType && s.detailSlug) {
+        setDetailType(s.detailType);
+        loadPlaceNames(s.detailType).then((names) => {
+          const name = slugToName(s.detailSlug!, names);
+          if (name) setDetailName(name);
+          else { setDetailType(null); setDetailName(null); }
+        });
+      } else {
+        setDetailType(null);
+        setDetailName(null);
+      }
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
@@ -645,7 +702,11 @@ export default function Home() {
 
     // Build final URL
     const qs = p.toString();
-    const pathname = path ? `${basePath}/${path}` : `${basePath}/`;
+    // When a detail page is open, the URL reflects the detail route
+    const isDetail = detailType && detailName;
+    const pathname = isDetail
+      ? `${basePath}/${detailPath(detailType!, detailName!)}`
+      : path ? `${basePath}/${path}` : `${basePath}/`;
     const url = qs ? `${pathname}?${qs}` : pathname;
 
     // First render / popstate: replace (don't create duplicate or break Forward).
@@ -660,35 +721,37 @@ export default function Home() {
     prevUrlRef.current = url;
 
     // Update canonical URL
-    const canonical = path
-      ? `https://trekhleb.dev${basePath}/${path}`
-      : `https://trekhleb.dev${basePath}/`;
+    const canonical = `https://trekhleb.dev${pathname}`;
     document.querySelector('link[rel="canonical"]')?.setAttribute("href", canonical);
 
     // Update Document Meta Info
-    const primarySlug = path.split('+')[0];
-    const route = SEO_ROUTES.find((r) => r.slug === path) || SEO_ROUTES.find((r) => r.slug === primarySlug);
-    if (route) {
-      const fullTitle = `${route.title} | CaliVibe`;
-      document.title = fullTitle;
-      document.querySelector('meta[name="description"]')?.setAttribute("content", route.desc);
+    function updateMeta(title: string, desc: string) {
+      document.title = title;
+      document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
       document.querySelector('meta[property="og:url"]')?.setAttribute("content", canonical);
-      document.querySelector('meta[property="og:title"]')?.setAttribute("content", fullTitle);
-      document.querySelector('meta[property="og:description"]')?.setAttribute("content", route.desc);
-      document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", fullTitle);
-      document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", route.desc);
-    } else if (path === "") {
-      const defaultTitle = "CaliVibe — Interactive California Map: Housing, Income, Education, Schools, Race, Age, Poverty, Crime, Temperature, Transit";
-      const defaultDesc = "Explore California on one interactive map. Compare counties and cities side by side across housing costs, household income, educational attainment, school performance ratings, race/ethnicity breakdown, age distribution, poverty rates, crime rates, population, density, temperature, sunshine hours, 18 transit systems, and 3D terrain.";
-      document.title = defaultTitle;
-      document.querySelector('meta[name="description"]')?.setAttribute("content", defaultDesc);
-      document.querySelector('meta[property="og:url"]')?.setAttribute("content", canonical);
-      document.querySelector('meta[property="og:title"]')?.setAttribute("content", defaultTitle);
-      document.querySelector('meta[property="og:description"]')?.setAttribute("content", defaultDesc);
-      document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", defaultTitle);
-      document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", defaultDesc);
+      document.querySelector('meta[property="og:title"]')?.setAttribute("content", title);
+      document.querySelector('meta[property="og:description"]')?.setAttribute("content", desc);
+      document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", title);
+      document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", desc);
     }
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showAge, ageMetric, showCityAge, cityAgeMetric, showPoverty, showCityPoverty, showSchools, schoolMetric, showCitySchools, citySchoolMetric, showSchoolPoints, schoolPointColor, schoolLevelFilter, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, compareTempMonth, compareTempUnit, compareSunMonth, compareSunSource, compareCrimeAbsolute, showAbout]);
+
+    if (isDetail) {
+      const displayName = detailType === "county" ? `${detailName} County` : detailName!;
+      const fullTitle = `${displayName}, California — Demographics, Housing, Crime & More | CaliVibe`;
+      const desc = `Explore ${displayName} demographics, housing costs, crime rates, education, schools, and more on the interactive CaliVibe California map.`;
+      updateMeta(fullTitle, desc);
+    } else {
+      const primarySlug = path.split('+')[0];
+      const route = SEO_ROUTES.find((r) => r.slug === path) || SEO_ROUTES.find((r) => r.slug === primarySlug);
+      if (route) {
+        updateMeta(`${route.title} | CaliVibe`, route.desc);
+      } else if (path === "") {
+        const defaultTitle = "CaliVibe — Interactive California Map: Housing, Income, Education, Schools, Race, Age, Poverty, Crime, Temperature, Transit";
+        const defaultDesc = "Explore California on one interactive map. Compare counties and cities side by side across housing costs, household income, educational attainment, school performance ratings, race/ethnicity breakdown, age distribution, poverty rates, crime rates, population, density, temperature, sunshine hours, 18 transit systems, and 3D terrain.";
+        updateMeta(defaultTitle, defaultDesc);
+      }
+    }
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showAge, ageMetric, showCityAge, cityAgeMetric, showPoverty, showCityPoverty, showSchools, schoolMetric, showCitySchools, citySchoolMetric, showSchoolPoints, schoolPointColor, schoolLevelFilter, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, compareTempMonth, compareTempUnit, compareSunMonth, compareSunSource, compareCrimeAbsolute, showAbout, detailType, detailName]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -719,6 +782,34 @@ export default function Home() {
     setCompareNames([]);
     setCompareSortConfig(null);
   }, []);
+
+  const openDetail = useCallback((type: PlaceType, name: string) => {
+    setDetailType(type);
+    setDetailName(name);
+    setBrowseType(null); // close browse if open
+  }, []);
+  const closeDetail = useCallback(() => {
+    setDetailType(null);
+    setDetailName(null);
+  }, []);
+
+  const openBrowse = useCallback((type?: PlaceType) => {
+    setBrowseType(type ?? "county");
+  }, []);
+  const closeBrowse = useCallback(() => {
+    setBrowseType(null);
+  }, []);
+
+  const handleBrowseSelect = useCallback((type: PlaceType, name: string) => {
+    openDetail(type, name);
+  }, [openDetail]);
+
+  const viewCountyDetail = useCallback((name: string) => {
+    openDetail("county", name);
+  }, [openDetail]);
+  const viewCityDetail = useCallback((name: string) => {
+    openDetail("city", name);
+  }, [openDetail]);
 
   // --- Mutually exclusive toggle helpers ---
   const clearOverlays = () => {
@@ -928,6 +1019,9 @@ export default function Home() {
     setSelectedRaceCityName(null);
     setSelectedAgeCountyName(null);
     setSelectedAgeCityName(null);
+    setDetailType(null);
+    setDetailName(null);
+    setBrowseType(null);
   }, []);
 
   const goToFavoriteCounty = useCallback((name: string) => {
@@ -1208,8 +1302,10 @@ export default function Home() {
                 onDeselectTransitStop={() => { setFlyToTransitStop(false); setSelectedTransitStopName(null); }}
                 onToggleCountyFavorite={onToggleCountyFavorite}
                 isCountyFavorite={isCountyFavorite}
+                onViewCountyDetail={viewCountyDetail}
                 onToggleCityFavorite={onToggleCityFavorite}
                 isCityFavorite={isCityFavorite}
+                onViewCityDetail={viewCityDetail}
                 overlayOffset={overlayOffset}
                 selectedCountyName={selectedCountyName}
                 selectedCityName={selectedCityName}
@@ -1290,14 +1386,21 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Compare button */}
-          <div className="flex-shrink-0 mt-2 -mx-4 px-4 md:-mx-6 md:px-6">
+          {/* Explore + Compare buttons */}
+          <div className="flex-shrink-0 mt-2 -mx-4 px-4 md:-mx-6 md:px-6 flex gap-2">
+            <button
+              onClick={() => openBrowse()}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+            >
+              <LuCompass className="h-3.5 w-3.5" />
+              Explore
+            </button>
             <button
               onClick={() => openCompare(compareType ?? "county", compareNames)}
-              className="w-full inline-flex items-center justify-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
             >
               <LuColumns3 className="h-3.5 w-3.5" />
-              Compare Counties / Cities
+              Compare
             </button>
           </div>
 
@@ -2919,6 +3022,7 @@ export default function Home() {
                             items={favoriteCounties}
                             onReorder={(names) => reorderFavorites("county", names)}
                             onClickItem={goToFavoriteCounty}
+                            onViewDetail={viewCountyDetail}
                             onRemoveItem={(name) => toggleFavorite("county", name)}
                           />
                         </div>
@@ -2948,6 +3052,7 @@ export default function Home() {
                             items={favoriteCities}
                             onReorder={(names) => reorderFavorites("city", names)}
                             onClickItem={goToFavoriteCity}
+                            onViewDetail={viewCityDetail}
                             onRemoveItem={(name) => toggleFavorite("city", name)}
                           />
                         </div>
@@ -3197,6 +3302,20 @@ export default function Home() {
         onSunMonthChange={setCompareSunMonth}
         onSunSourceChange={setCompareSunSource}
         onCrimeAbsoluteChange={setCompareCrimeAbsolute}
+      />
+      <PlaceDetailModal
+        open={detailType !== null && detailName !== null}
+        onClose={closeDetail}
+        placeType={detailType ?? "county"}
+        placeName={detailName ?? ""}
+        onNavigate={openDetail}
+      />
+      <PlaceBrowseModal
+        open={browseType !== null}
+        onClose={closeBrowse}
+        browseType={browseType ?? "county"}
+        onTypeChange={(t) => setBrowseType(t)}
+        onSelectPlace={handleBrowseSelect}
       />
       <TemperatureTableModal
         open={showTempTable}

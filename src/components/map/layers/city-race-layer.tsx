@@ -7,6 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 import HeartButton from "@/components/heart-button";
+import DetailLinkButton from "@/components/detail-link-button";
 import {
   RACE_LABELS,
   type RaceMetric,
@@ -95,6 +96,7 @@ interface CityRaceLayerProps {
   overlayOffset?: number;
   selectName?: string | null;
   onToggleFavorite?: (name: string) => void;
+  onViewDetail?: (name: string) => void;
   isFavorite?: (name: string) => boolean;
 }
 
@@ -120,7 +122,7 @@ export function CityRaceLegend({ raceMetric, overlayOffset = 0 }: { raceMetric: 
   );
 }
 
-export default function CityRaceLayer({ raceMetric, overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CityRaceLayerProps) {
+export default function CityRaceLayer({ raceMetric, overlayOffset = 0, selectName = null, onToggleFavorite, onViewDetail, isFavorite }: CityRaceLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,

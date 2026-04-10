@@ -7,6 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 import HeartButton from "@/components/heart-button";
+import DetailLinkButton from "@/components/detail-link-button";
 
 const SOURCE_ID = "counties-race";
 const LABEL_SOURCE_ID = "county-race-labels-source";
@@ -101,6 +102,7 @@ interface CountyRaceLayerProps {
   overlayOffset?: number;
   selectName?: string | null;
   onToggleFavorite?: (name: string) => void;
+  onViewDetail?: (name: string) => void;
   isFavorite?: (name: string) => boolean;
 }
 
@@ -126,7 +128,7 @@ export function RaceLegend({ raceMetric, overlayOffset = 0 }: { raceMetric: Race
   );
 }
 
-export default function CountyRaceLayer({ raceMetric, overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CountyRaceLayerProps) {
+export default function CountyRaceLayer({ raceMetric, overlayOffset = 0, selectName = null, onToggleFavorite, onViewDetail, isFavorite }: CountyRaceLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,

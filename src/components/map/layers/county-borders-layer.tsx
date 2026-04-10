@@ -7,6 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 import HeartButton from "@/components/heart-button";
+import DetailLinkButton from "@/components/detail-link-button";
 
 const SOURCE_ID = "counties";
 const LABEL_SOURCE_ID = "county-labels-source";
@@ -41,6 +42,7 @@ function isHighlighted(): ExpressionSpecification {
 interface CountyBordersLayerProps {
   displayMode?: CountyDisplayMode;
   onToggleFavorite?: (name: string) => void;
+  onViewDetail?: (name: string) => void;
   isFavorite?: (name: string) => boolean;
   overlayOffset?: number;
   selectName?: string | null;
@@ -49,6 +51,7 @@ interface CountyBordersLayerProps {
 export default function CountyBordersLayer({
   displayMode = "borders",
   onToggleFavorite,
+  onViewDetail,
   isFavorite,
   overlayOffset = 0,
   selectName = null,
@@ -169,6 +172,9 @@ export default function CountyBordersLayer({
             </div>
             {onToggleFavorite && (
               <HeartButton favorited={favorited} onToggle={() => onToggleFavorite(activeName)} />
+            )}
+            {onViewDetail && (
+              <DetailLinkButton onClick={() => onViewDetail(activeName)} />
             )}
           </div>
         </div>

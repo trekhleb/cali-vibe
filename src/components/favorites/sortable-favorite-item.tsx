@@ -1,16 +1,19 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { LuGripVertical, LuX } from "react-icons/lu";
+import { FaArrowRight } from "react-icons/fa6";
 
 interface SortableFavoriteItemProps {
   id: string;
   onClickItem: (name: string) => void;
+  onViewDetail: (name: string) => void;
   onRemoveItem: (name: string) => void;
 }
 
 export default function SortableFavoriteItem({
   id,
   onClickItem,
+  onViewDetail,
   onRemoveItem,
 }: SortableFavoriteItemProps) {
   const {
@@ -32,9 +35,8 @@ export default function SortableFavoriteItem({
     <li
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-1 rounded-md px-2 py-1 text-sm text-gray-700 ${
-        isDragging ? "bg-white shadow-md" : "hover:bg-gray-50"
-      }`}
+      className={`flex items-center gap-1 rounded-md px-2 py-1 text-sm text-gray-700 ${isDragging ? "bg-white shadow-md" : "hover:bg-gray-50"
+        }`}
     >
       <button
         {...attributes}
@@ -53,8 +55,18 @@ export default function SortableFavoriteItem({
       </button>
 
       <button
+        onClick={() => onViewDetail(id)}
+        className="flex-shrink-0 p-1 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+        title="View details"
+      >
+        <FaArrowRight className="h-3.5 w-3.5" />
+      </button>
+
+      <div className="flex-shrink-0 w-px h-3 bg-gray-200 mx-0.5" />
+
+      <button
         onClick={() => onRemoveItem(id)}
-        className="flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors"
+        className="flex-shrink-0 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
         title="Remove from favorites"
       >
         <LuX className="h-3.5 w-3.5" />

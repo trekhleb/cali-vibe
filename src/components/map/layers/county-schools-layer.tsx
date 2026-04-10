@@ -7,6 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 import HeartButton from "@/components/heart-button";
+import DetailLinkButton from "@/components/detail-link-button";
 
 const SOURCE_ID = "counties-schools";
 const LABEL_SOURCE_ID = "county-schools-labels-source";
@@ -103,6 +104,7 @@ interface CountySchoolsLayerProps {
   overlayOffset?: number;
   selectName?: string | null;
   onToggleFavorite?: (name: string) => void;
+  onViewDetail?: (name: string) => void;
   isFavorite?: (name: string) => boolean;
 }
 
@@ -130,7 +132,7 @@ export function SchoolsLegend({ schoolMetric, overlayOffset = 0 }: { schoolMetri
   );
 }
 
-export default function CountySchoolsLayer({ schoolMetric, overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CountySchoolsLayerProps) {
+export default function CountySchoolsLayer({ schoolMetric, overlayOffset = 0, selectName = null, onToggleFavorite, onViewDetail, isFavorite }: CountySchoolsLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,

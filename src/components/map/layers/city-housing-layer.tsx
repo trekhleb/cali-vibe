@@ -7,6 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
 import HeartButton from "@/components/heart-button";
+import DetailLinkButton from "@/components/detail-link-button";
 import {
   HOUSING_LABELS,
   type HousingMetric,
@@ -90,6 +91,7 @@ interface CityHousingLayerProps {
   overlayOffset?: number;
   selectName?: string | null;
   onToggleFavorite?: (name: string) => void;
+  onViewDetail?: (name: string) => void;
   isFavorite?: (name: string) => boolean;
 }
 
@@ -120,7 +122,7 @@ export function CityHousingLegend({ housingMetric, overlayOffset = 0 }: { housin
   );
 }
 
-export default function CityHousingLayer({ housingMetric, overlayOffset = 0, selectName = null, onToggleFavorite, isFavorite }: CityHousingLayerProps) {
+export default function CityHousingLayer({ housingMetric, overlayOffset = 0, selectName = null, onToggleFavorite, onViewDetail, isFavorite }: CityHousingLayerProps) {
   const { activeName, activeProperties } = useMapInteraction(SOURCE_ID, FILL_LAYER_ID, {
     selectName,
     geojsonUrl: GEOJSON_URL,
