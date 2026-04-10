@@ -127,7 +127,7 @@ React, TypeScript, Vite, MapLibre GL JS, Tailwind CSS. H3 hexagonal grid for cli
 
 ## Vibe-coded
 
-~98% of the code was written by Claude Code (Opus) with a few sprinkles from Gemini 2.5 Pro.
+`~98%` of the code was written by Claude Code (Opus) with a few sprinkles from Gemini 2.5 Pro.
 
 ---
 
