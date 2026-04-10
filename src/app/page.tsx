@@ -322,6 +322,11 @@ function readParams() {
 export default function Home() {
   const init = useMemo(readParams, []);
 
+  // History navigation refs
+  const isFirstRender = useRef(true);
+  const isPopState = useRef(false);
+  const prevUrlRef = useRef("");
+
   const [terrain3d, setTerrain3d] = useState(init.terrain3d);
   const [showCounties, setShowCounties] = useState(init.counties);
   const [countyDisplayMode, setCountyDisplayMode] = useState<CountyDisplayMode>(init.cmode);
@@ -464,6 +469,82 @@ export default function Home() {
 
   const terrainRef = useRef<California3DTerrainRef>(null);
 
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      isPopState.current = true;
+      const s = readParams();
+      setTerrain3d(s.terrain3d);
+      setShowCounties(s.counties);
+      setCountyDisplayMode(s.cmode);
+      setShowPopulation(s.pop);
+      setPopulationMetric(s.pmetric);
+      setShowCityPopulation(s.cityPop);
+      setCityPopulationMetric(s.cpmetric);
+      setShowCities(s.cities);
+      setCityDisplayMode(s.cimode);
+      setShowCrime(s.crime);
+      setCrimeType(s.ctype);
+      setShowHousing(s.housing);
+      setHousingMetric(s.hmetric);
+      setShowIncome(s.income);
+      setShowCityHousing(s.cityHousing);
+      setCityHousingMetric(s.chmetric);
+      setShowCityIncome(s.cityIncome);
+      setShowCityCrime(s.cityCrime);
+      setCityCrimeType(s.cictype);
+      setShowEducation(s.edu);
+      setEducationMetric(s.emetric);
+      setShowCityEducation(s.cityEdu);
+      setCityEducationMetric(s.cemetric);
+      setShowRace(s.race);
+      setRaceMetric(s.rmetric);
+      setShowCityRace(s.cityRace);
+      setCityRaceMetric(s.crmetric);
+      setShowAge(s.age);
+      setAgeMetric(s.ametric);
+      setShowCityAge(s.cityAge);
+      setCityAgeMetric(s.cametric);
+      setShowPoverty(s.pov);
+      setShowCityPoverty(s.cityPov);
+      setShowSchools(s.schools);
+      setSchoolMetric(s.smetric);
+      setShowCitySchools(s.citySchools);
+      setCitySchoolMetric(s.csmetric);
+      setShowSchoolPoints(s.schPts);
+      setSchoolPointColor(s.spcolor);
+      setSchoolLevelFilter(s.splevel);
+      setShowTemperature(s.temp);
+      setTempMetric(s.tmetric);
+      setTempMonth(s.tmonth);
+      setTempUnit(s.tunit);
+      setTempResolution(s.tres);
+      setShowSunshine(s.shine);
+      setSunshineMonth(s.smonth);
+      setSunshineResolution(s.sres);
+      setSunshineDataSource(s.ssrc);
+      setShowTransit(s.transit);
+      setTransitSystems(s.tsys);
+      setMapStyleId(s.style);
+      setShowRelief(s.relief);
+      setShowPeaks(s.peaks);
+      setPeakUnit(s.punit);
+      setActiveTab(s.tab);
+      setIsDrawerOpen(s.drawer !== null ? s.drawer : !window.matchMedia("(max-width: 767px)").matches);
+      setCompareType(s.compare);
+      setCompareNames(s.cnames);
+      setCompareSortConfig(s.csort);
+      setCompareTempMonth(s.ctmonth);
+      setCompareTempUnit(s.ctunit);
+      setCompareSunMonth(s.csmonth);
+      setCompareSunSource(s.cssrc);
+      setCompareCrimeAbsolute(s.ccrime);
+      setShowAbout(s.about);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   // Sync state to URL (path-based for layers, query params for display prefs)
   useEffect(() => {
     const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -499,9 +580,8 @@ export default function Home() {
 
     let { path, transitInPath } = paramsToPath(layerState, transitSystems as string[]);
 
-    // Preserve root URL for default state (only temp on with default metric)
-    const atRoot = window.location.pathname.replace(/\/$/, "") === basePath;
-    if (atRoot && path === "temperature") {
+    // Default state (only temp on with default metric) maps to root URL
+    if (path === "temperature") {
       path = "";
       transitInPath = false;
     }
@@ -515,9 +595,9 @@ export default function Home() {
       if (val !== def) p.set(key, val ? "1" : "0");
     };
 
-    // Blank map fallback: all layers off differs from defaults (temp=true)
-    if (!path && !atRoot) {
-      // Navigated from a path URL and all layers are now off
+    // Blank map fallback: all layers off differs from defaults (temp=true).
+    // An empty path with no active layers means user turned everything off.
+    if (!path) {
       const hasAny = Object.entries(layerState).some(
         ([, v]) => v === true,
       );
@@ -566,7 +646,17 @@ export default function Home() {
     const qs = p.toString();
     const pathname = path ? `${basePath}/${path}` : `${basePath}/`;
     const url = qs ? `${pathname}?${qs}` : pathname;
-    window.history.replaceState(null, "", url);
+
+    // First render / popstate: replace (don't create duplicate or break Forward).
+    // Otherwise: push if URL changed (every change is a Back/Forward entry).
+    if (isFirstRender.current || isPopState.current) {
+      isFirstRender.current = false;
+      isPopState.current = false;
+      window.history.replaceState(null, "", url);
+    } else if (url !== prevUrlRef.current) {
+      window.history.pushState(null, "", url);
+    }
+    prevUrlRef.current = url;
 
     // Update canonical URL
     const canonical = path
@@ -813,10 +903,6 @@ export default function Home() {
     setSelectedRaceCityName(null);
     setSelectedAgeCountyName(null);
     setSelectedAgeCityName(null);
-    // Navigate to root so the URL-writing useEffect sees atRoot=true
-    // and keeps the path as /cali-vibe/ (temperature is the default layer).
-    const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
-    window.history.replaceState(null, "", basePath + "/");
   }, []);
 
   const goToFavoriteCounty = useCallback((name: string) => {
