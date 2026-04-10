@@ -145,6 +145,47 @@ function getNestedValue(obj: Record<string, unknown>, path: string): number | nu
   return typeof cur === "number" ? cur : null;
 }
 
+// --- Ranking & coloring ---
+
+interface RankInfo {
+  rank: number;   // 1-based, 1 = best
+  total: number;
+  color?: string; // background color
+}
+
+/** Compute rank among all places for a given metric. Rank 1 = best per polarity. */
+function computeRank(
+  value: number,
+  allValues: number[],
+  polarity: Polarity,
+): RankInfo | null {
+  if (polarity === "neutral") return null;
+  const sorted = [...allValues].sort((a, b) => a - b);
+  const total = sorted.length;
+  if (total < 2) return null;
+
+  // For "higher" polarity, rank 1 = highest value. For "lower", rank 1 = lowest.
+  const rank = polarity === "higher" || polarity === "temperature"
+    ? sorted.filter((v) => v > value).length + 1
+    : sorted.filter((v) => v < value).length + 1;
+
+  // Color: normalized 0–1, where 1 = best
+  const min = sorted[0];
+  const max = sorted[sorted.length - 1];
+  if (max === min) return { rank, total };
+  const normalized = (value - min) / (max - min);
+
+  let t: number;
+  if (polarity === "temperature") {
+    // Warm = orange, cold = blue (same as compare modal)
+    const hue = 220 - normalized * 190;
+    return { rank, total, color: `hsl(${hue}, 70%, 88%)` };
+  }
+  t = polarity === "higher" ? normalized : 1 - normalized;
+  const hue = 220 - t * 190;
+  return { rank, total, color: `hsl(${hue}, 70%, 88%)` };
+}
+
 // --- Component ---
 
 export type DetailTab = "summary" | "local" | "roast";
@@ -179,20 +220,20 @@ const TAB_THEMES: Record<DetailTab, TabTheme> = {
     bodyBorder: "border-amber-200",
   },
   roast: {
-    activeBg: "bg-red-50",
-    activeText: "text-red-900",
-    activeBorder: "border-red-200",
-    inactiveText: "text-red-400",
-    inactiveHoverBg: "hover:bg-red-50/50",
-    bodyBg: "bg-red-50",
-    bodyBorder: "border-red-200",
+    activeBg: "bg-pink-50",
+    activeText: "text-pink-900",
+    activeBorder: "border-pink-200",
+    inactiveText: "text-pink-400",
+    inactiveHoverBg: "hover:bg-pink-50/50",
+    bodyBg: "bg-pink-50",
+    bodyBorder: "border-pink-200",
   },
 };
 
 const DETAIL_TABS: { id: DetailTab; label: string; icon: ReactNode }[] = [
-  { id: "summary", label: "Summary", icon: <LuChartColumn className="h-4.5 w-4.5" /> },
-  { id: "local", label: "Local's Take", icon: <LuMessageCircle className="h-4.5 w-4.5" /> },
-  { id: "roast", label: "Roast", icon: <LuFlame className="h-4.5 w-4.5" /> },
+  { id: "summary", label: "Summary", icon: <LuChartColumn className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5" /> },
+  { id: "local", label: "Local's Take", icon: <LuMessageCircle className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5" /> },
+  { id: "roast", label: "Roast", icon: <LuFlame className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5" /> },
 ];
 
 export interface PlaceDetailModalProps {
@@ -270,17 +311,19 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
     return () => document.removeEventListener("mousedown", handler);
   }, [showDropdown]);
 
+  const [allFeatures, setAllFeatures] = useState<Record<string, unknown>[]>([]);
+
   useEffect(() => {
     if (!open || !placeName) { setProperties(null); return; }
     setLoading(true);
     setError(null);
     fetchJsonCached(DATA_URLS[placeType])
       .then((geo: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-        const feature = geo.features.find(
-          (f: { properties: { name: string } }) => f.properties.name === placeName,
-        );
-        if (feature) {
-          setProperties(feature.properties);
+        const features = geo.features.map((f: { properties: Record<string, unknown> }) => f.properties);
+        setAllFeatures(features);
+        const props = features.find((p: Record<string, unknown>) => p.name === placeName);
+        if (props) {
+          setProperties(props as Record<string, unknown>);
         } else {
           setError(`${placeName} not found`);
         }
@@ -313,6 +356,47 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
       : (v: number) => `${(Math.round(v * 10) / 10).toFixed(1)}°C`,
     [tempUnit],
   );
+
+  // Build map of all values per metric key (for ranking)
+  const allValuesMap = useMemo(() => {
+    if (allFeatures.length === 0) return new Map<string, number[]>();
+    const map = new Map<string, number[]>();
+
+    // Collect all demographic metric values
+    for (const cat of DEMOGRAPHIC_CATEGORIES) {
+      for (const m of cat.metrics) {
+        const vals: number[] = [];
+        for (const feat of allFeatures) {
+          const v = getNestedValue(feat, m.key);
+          if (v !== null) vals.push(v);
+        }
+        map.set(m.key, vals);
+      }
+    }
+
+    // Collect climate metric values (hydrated for current month/unit/source)
+    const climateKeys = [
+      { key: "_tmax", getter: (c: any) => getClimateMonthVal(c?.tmax, tempMonth) }, // eslint-disable-line @typescript-eslint/no-explicit-any
+      { key: "_tavg", getter: (c: any) => getClimateMonthVal(c?.tavg, tempMonth) }, // eslint-disable-line @typescript-eslint/no-explicit-any
+      { key: "_tmin", getter: (c: any) => getClimateMonthVal(c?.tmin, tempMonth) }, // eslint-disable-line @typescript-eslint/no-explicit-any
+      { key: "_sunHrs", getter: (c: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+        const arr = sunSource === "nsrdb" ? c?.sunNsrdb : c?.sunEra5;
+        return getClimateMonthVal(arr, sunMonth);
+      }},
+    ];
+    for (const ck of climateKeys) {
+      const vals: number[] = [];
+      for (const feat of allFeatures) {
+        const raw = ck.getter(feat.climate);
+        if (raw === null) continue;
+        const v = ck.key.startsWith("_t") && tempUnit === "F" ? cToF(raw) : raw;
+        vals.push(v);
+      }
+      map.set(ck.key, vals);
+    }
+
+    return map;
+  }, [allFeatures, tempMonth, tempUnit, sunMonth, sunSource]);
 
   const allCategories = useMemo<CategoryDef[]>(() => [
     {
@@ -543,6 +627,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                       collapsed={isCollapsed}
                       onToggle={() => toggleCategory(cat.label)}
                       controls={controls}
+                      allValuesMap={allValuesMap}
                     />
                   );
                 })}
@@ -569,12 +654,14 @@ function DetailCategoryGroup({
   collapsed,
   onToggle,
   controls,
+  allValuesMap,
 }: {
   category: CategoryDef;
   properties: Record<string, unknown>;
   collapsed: boolean;
   onToggle: () => void;
   controls?: ReactNode;
+  allValuesMap: Map<string, number[]>;
 }) {
   return (
     <>
@@ -583,7 +670,7 @@ function DetailCategoryGroup({
         onClick={onToggle}
       >
         <td
-          colSpan={2}
+          colSpan={3}
           className="px-4 py-2 font-semibold text-gray-700 bg-gray-100 border-b border-gray-200 text-xs uppercase tracking-wide"
         >
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -599,13 +686,25 @@ function DetailCategoryGroup({
       {!collapsed &&
         category.metrics.map((metric) => {
           const val = getNestedValue(properties, metric.key);
+          const allVals = allValuesMap.get(metric.key);
+          const rankInfo = val !== null && allVals ? computeRank(val, allVals, metric.polarity) : null;
           return (
             <tr key={metric.key} className="hover:bg-gray-50/50">
               <td className="px-4 py-1.5 text-gray-600 border-b border-gray-100 whitespace-nowrap">
                 {metric.label}
               </td>
-              <td className="px-4 py-1.5 text-right border-b border-gray-100 tabular-nums font-medium text-gray-900">
+              <td className="px-4 py-1.5 text-right border-b border-gray-100 tabular-nums font-medium text-gray-900 whitespace-nowrap">
                 {val !== null ? metric.format(val) : <span className="text-gray-300">—</span>}
+              </td>
+              <td className="pr-4 py-1.5 text-right border-b border-gray-100 w-16">
+                {rankInfo && (
+                  <span
+                    className="inline-block rounded px-1.5 py-0.5 text-[10px] font-medium tabular-nums"
+                    style={rankInfo.color ? { backgroundColor: rankInfo.color } : undefined}
+                  >
+                    {rankInfo.rank}/{rankInfo.total}
+                  </span>
+                )}
               </td>
             </tr>
           );
