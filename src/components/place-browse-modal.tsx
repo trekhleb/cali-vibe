@@ -42,7 +42,7 @@ export default function PlaceBrowseModal({
           .sort((a: string, b: string) => a.localeCompare(b));
         setAllNames(names);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, [open, dataUrl]);
 
@@ -78,7 +78,7 @@ export default function PlaceBrowseModal({
     <LegalModal
       open={open}
       onClose={onClose}
-      title={`California ${typeLabel}`}
+      title={`CaliVibe: California ${typeLabel}`}
       wide
       sizeClassName="!max-w-xl !h-[80dvh] !w-[95vw] md:!w-[90vw]"
     >

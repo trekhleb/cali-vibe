@@ -375,7 +375,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                   : <LuMapPin className="h-5 w-5 text-black flex-shrink-0" />}
                 <span><span className="font-bold">{displayName}</span><span className="text-gray-400 font-normal">, California</span></span>
               </h2>
-              <p className="mt-1.5 text-sm text-gray-600 mb-2 invisible">&lt;DESCRIPTION&gt;</p>
+              <p className="mt-1.5 text-sm text-gray-600 mb-2">&lt;TODO: GENERATE A CONCISE DESCRIPTION BASED ON THE COMMON KNOWLEDGE AND THE AVAILABLE DATA IN THE TABLE BELOW&gt;</p>
             </div>
 
             {/* Key Metrics subheader */}
