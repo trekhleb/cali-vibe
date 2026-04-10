@@ -3309,6 +3309,9 @@ export default function Home() {
         placeType={detailType ?? "county"}
         placeName={detailName ?? ""}
         onNavigate={openDetail}
+        onCompare={(type, name) => { closeDetail(); openCompare(type, [name]); }}
+        onToggleFavorite={(detailType ?? "county") === "county" ? onToggleCountyFavorite : onToggleCityFavorite}
+        isFavorite={(detailType ?? "county") === "county" ? isCountyFavorite : isCityFavorite}
       />
       <PlaceBrowseModal
         open={browseType !== null}

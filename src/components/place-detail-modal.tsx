@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import LegalModal from "@/components/legal-modal";
-import { LuChevronDown, LuChevronRight, LuSearch, LuThermometer, LuSun, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuCalendarDays, LuSchool, LuMapPin, LuLandmark } from "react-icons/lu";
+import { LuChevronDown, LuChevronRight, LuColumns3, LuSearch, LuThermometer, LuSun, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuCalendarDays, LuSchool, LuMapPin, LuLandmark } from "react-icons/lu";
+import HeartButton from "@/components/heart-button";
 import { IoManOutline } from "react-icons/io5";
 import { fetchJsonCached } from "@/utils/fetch-json";
 import type { PlaceType } from "@/utils/place-slugs";
@@ -152,9 +153,12 @@ export interface PlaceDetailModalProps {
   placeType: PlaceType;
   placeName: string;
   onNavigate?: (type: PlaceType, name: string) => void;
+  onCompare?: (type: PlaceType, name: string) => void;
+  onToggleFavorite?: (name: string) => void;
+  isFavorite?: (name: string) => boolean;
 }
 
-export default function PlaceDetailModal({ open, onClose, placeType, placeName, onNavigate }: PlaceDetailModalProps) {
+export default function PlaceDetailModal({ open, onClose, placeType, placeName, onNavigate, onCompare, onToggleFavorite, isFavorite }: PlaceDetailModalProps) {
   const [properties, setProperties] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -367,15 +371,35 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
 
         {!loading && !error && hydratedProps && (
           <>
-            {/* Title + Description */}
+            {/* Title + Actions + Description */}
             <div className="px-4 pt-4 pb-3 border-b border-gray-100">
-              <h2 className="flex items-center gap-2 text-xl text-gray-900 mb-4">
-                {placeType === "county"
-                  ? <LuLandmark className="h-5 w-5 text-black flex-shrink-0" />
-                  : <LuMapPin className="h-5 w-5 text-black flex-shrink-0" />}
-                <span><span className="font-bold">{displayName}</span><span className="text-gray-400 font-normal">, California</span></span>
-              </h2>
-              <p className="mt-1.5 text-sm text-gray-600 mb-2">&lt;TODO: GENERATE A CONCISE DESCRIPTION BASED ON THE COMMON KNOWLEDGE AND THE AVAILABLE DATA IN THE TABLE BELOW&gt;</p>
+              <div className="flex items-center gap-2 mb-4">
+                <h2 className="flex items-center gap-2 text-xl text-gray-900 min-w-0">
+                  {placeType === "county"
+                    ? <LuLandmark className="h-5 w-5 text-black flex-shrink-0" />
+                    : <LuMapPin className="h-5 w-5 text-black flex-shrink-0" />}
+                  <span className="truncate"><span className="font-bold">{displayName}</span><span className="text-gray-400 font-normal">, California</span></span>
+                </h2>
+                <div className="flex items-center gap-3 ml-auto flex-shrink-0">
+                  {onCompare && (
+                    <button
+                      onClick={() => onCompare(placeType, placeName)}
+                      className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                      title={`Compare with other ${placeType === "county" ? "counties" : "cities"}`}
+                    >
+                      <LuColumns3 className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Compare</span>
+                    </button>
+                  )}
+                  {onToggleFavorite && (
+                    <HeartButton
+                      favorited={isFavorite?.(placeName) ?? false}
+                      onToggle={() => onToggleFavorite(placeName)}
+                    />
+                  )}
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">&lt;TODO: GENERATE A CONCISE DESCRIPTION BASED ON THE COMMON KNOWLEDGE AND THE AVAILABLE DATA IN THE TABLE BELOW&gt;</p>
             </div>
 
             {/* Key Metrics subheader */}
