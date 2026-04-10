@@ -813,6 +813,10 @@ export default function Home() {
     setSelectedRaceCityName(null);
     setSelectedAgeCountyName(null);
     setSelectedAgeCityName(null);
+    // Navigate to root so the URL-writing useEffect sees atRoot=true
+    // and keeps the path as /cali-vibe/ (temperature is the default layer).
+    const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+    window.history.replaceState(null, "", basePath + "/");
   }, []);
 
   const goToFavoriteCounty = useCallback((name: string) => {
