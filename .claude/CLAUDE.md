@@ -17,18 +17,9 @@
 - Every time you scrape or use the external data-sources or APIs, make sure that the information is shareable and that using it do not violate any licenses or terms of service. If some data-source if important, has high quality but requires some additional steps from the licenciong perspective, do not discard it but ask for clarification on how to proceed.
 - Before calling the task "done" do a self-review of the changes you made.
 
-## Architecture
+## Additional context
 
-**Single-page React app** hosted on GitHub Pages at `/cali-vibe/`. No backend, no router library — uses the browser History API with path-based URLs.
-
-### URL structure
-
-Layer selection is path-encoded: `/cali-vibe/{layer}[/{metric}][+{layer}[/{metric}]...]`
-- Multi-layer combos use `+`: `/housing/rent+crime`
-- Display preferences are query params: `?style=dark&tmonth=6`
-- County/city detail pages: `/county/{slug}` and `/city/{slug}`
-- The root URL (`/cali-vibe/`) shows the temperature layer by default
-
-**Route catalog** (`src/utils/route-catalog.ts`): single source of truth for layer slug ↔ state param mapping. `pathToParams()` reads URLs, `paramsToPath()` writes them. `parseDetailRoute()` handles county/city detail URLs.
-
-**SEO routes** (`src/utils/seo-routes.json`): metadata (title, description, priority, freq) for every indexable layer URL. Used at build-time by `scripts/build-html-routes.mjs` to stamp unique `<title>`, OG tags, and canonical links into per-route HTML files and the sitemap.
+- See @CONTRIBUTING and @package.json for available npm commands for this project.
+- [URL Architecture & SEO Strategy](./rules/project_url_architecture.md) — path-based routing decisions, multi-layer URL patterns, future county/city pages, blurred map background design
+- [Project Hosting Constraints](./rules/project_constraints.md) — GitHub Pages, no server, must stay free
+- [E2E Snapshot Testing](./rules/e2e_snapshot_testing.md) — when experimenting with e2e snapshot updates, first test with a single test/snapshot to verify the assumption works before running `--update-snapshots` for all tests. Bulk snapshot updates take a long time.
