@@ -178,6 +178,7 @@ const DEFAULTS = {
   about: false,
   detailType: null as PlaceType | null,
   detailName: null as string | null,
+  detailTab: "summary" as "summary" | "local" | "roast",
   browseType: null as PlaceType | null,
 };
 
@@ -348,6 +349,7 @@ function readParams() {
     about: bool("about", DEFAULTS.about),
     detailType: detailRoute?.type ?? null,
     detailSlug: detailRoute?.slug ?? null,
+    detailTab: str("dtab", DEFAULTS.detailTab, ["summary", "local", "roast"] as const),
     browseType: null as PlaceType | null,
   };
 }
@@ -495,6 +497,7 @@ export default function Home() {
   const [showAbout, setShowAbout] = useState(init.about);
   const [detailType, setDetailType] = useState<PlaceType | null>(init.detailType);
   const [detailName, setDetailName] = useState<string | null>(null);
+  const [detailTab, setDetailTab] = useState<"summary" | "local" | "roast">(init.detailTab);
   const [browseType, setBrowseType] = useState<PlaceType | null>(init.browseType);
   const isMobile = useIsMobile();
 
@@ -502,6 +505,7 @@ export default function Home() {
   useEffect(() => {
     if (!init.detailType || !init.detailSlug) return;
     loadPlaceNames(init.detailType).then((names) => {
+      isFirstRender.current = true; // still part of initial load
       const name = slugToName(init.detailSlug!, names);
       if (name) setDetailName(name);
       else { setDetailType(null); setDetailName(null); }
@@ -587,9 +591,11 @@ export default function Home() {
       setCompareCrimeAbsolute(s.ccrime);
       setShowAbout(s.about);
       // Detail route
+      setDetailTab(s.detailTab);
       if (s.detailType && s.detailSlug) {
         setDetailType(s.detailType);
         loadPlaceNames(s.detailType).then((names) => {
+          isPopState.current = true; // still restoring from popstate
           const name = slugToName(s.detailSlug!, names);
           if (name) setDetailName(name);
           else { setDetailType(null); setDetailName(null); }
@@ -700,6 +706,11 @@ export default function Home() {
     }
     setBoolQ("about", showAbout, DEFAULTS.about);
 
+    // Detail tab
+    if (detailType && detailName && detailTab !== DEFAULTS.detailTab) {
+      p.set("dtab", detailTab);
+    }
+
     // Build final URL
     const qs = p.toString();
     // When a detail page is open, the URL reflects the detail route
@@ -751,7 +762,7 @@ export default function Home() {
         updateMeta(defaultTitle, defaultDesc);
       }
     }
-  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showAge, ageMetric, showCityAge, cityAgeMetric, showPoverty, showCityPoverty, showSchools, schoolMetric, showCitySchools, citySchoolMetric, showSchoolPoints, schoolPointColor, schoolLevelFilter, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, compareTempMonth, compareTempUnit, compareSunMonth, compareSunSource, compareCrimeAbsolute, showAbout, detailType, detailName]);
+  }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showAge, ageMetric, showCityAge, cityAgeMetric, showPoverty, showCityPoverty, showSchools, schoolMetric, showCitySchools, citySchoolMetric, showSchoolPoints, schoolPointColor, schoolLevelFilter, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, compareTempMonth, compareTempUnit, compareSunMonth, compareSunSource, compareCrimeAbsolute, showAbout, detailType, detailName, detailTab]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
 
@@ -3312,6 +3323,8 @@ export default function Home() {
         onCompare={(type, name) => { closeDetail(); openCompare(type, [name]); }}
         onToggleFavorite={(detailType ?? "county") === "county" ? onToggleCountyFavorite : onToggleCityFavorite}
         isFavorite={(detailType ?? "county") === "county" ? isCountyFavorite : isCityFavorite}
+        activeTab={detailTab}
+        onTabChange={setDetailTab}
       />
       <PlaceBrowseModal
         open={browseType !== null}

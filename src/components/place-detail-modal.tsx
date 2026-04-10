@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import LegalModal from "@/components/legal-modal";
-import { LuChevronDown, LuChevronRight, LuColumns3, LuSearch, LuThermometer, LuSun, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuCalendarDays, LuSchool, LuMapPin, LuLandmark } from "react-icons/lu";
+import { LuChevronDown, LuChevronRight, LuColumns3, LuSearch, LuThermometer, LuSun, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuCalendarDays, LuSchool, LuMapPin, LuLandmark, LuChartColumn, LuMessageCircle, LuFlame } from "react-icons/lu";
 import HeartButton from "@/components/heart-button";
 import { IoManOutline } from "react-icons/io5";
 import { fetchJsonCached } from "@/utils/fetch-json";
@@ -147,6 +147,54 @@ function getNestedValue(obj: Record<string, unknown>, path: string): number | nu
 
 // --- Component ---
 
+export type DetailTab = "summary" | "local" | "roast";
+
+interface TabTheme {
+  activeBg: string;
+  activeText: string;
+  activeBorder: string;
+  inactiveText: string;
+  inactiveHoverBg: string;
+  bodyBg: string;
+  bodyBorder: string;
+}
+
+const TAB_THEMES: Record<DetailTab, TabTheme> = {
+  summary: {
+    activeBg: "bg-gray-50",
+    activeText: "text-gray-900",
+    activeBorder: "border-gray-200",
+    inactiveText: "text-gray-400",
+    inactiveHoverBg: "hover:bg-gray-50",
+    bodyBg: "bg-gray-50",
+    bodyBorder: "border-gray-200",
+  },
+  local: {
+    activeBg: "bg-amber-50",
+    activeText: "text-amber-900",
+    activeBorder: "border-amber-200",
+    inactiveText: "text-amber-500",
+    inactiveHoverBg: "hover:bg-amber-50/50",
+    bodyBg: "bg-amber-50",
+    bodyBorder: "border-amber-200",
+  },
+  roast: {
+    activeBg: "bg-red-50",
+    activeText: "text-red-900",
+    activeBorder: "border-red-200",
+    inactiveText: "text-red-400",
+    inactiveHoverBg: "hover:bg-red-50/50",
+    bodyBg: "bg-red-50",
+    bodyBorder: "border-red-200",
+  },
+};
+
+const DETAIL_TABS: { id: DetailTab; label: string; icon: ReactNode }[] = [
+  { id: "summary", label: "Summary", icon: <LuChartColumn className="h-4.5 w-4.5" /> },
+  { id: "local", label: "Local's Take", icon: <LuMessageCircle className="h-4.5 w-4.5" /> },
+  { id: "roast", label: "Roast", icon: <LuFlame className="h-4.5 w-4.5" /> },
+];
+
 export interface PlaceDetailModalProps {
   open: boolean;
   onClose: () => void;
@@ -156,9 +204,11 @@ export interface PlaceDetailModalProps {
   onCompare?: (type: PlaceType, name: string) => void;
   onToggleFavorite?: (name: string) => void;
   isFavorite?: (name: string) => boolean;
+  activeTab?: DetailTab;
+  onTabChange?: (tab: DetailTab) => void;
 }
 
-export default function PlaceDetailModal({ open, onClose, placeType, placeName, onNavigate, onCompare, onToggleFavorite, isFavorite }: PlaceDetailModalProps) {
+export default function PlaceDetailModal({ open, onClose, placeType, placeName, onNavigate, onCompare, onToggleFavorite, isFavorite, activeTab = "summary", onTabChange }: PlaceDetailModalProps) {
   const [properties, setProperties] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -303,7 +353,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
       onClose={onClose}
       title={placeType === "county" ? "CaliVibe: County Review" : "CaliVibe: City Review"}
       wide
-      sizeClassName="!max-w-3xl !h-[90dvh] !w-[95vw] md:!w-[90vw]"
+      sizeClassName="!max-w-4xl !h-[90dvh] !w-[95vw] md:!w-[90vw]"
     >
       {/* Place switcher */}
       {onNavigate && (
@@ -311,14 +361,16 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
           <div className="inline-flex rounded-md border border-gray-300 text-xs overflow-hidden">
             <button
               onClick={() => { setSearchType("county"); setSearchQuery(""); }}
-              className={`px-2.5 py-1 font-medium transition-colors ${searchType === "county" ? "bg-gray-800 text-white" : "bg-white text-gray-600 hover:bg-gray-100"}`}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 font-medium transition-colors ${searchType === "county" ? "bg-gray-800 text-white" : "bg-white text-gray-600 hover:bg-gray-100"}`}
             >
+              <LuLandmark className="h-3 w-3" />
               Counties
             </button>
             <button
               onClick={() => { setSearchType("city"); setSearchQuery(""); }}
-              className={`px-2.5 py-1 font-medium transition-colors border-l border-gray-300 ${searchType === "city" ? "bg-gray-800 text-white" : "bg-white text-gray-600 hover:bg-gray-100"}`}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 font-medium transition-colors border-l border-gray-300 ${searchType === "city" ? "bg-gray-800 text-white" : "bg-white text-gray-600 hover:bg-gray-100"}`}
             >
+              <LuMapPin className="h-3 w-3" />
               Cities
             </button>
           </div>
@@ -336,7 +388,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
             {showDropdown && lowerQuery && (
               <div
                 ref={dropdownRef}
-                className="absolute z-10 left-0 right-0 top-full mt-1 max-h-52 overflow-auto rounded-md border border-gray-200 bg-white shadow-lg"
+                className="absolute z-50 left-0 right-0 top-full mt-1 max-h-52 overflow-auto rounded-md border border-gray-200 bg-white shadow-lg"
               >
                 {filteredNames.length === 0 ? (
                   <p className="px-3 py-2 text-xs text-gray-400">No matches</p>
@@ -399,11 +451,59 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                   )}
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mb-2">&lt;TODO: GENERATE A CONCISE DESCRIPTION BASED ON THE COMMON KNOWLEDGE AND THE AVAILABLE DATA IN THE TABLE BELOW&gt;</p>
+              {/* Tabs — connected header + body block */}
+              {(() => {
+                const theme = TAB_THEMES[activeTab];
+                return (
+                  <div className="mt-3 mb-4 -mx-4 px-4">
+                    {/* Tab buttons */}
+                    <div className="flex gap-1" role="tablist">
+                      {DETAIL_TABS.map((tab) => {
+                        const t = TAB_THEMES[tab.id];
+                        const isActive = activeTab === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            role="tab"
+                            aria-selected={isActive}
+                            onClick={() => onTabChange?.(tab.id)}
+                            className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors cursor-pointer ${
+                              isActive
+                                ? `border ${t.activeBorder} border-b-0 -mb-px relative z-10 ${t.activeBg} ${t.activeText}`
+                                : `border border-transparent mb-0 ${t.inactiveText} ${t.inactiveHoverBg} rounded-lg`
+                            }`}
+                          >
+                            {tab.icon}
+                            {tab.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {/* Tab body */}
+                    <div className={`${theme.bodyBg} border ${theme.bodyBorder} rounded-b-lg rounded-tr-lg ${activeTab !== "summary" ? "rounded-tl-lg" : ""}`}>
+                      {DETAIL_TABS.map((tab) => (
+                        <div
+                          key={tab.id}
+                          className={activeTab === tab.id ? "" : "hidden"}
+                          role="tabpanel"
+                          aria-label={tab.label}
+                        >
+                          <div className="px-4 py-4 text-sm text-gray-600">
+                            {tab.id === "summary" && <p>Data-driven summary for {displayName} will appear here.</p>}
+                            {tab.id === "local" && <p>Local&apos;s perspective on {displayName} will appear here.</p>}
+                            {tab.id === "roast" && <p>Data-driven roast of {displayName} will appear here.</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Key Metrics subheader */}
-            <h3 className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">Key Metrics</h3>
+            <div className="px-4">
+            <h3 className="pt-4 pb-2 text-xs font-semibold text-gray-900 uppercase tracking-wide">Key Metrics</h3>
 
             <table className="w-full border-collapse text-sm">
               <tbody>
@@ -448,6 +548,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                 })}
               </tbody>
             </table>
+            </div>
           </>
         )}
       </div>

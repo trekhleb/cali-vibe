@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LegalModal from "@/components/legal-modal";
-import { LuSearch, LuChevronRight } from "react-icons/lu";
+import { LuSearch, LuChevronRight, LuLandmark, LuMapPin } from "react-icons/lu";
 import { fetchJsonCached } from "@/utils/fetch-json";
 import type { PlaceType } from "@/utils/place-slugs";
 
@@ -88,14 +88,16 @@ export default function PlaceBrowseModal({
         <div className="inline-flex rounded-md border border-gray-300 text-xs overflow-hidden">
           <button
             onClick={() => handleTypeSwitch("county")}
-            className={`px-2.5 py-1 font-medium transition-colors ${browseType === "county" ? "bg-gray-800 text-white" : "bg-white text-gray-600 hover:bg-gray-100"}`}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 font-medium transition-colors ${browseType === "county" ? "bg-gray-800 text-white" : "bg-white text-gray-600 hover:bg-gray-100"}`}
           >
+            <LuLandmark className="h-3 w-3" />
             Counties
           </button>
           <button
             onClick={() => handleTypeSwitch("city")}
-            className={`px-2.5 py-1 font-medium transition-colors border-l border-gray-300 ${browseType === "city" ? "bg-gray-800 text-white" : "bg-white text-gray-600 hover:bg-gray-100"}`}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 font-medium transition-colors border-l border-gray-300 ${browseType === "city" ? "bg-gray-800 text-white" : "bg-white text-gray-600 hover:bg-gray-100"}`}
           >
+            <LuMapPin className="h-3 w-3" />
             Cities
           </button>
         </div>
