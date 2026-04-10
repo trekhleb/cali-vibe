@@ -203,6 +203,13 @@
     "freq": "yearly"
   },
   {
+    "slug": "race/other",
+    "title": "California County Race Map — Other Population",
+    "desc": "Interactive map of Other population percentage across all 58 California counties. Census ACS 2019–2023.",
+    "priority": 0.8,
+    "freq": "yearly"
+  },
+  {
     "slug": "age",
     "title": "California County Age Distribution Map — Median Age",
     "desc": "Interactive map of median age across all 58 California counties. Census ACS 2019–2023.",
@@ -301,6 +308,55 @@
     "freq": "yearly"
   },
   {
+    "slug": "city-crime/homicide",
+    "title": "California City Homicide Rate Map",
+    "desc": "Interactive homicide rate map of California cities per 100K residents. CA DOJ 2023.",
+    "priority": 0.6,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-crime/robbery",
+    "title": "California City Robbery Rate Map",
+    "desc": "Interactive robbery rate map of California cities per 100K residents. CA DOJ 2023.",
+    "priority": 0.6,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-crime/burglary",
+    "title": "California City Burglary Rate Map",
+    "desc": "Interactive burglary rate map of California cities per 100K residents. CA DOJ 2023.",
+    "priority": 0.6,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-crime/vehicle-theft",
+    "title": "California City Vehicle Theft Map",
+    "desc": "Interactive motor vehicle theft rate map of California cities per 100K residents. CA DOJ 2023.",
+    "priority": 0.6,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-crime/larceny",
+    "title": "California City Larceny-Theft Map",
+    "desc": "Interactive larceny-theft rate map of California cities per 100K residents. CA DOJ 2023.",
+    "priority": 0.6,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-crime/assault",
+    "title": "California City Aggravated Assault Map",
+    "desc": "Interactive aggravated assault rate map of California cities per 100K residents. CA DOJ 2023.",
+    "priority": 0.6,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-crime/rape",
+    "title": "California City Rape Rate Map",
+    "desc": "Interactive rape rate map of California cities per 100K residents. CA DOJ 2023.",
+    "priority": 0.6,
+    "freq": "yearly"
+  },
+  {
     "slug": "city-education",
     "title": "California City Education Map — Bachelor's Degree+",
     "desc": "Interactive map of bachelor's degree attainment across 697 California cities. Census ACS 2019–2023.",
@@ -364,10 +420,59 @@
     "freq": "yearly"
   },
   {
+    "slug": "city-race/asian",
+    "title": "California City Race Map — Asian Population",
+    "desc": "Interactive map of Asian population percentage across 697 California cities. Census ACS 2019–2023.",
+    "priority": 0.7,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-race/black",
+    "title": "California City Race Map — Black Population",
+    "desc": "Interactive map of Black population percentage across 697 California cities. Census ACS 2019–2023.",
+    "priority": 0.7,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-race/other",
+    "title": "California City Race Map — Other Population",
+    "desc": "Interactive map of Other population percentage across 697 California cities. Census ACS 2019–2023.",
+    "priority": 0.7,
+    "freq": "yearly"
+  },
+  {
     "slug": "city-age",
     "title": "California City Age Distribution Map — Median Age",
     "desc": "Interactive map of median age across 697 California cities. Census ACS 2019–2023.",
     "priority": 0.8,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-age/under18",
+    "title": "California City Age Map — Under 18",
+    "desc": "Interactive map of under-18 population percentage across 697 California cities.",
+    "priority": 0.7,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-age/18-34",
+    "title": "California City Age Map — 18 to 34",
+    "desc": "Interactive map of 18–34 population percentage across 697 California cities.",
+    "priority": 0.6,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-age/35-64",
+    "title": "California City Age Map — 35 to 64",
+    "desc": "Interactive map of 35–64 population percentage across 697 California cities.",
+    "priority": 0.6,
+    "freq": "yearly"
+  },
+  {
+    "slug": "city-age/65plus",
+    "title": "California City Age Map — 65+",
+    "desc": "Interactive map of 65+ population percentage across 697 California cities.",
+    "priority": 0.6,
     "freq": "yearly"
   },
   {
