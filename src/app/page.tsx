@@ -76,6 +76,7 @@ import { RiFocus3Line, RiFocus3Fill } from "react-icons/ri";
 import { FaGithub } from "react-icons/fa";
 import type { California3DTerrainRef } from "@/components/map/terrain-3d/california-3d-terrain";
 import { pathToParams, paramsToPath, LAYER_PARAM_KEYS } from "@/utils/route-catalog";
+import SEO_ROUTES from "@/utils/seo-routes.json";
 
 const crimeTypeIds = Object.keys(CRIME_LABELS) as CrimeType[];
 const tempMetricIds = Object.keys(METRIC_LABELS) as TempMetric[];
@@ -663,6 +664,30 @@ export default function Home() {
       ? `https://trekhleb.dev${basePath}/${path}`
       : `https://trekhleb.dev${basePath}/`;
     document.querySelector('link[rel="canonical"]')?.setAttribute("href", canonical);
+
+    // Update Document Meta Info
+    const primarySlug = path.split('+')[0];
+    const route = SEO_ROUTES.find((r) => r.slug === path) || SEO_ROUTES.find((r) => r.slug === primarySlug);
+    if (route) {
+      const fullTitle = `${route.title} | CaliVibe`;
+      document.title = fullTitle;
+      document.querySelector('meta[name="description"]')?.setAttribute("content", route.desc);
+      document.querySelector('meta[property="og:url"]')?.setAttribute("content", canonical);
+      document.querySelector('meta[property="og:title"]')?.setAttribute("content", fullTitle);
+      document.querySelector('meta[property="og:description"]')?.setAttribute("content", route.desc);
+      document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", fullTitle);
+      document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", route.desc);
+    } else if (path === "") {
+      const defaultTitle = "CaliVibe — Interactive California Map: Housing, Income, Education, Schools, Race, Age, Poverty, Crime, Temperature, Transit";
+      const defaultDesc = "Explore California on one interactive map. Compare counties and cities side by side across housing costs, household income, educational attainment, school performance ratings, race/ethnicity breakdown, age distribution, poverty rates, crime rates, population, density, temperature, sunshine hours, 18 transit systems, and 3D terrain.";
+      document.title = defaultTitle;
+      document.querySelector('meta[name="description"]')?.setAttribute("content", defaultDesc);
+      document.querySelector('meta[property="og:url"]')?.setAttribute("content", canonical);
+      document.querySelector('meta[property="og:title"]')?.setAttribute("content", defaultTitle);
+      document.querySelector('meta[property="og:description"]')?.setAttribute("content", defaultDesc);
+      document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", defaultTitle);
+      document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", defaultDesc);
+    }
   }, [terrain3d, showCounties, countyDisplayMode, showPopulation, populationMetric, showCityPopulation, cityPopulationMetric, showCities, cityDisplayMode, showCrime, crimeType, showHousing, housingMetric, showIncome, showEducation, educationMetric, showCityEducation, cityEducationMetric, showRace, raceMetric, showCityRace, cityRaceMetric, showAge, ageMetric, showCityAge, cityAgeMetric, showPoverty, showCityPoverty, showSchools, schoolMetric, showCitySchools, citySchoolMetric, showSchoolPoints, schoolPointColor, schoolLevelFilter, showCityHousing, cityHousingMetric, showCityIncome, showCityCrime, cityCrimeType, showTemperature, tempMetric, tempMonth, tempUnit, tempResolution, showSunshine, sunshineMonth, sunshineResolution, sunshineDataSource, showTransit, transitSystems, mapStyleId, showRelief, showPeaks, peakUnit, activeTab, isDrawerOpen, compareType, compareNames, compareSortConfig, compareTempMonth, compareTempUnit, compareSunMonth, compareSunSource, compareCrimeAbsolute, showAbout]);
 
   const { favorites, favoriteCounties, favoriteCities, favoriteCountySet, favoriteCitySet, toggleFavorite, reorderFavorites } = useFavorites();
