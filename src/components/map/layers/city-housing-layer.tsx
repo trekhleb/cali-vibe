@@ -6,8 +6,7 @@ import type {
   ExpressionSpecification,
 } from "maplibre-gl";
 import { useMapInteraction } from "@/hooks/use-map-interaction";
-import HeartButton from "@/components/heart-button";
-import DetailLinkButton from "@/components/detail-link-button";
+import PlacePopupHeader from "@/components/map/place-popup-header";
 import {
   HOUSING_LABELS,
   type HousingMetric,
@@ -216,14 +215,13 @@ export default function CityHousingLayer({ housingMetric, overlayOffset = 0, sel
           className="absolute rounded-lg bg-white/90 px-3 py-2 shadow backdrop-blur-sm transition-all duration-300 left-4 top-24 md:left-6 md:top-28"
           style={overlayOffset ? { left: overlayOffset + 24, top: 24 } : undefined}
         >
-          <div className="flex items-center gap-2">
-            <div className="text-sm font-semibold text-gray-800">
-              {activeName}
-            </div>
-            {onToggleFavorite && (
-              <HeartButton favorited={favorited} onToggle={() => onToggleFavorite(activeName)} />
-            )}
-          </div>
+          <PlacePopupHeader
+            placeType="city"
+            name={activeName}
+            favorited={favorited}
+            onToggleFavorite={onToggleFavorite}
+            onViewDetail={onViewDetail}
+          />
           <div className="text-sm text-gray-600">
             {HOUSING_LABELS[housingMetric]}: {formatValue(activeVal, housingMetric)}
           </div>
