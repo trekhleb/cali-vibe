@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import LegalModal from "@/components/legal-modal";
 import { LuChevronDown, LuChevronRight, LuColumns3, LuSearch, LuThermometer, LuSun, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuCalendarDays, LuSchool, LuMapPin, LuLandmark, LuMessageCircle, LuFlame } from "react-icons/lu";
 import HeartButton from "@/components/heart-button";
+import PlaceMiniMap from "@/components/place-mini-map";
 import { IoManOutline } from "react-icons/io5";
 import { fetchJsonCached } from "@/utils/fetch-json";
 import type { PlaceType } from "@/utils/place-slugs";
@@ -177,8 +178,8 @@ function computeRank(
 
   let t: number;
   if (polarity === "temperature") {
-    // Warm = orange, cold = blue (same as compare modal)
-    const hue = 220 - normalized * 190;
+    // Cold = blue (220°), hot = red (10°), via purple — avoids green
+    const hue = (220 + normalized * 150) % 360;
     return { rank, total, color: `hsl(${hue}, 70%, 88%)` };
   }
   t = polarity === "higher" ? normalized : 1 - normalized;
@@ -208,7 +209,7 @@ const TAB_THEMES: Record<DetailTab, TabTheme> = {
     activeBg: "bg-violet-50",
     activeText: "text-violet-800",
     activeBorder: "border-violet-200",
-    inactiveText: "text-violet-400",
+    inactiveText: "text-violet-800",
     inactiveHoverBg: "hover:bg-violet-50/50",
     bodyBg: "bg-violet-50",
     bodyBorder: "border-violet-200",
@@ -218,7 +219,7 @@ const TAB_THEMES: Record<DetailTab, TabTheme> = {
   },
   roast: {
     activeBg: "bg-orange-50",
-    activeText: "text-orange-800",
+    activeText: "text-orange-400",
     activeBorder: "border-orange-200",
     inactiveText: "text-orange-400",
     inactiveHoverBg: "hover:bg-orange-50/50",
@@ -378,10 +379,12 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
       { key: "_tmax", getter: (c: any) => getClimateMonthVal(c?.tmax, tempMonth) }, // eslint-disable-line @typescript-eslint/no-explicit-any
       { key: "_tavg", getter: (c: any) => getClimateMonthVal(c?.tavg, tempMonth) }, // eslint-disable-line @typescript-eslint/no-explicit-any
       { key: "_tmin", getter: (c: any) => getClimateMonthVal(c?.tmin, tempMonth) }, // eslint-disable-line @typescript-eslint/no-explicit-any
-      { key: "_sunHrs", getter: (c: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-        const arr = sunSource === "nsrdb" ? c?.sunNsrdb : c?.sunEra5;
-        return getClimateMonthVal(arr, sunMonth);
-      }},
+      {
+        key: "_sunHrs", getter: (c: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+          const arr = sunSource === "nsrdb" ? c?.sunNsrdb : c?.sunEra5;
+          return getClimateMonthVal(arr, sunMonth);
+        }
+      },
     ];
     for (const ck of climateKeys) {
       const vals: number[] = [];
@@ -550,11 +553,10 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                             role="tab"
                             aria-selected={isActive}
                             onClick={() => onTabChange?.(tab.id)}
-                            className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-t-lg transition-colors cursor-pointer ${
-                              isActive
-                                ? `border ${t.activeBorder} border-b-0 -mb-px relative z-10 ${t.activeBg} ${t.activeText}`
-                                : `border border-transparent mb-0 ${t.inactiveText} ${t.inactiveHoverBg} rounded-lg`
-                            }`}
+                            className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-t-lg transition-colors cursor-pointer ${isActive
+                              ? `border ${t.activeBorder} border-b-0 -mb-px relative z-10 ${t.activeBg} ${t.activeText}`
+                              : `border border-transparent mb-0 ${t.inactiveText} ${t.inactiveHoverBg} rounded-lg`
+                              }`}
                           >
                             {tab.icon}
                             {tab.label}
@@ -572,7 +574,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                           aria-label={tab.label}
                         >
                           <div className="px-4 py-4 text-sm text-gray-600">
-                            <span className={`inline-block mb-2 rounded border ${theme.tagBorder} ${theme.tagBg} px-1.5 py-0.5 text-[8px] font-medium ${theme.tagText} uppercase tracking-wide`}>AI-Generated Summary Based on Actual Location Metrics</span>
+                            <span className={`inline-block mb-2 rounded border ${theme.tagBorder} ${theme.tagBg} px-1.5 py-0.5 text-[8px] font-medium ${theme.tagText} uppercase tracking-wide`}>AI-Generated Summary Based on Actual Location Metrics. For entertainment purposes only — not housing or relocation advice.</span>
                             {tab.id === "local" && <p>Local&apos;s perspective on {displayName} will appear here.</p>}
                             {tab.id === "roast" && <p>Data-driven roast of {displayName} will appear here.</p>}
                           </div>
@@ -584,59 +586,64 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
               })()}
             </div>
 
+            {/* Mini map */}
+            <div className="px-4 pt-4">
+              <PlaceMiniMap placeType={placeType} placeName={placeName} />
+            </div>
+
             {/* Key Metrics subheader */}
-            <div className="px-2 sm:px-4">
-            <h3 className="pt-4 pb-2 text-xs font-semibold text-gray-900 uppercase tracking-wide">Key Metrics</h3>
+            <div className="px-4">
+              <h3 className="pt-4 pb-2 text-xs font-semibold text-gray-900 uppercase tracking-wide">Key Metrics</h3>
 
-            <table className="w-full table-fixed border-collapse text-sm">
-              <colgroup>
-                <col />
-                <col className="w-24 sm:w-28" />
-                <col className="w-14 sm:w-18" />
-              </colgroup>
-              <tbody>
-                {allCategories.map((cat) => {
-                  const isCollapsed = collapsedCategories.has(cat.label);
+              <table className="w-full table-fixed border-collapse text-sm">
+                <colgroup>
+                  <col />
+                  <col className="w-24 sm:w-28" />
+                  <col className="w-14 sm:w-18" />
+                </colgroup>
+                <tbody>
+                  {allCategories.map((cat) => {
+                    const isCollapsed = collapsedCategories.has(cat.label);
 
-                  let controls: ReactNode = undefined;
-                  if (cat.label === "Temperature") {
-                    controls = (
-                      <>
-                        <MonthSelector value={tempMonth} onChange={(m) => { setTempMonth(m); setSunMonth(m); }} />
-                        <SmallToggle
-                          options={[{ value: "F", label: "°F" }, { value: "C", label: "°C" }]}
-                          value={tempUnit}
-                          onChange={(v) => setTempUnit(v as TempUnit)}
-                        />
-                      </>
+                    let controls: ReactNode = undefined;
+                    if (cat.label === "Temperature") {
+                      controls = (
+                        <>
+                          <MonthSelector value={tempMonth} onChange={(m) => { setTempMonth(m); setSunMonth(m); }} />
+                          <SmallToggle
+                            options={[{ value: "F", label: "°F" }, { value: "C", label: "°C" }]}
+                            value={tempUnit}
+                            onChange={(v) => setTempUnit(v as TempUnit)}
+                          />
+                        </>
+                      );
+                    } else if (cat.label === "Sunshine") {
+                      controls = (
+                        <>
+                          <MonthSelector value={sunMonth} onChange={(m) => { setSunMonth(m); setTempMonth(m); }} />
+                          <SmallToggle
+                            options={[{ value: "nsrdb", label: "NSRDB" }, { value: "era5", label: "ERA5" }]}
+                            value={sunSource}
+                            onChange={(v) => setSunSource(v as SunSource)}
+                          />
+                        </>
+                      );
+                    }
+
+                    return (
+                      <DetailCategoryGroup
+                        key={cat.label}
+                        category={cat}
+                        properties={hydratedProps}
+                        collapsed={isCollapsed}
+                        onToggle={() => toggleCategory(cat.label)}
+                        controls={controls}
+                        allValuesMap={allValuesMap}
+                      />
                     );
-                  } else if (cat.label === "Sunshine") {
-                    controls = (
-                      <>
-                        <MonthSelector value={sunMonth} onChange={(m) => { setSunMonth(m); setTempMonth(m); }} />
-                        <SmallToggle
-                          options={[{ value: "nsrdb", label: "NSRDB" }, { value: "era5", label: "ERA5" }]}
-                          value={sunSource}
-                          onChange={(v) => setSunSource(v as SunSource)}
-                        />
-                      </>
-                    );
-                  }
-
-                  return (
-                    <DetailCategoryGroup
-                      key={cat.label}
-                      category={cat}
-                      properties={hydratedProps}
-                      collapsed={isCollapsed}
-                      onToggle={() => toggleCategory(cat.label)}
-                      controls={controls}
-                      allValuesMap={allValuesMap}
-                    />
-                  );
-                })}
-              </tbody>
-            </table>
+                  })}
+                </tbody>
+              </table>
             </div>
           </>
         )}

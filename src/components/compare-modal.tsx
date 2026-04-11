@@ -155,10 +155,9 @@ function hslColor(t: number): string {
   return `hsl(${hue}, 65%, 88%)`;
 }
 
-/** Blue (cold) → orange/red (hot) gradient. t: 0 = coldest, 1 = hottest. */
+/** Blue (cold) → red (hot) gradient via purple — avoids green. t: 0 = coldest, 1 = hottest. */
 function tempColor(t: number): string {
-  // hue 220 (blue) → 30 (orange)
-  const hue = 220 - t * 190;
+  const hue = (220 + t * 150) % 360;
   return `hsl(${hue}, 70%, 88%)`;
 }
 
