@@ -178,7 +178,7 @@ const DEFAULTS = {
   about: false,
   detailType: null as PlaceType | null,
   detailName: null as string | null,
-  detailTab: "summary" as "summary" | "local" | "roast",
+  detailTab: "local" as "local" | "roast",
   browseType: null as PlaceType | null,
 };
 
@@ -349,7 +349,7 @@ function readParams() {
     about: bool("about", DEFAULTS.about),
     detailType: detailRoute?.type ?? null,
     detailSlug: detailRoute?.slug ?? null,
-    detailTab: str("dtab", DEFAULTS.detailTab, ["summary", "local", "roast"] as const),
+    detailTab: str("dtab", DEFAULTS.detailTab, ["local", "roast"] as const),
     browseType: null as PlaceType | null,
   };
 }
@@ -497,7 +497,7 @@ export default function Home() {
   const [showAbout, setShowAbout] = useState(init.about);
   const [detailType, setDetailType] = useState<PlaceType | null>(init.detailType);
   const [detailName, setDetailName] = useState<string | null>(null);
-  const [detailTab, setDetailTab] = useState<"summary" | "local" | "roast">(init.detailTab);
+  const [detailTab, setDetailTab] = useState<"local" | "roast">(init.detailTab);
   const [browseType, setBrowseType] = useState<PlaceType | null>(init.browseType);
   const isMobile = useIsMobile();
 

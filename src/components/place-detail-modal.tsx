@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import LegalModal from "@/components/legal-modal";
-import { LuChevronDown, LuChevronRight, LuColumns3, LuSearch, LuThermometer, LuSun, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuCalendarDays, LuSchool, LuMapPin, LuLandmark, LuChartColumn, LuMessageCircle, LuFlame } from "react-icons/lu";
+import { LuChevronDown, LuChevronRight, LuColumns3, LuSearch, LuThermometer, LuSun, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuCalendarDays, LuSchool, LuMapPin, LuLandmark, LuMessageCircle, LuFlame } from "react-icons/lu";
 import HeartButton from "@/components/heart-button";
 import { IoManOutline } from "react-icons/io5";
 import { fetchJsonCached } from "@/utils/fetch-json";
@@ -188,7 +188,7 @@ function computeRank(
 
 // --- Component ---
 
-export type DetailTab = "summary" | "local" | "roast";
+export type DetailTab = "local" | "roast";
 
 interface TabTheme {
   activeBg: string;
@@ -201,37 +201,27 @@ interface TabTheme {
 }
 
 const TAB_THEMES: Record<DetailTab, TabTheme> = {
-  summary: {
-    activeBg: "bg-gray-50",
-    activeText: "text-gray-900",
-    activeBorder: "border-gray-200",
-    inactiveText: "text-gray-400",
-    inactiveHoverBg: "hover:bg-gray-50",
-    bodyBg: "bg-gray-50",
-    bodyBorder: "border-gray-200",
-  },
   local: {
-    activeBg: "bg-amber-50",
-    activeText: "text-amber-900",
-    activeBorder: "border-amber-200",
-    inactiveText: "text-amber-500",
-    inactiveHoverBg: "hover:bg-amber-50/50",
-    bodyBg: "bg-amber-50",
-    bodyBorder: "border-amber-200",
+    activeBg: "bg-yellow-50",
+    activeText: "text-yellow-900",
+    activeBorder: "border-yellow-200",
+    inactiveText: "text-yellow-500",
+    inactiveHoverBg: "hover:bg-yellow-50/50",
+    bodyBg: "bg-yellow-50",
+    bodyBorder: "border-yellow-200",
   },
   roast: {
-    activeBg: "bg-pink-50",
-    activeText: "text-pink-900",
-    activeBorder: "border-pink-200",
-    inactiveText: "text-pink-400",
-    inactiveHoverBg: "hover:bg-pink-50/50",
-    bodyBg: "bg-pink-50",
-    bodyBorder: "border-pink-200",
+    activeBg: "bg-red-100",
+    activeText: "text-red-700",
+    activeBorder: "border-red-300",
+    inactiveText: "text-red-400",
+    inactiveHoverBg: "hover:bg-red-100/50",
+    bodyBg: "bg-red-100",
+    bodyBorder: "border-red-300",
   },
 };
 
 const DETAIL_TABS: { id: DetailTab; label: string; icon: ReactNode }[] = [
-  { id: "summary", label: "Summary", icon: <LuChartColumn className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5" /> },
   { id: "local", label: "Local's Take", icon: <LuMessageCircle className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5" /> },
   { id: "roast", label: "Roast", icon: <LuFlame className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5" /> },
 ];
@@ -249,7 +239,7 @@ export interface PlaceDetailModalProps {
   onTabChange?: (tab: DetailTab) => void;
 }
 
-export default function PlaceDetailModal({ open, onClose, placeType, placeName, onNavigate, onCompare, onToggleFavorite, isFavorite, activeTab = "summary", onTabChange }: PlaceDetailModalProps) {
+export default function PlaceDetailModal({ open, onClose, placeType, placeName, onNavigate, onCompare, onToggleFavorite, isFavorite, activeTab = "local", onTabChange }: PlaceDetailModalProps) {
   const [properties, setProperties] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -501,7 +491,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
       )}
 
       {/* Content */}
-      <div className="overflow-auto min-h-0 flex-1">
+      <div className="overflow-y-auto overflow-x-hidden min-h-0 flex-1">
         {loading && <p className="text-center py-12 text-gray-500">Loading...</p>}
         {error && <p className="text-center py-12 text-red-600">Error: {error}</p>}
 
@@ -551,7 +541,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                             role="tab"
                             aria-selected={isActive}
                             onClick={() => onTabChange?.(tab.id)}
-                            className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors cursor-pointer ${
+                            className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-t-lg transition-colors cursor-pointer ${
                               isActive
                                 ? `border ${t.activeBorder} border-b-0 -mb-px relative z-10 ${t.activeBg} ${t.activeText}`
                                 : `border border-transparent mb-0 ${t.inactiveText} ${t.inactiveHoverBg} rounded-lg`
@@ -564,7 +554,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                       })}
                     </div>
                     {/* Tab body */}
-                    <div className={`${theme.bodyBg} border ${theme.bodyBorder} rounded-b-lg rounded-tr-lg ${activeTab !== "summary" ? "rounded-tl-lg" : ""}`}>
+                    <div className={`${theme.bodyBg} border ${theme.bodyBorder} rounded-b-lg rounded-tr-lg ${activeTab !== "local" ? "rounded-tl-lg" : ""}`}>
                       {DETAIL_TABS.map((tab) => (
                         <div
                           key={tab.id}
@@ -573,7 +563,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                           aria-label={tab.label}
                         >
                           <div className="px-4 py-4 text-sm text-gray-600">
-                            {tab.id === "summary" && <p>Data-driven summary for {displayName} will appear here.</p>}
+                            <span className="inline-block mb-2 rounded border border-gray-300 bg-gray-200/60 px-1.5 py-0.5 text-[8px] font-medium text-gray-400 uppercase tracking-wide">AI Generated Summary</span>
                             {tab.id === "local" && <p>Local&apos;s perspective on {displayName} will appear here.</p>}
                             {tab.id === "roast" && <p>Data-driven roast of {displayName} will appear here.</p>}
                           </div>
@@ -586,10 +576,15 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
             </div>
 
             {/* Key Metrics subheader */}
-            <div className="px-4">
+            <div className="px-2 sm:px-4">
             <h3 className="pt-4 pb-2 text-xs font-semibold text-gray-900 uppercase tracking-wide">Key Metrics</h3>
 
-            <table className="w-full border-collapse text-sm">
+            <table className="w-full table-fixed border-collapse text-sm">
+              <colgroup>
+                <col />
+                <col className="w-24 sm:w-28" />
+                <col className="w-14 sm:w-18" />
+              </colgroup>
               <tbody>
                 {allCategories.map((cat) => {
                   const isCollapsed = collapsedCategories.has(cat.label);
@@ -671,7 +666,7 @@ function DetailCategoryGroup({
       >
         <td
           colSpan={3}
-          className="px-4 py-2 font-semibold text-gray-700 bg-gray-100 border-b border-gray-200 text-xs uppercase tracking-wide"
+          className="px-2 sm:px-4 py-2 font-semibold text-gray-700 bg-gray-100 border-b border-gray-200 text-xs uppercase tracking-wide"
         >
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="inline-flex items-center gap-1.5">
@@ -690,16 +685,16 @@ function DetailCategoryGroup({
           const rankInfo = val !== null && allVals ? computeRank(val, allVals, metric.polarity) : null;
           return (
             <tr key={metric.key} className="hover:bg-gray-50/50">
-              <td className="px-4 py-1.5 text-gray-600 border-b border-gray-100 whitespace-nowrap">
+              <td className="px-2 sm:px-4 py-1.5 text-gray-600 border-b border-gray-100 truncate" title={metric.label}>
                 {metric.label}
               </td>
-              <td className="px-4 py-1.5 text-right border-b border-gray-100 tabular-nums font-medium text-gray-900 whitespace-nowrap">
+              <td className="px-2 sm:px-4 py-1.5 text-right border-b border-gray-100 tabular-nums font-medium text-gray-900 whitespace-nowrap">
                 {val !== null ? metric.format(val) : <span className="text-gray-300">—</span>}
               </td>
-              <td className="pr-4 py-1.5 text-right border-b border-gray-100 w-16">
+              <td className="pr-2 sm:pr-4 py-1.5 text-right border-b border-gray-100 w-14 sm:w-16">
                 {rankInfo && (
                   <span
-                    className="inline-block rounded px-1.5 py-0.5 text-[10px] font-medium tabular-nums"
+                    className="inline-block rounded px-1 sm:px-1.5 py-0.5 text-[10px] font-medium tabular-nums"
                     style={rankInfo.color ? { backgroundColor: rankInfo.color } : undefined}
                   >
                     {rankInfo.rank}/{rankInfo.total}
