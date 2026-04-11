@@ -198,26 +198,35 @@ interface TabTheme {
   inactiveHoverBg: string;
   bodyBg: string;
   bodyBorder: string;
+  tagBg: string;
+  tagBorder: string;
+  tagText: string;
 }
 
 const TAB_THEMES: Record<DetailTab, TabTheme> = {
   local: {
-    activeBg: "bg-yellow-50",
-    activeText: "text-yellow-900",
-    activeBorder: "border-yellow-200",
-    inactiveText: "text-yellow-500",
-    inactiveHoverBg: "hover:bg-yellow-50/50",
-    bodyBg: "bg-yellow-50",
-    bodyBorder: "border-yellow-200",
+    activeBg: "bg-violet-50",
+    activeText: "text-violet-800",
+    activeBorder: "border-violet-200",
+    inactiveText: "text-violet-400",
+    inactiveHoverBg: "hover:bg-violet-50/50",
+    bodyBg: "bg-violet-50",
+    bodyBorder: "border-violet-200",
+    tagBg: "bg-violet-100/60",
+    tagBorder: "border-violet-200",
+    tagText: "text-violet-400",
   },
   roast: {
-    activeBg: "bg-red-100",
-    activeText: "text-red-700",
-    activeBorder: "border-red-300",
-    inactiveText: "text-red-400",
-    inactiveHoverBg: "hover:bg-red-100/50",
-    bodyBg: "bg-red-100",
-    bodyBorder: "border-red-300",
+    activeBg: "bg-orange-50",
+    activeText: "text-orange-800",
+    activeBorder: "border-orange-200",
+    inactiveText: "text-orange-400",
+    inactiveHoverBg: "hover:bg-orange-50/50",
+    bodyBg: "bg-orange-50",
+    bodyBorder: "border-orange-200",
+    tagBg: "bg-orange-100/60",
+    tagBorder: "border-orange-200",
+    tagText: "text-orange-400",
   },
 };
 
@@ -563,7 +572,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                           aria-label={tab.label}
                         >
                           <div className="px-4 py-4 text-sm text-gray-600">
-                            <span className="inline-block mb-2 rounded border border-gray-300 bg-gray-200/60 px-1.5 py-0.5 text-[8px] font-medium text-gray-400 uppercase tracking-wide">AI Generated Summary</span>
+                            <span className={`inline-block mb-2 rounded border ${theme.tagBorder} ${theme.tagBg} px-1.5 py-0.5 text-[8px] font-medium ${theme.tagText} uppercase tracking-wide`}>AI-Generated Summary Based on Actual Location Metrics</span>
                             {tab.id === "local" && <p>Local&apos;s perspective on {displayName} will appear here.</p>}
                             {tab.id === "roast" && <p>Data-driven roast of {displayName} will appear here.</p>}
                           </div>
