@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import LegalModal from "@/components/legal-modal";
-import { LuChevronDown, LuChevronRight, LuColumns3, LuSearch, LuThermometer, LuSun, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuCalendarDays, LuSchool, LuMapPin, LuLandmark, LuMessageCircle, LuFlame } from "react-icons/lu";
+import { LuChevronDown, LuChevronRight, LuColumns3, LuSearch, LuThermometer, LuSun, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuCalendarDays, LuSchool, LuMapPin, LuLandmark, LuSparkles } from "react-icons/lu";
 import HeartButton from "@/components/heart-button";
 import PlaceMiniMap from "@/components/place-mini-map";
 import { IoManOutline } from "react-icons/io5";
 import { fetchJsonCached } from "@/utils/fetch-json";
 import type { PlaceType } from "@/utils/place-slugs";
+import { nameToSlug } from "@/utils/place-slugs";
 
 // --- Metric definitions (shared with compare-modal) ---
 
@@ -131,10 +132,17 @@ const DEMOGRAPHIC_CATEGORIES: CategoryDef[] = [
 
 // --- Helpers ---
 
+const DESCRIPTIONS_VERSION = "v2-opus";
+
 const DATA_URLS: Record<PlaceType, string> = {
   county: `${import.meta.env.BASE_URL}data/california-county-labels.geojson`,
   city: `${import.meta.env.BASE_URL}data/california-city-labels.geojson`,
 };
+
+interface PlaceDescriptions {
+  [key: string]: string | undefined;
+  summary?: string;
+}
 
 function getNestedValue(obj: Record<string, unknown>, path: string): number | null {
   const parts = path.split(".");
@@ -189,7 +197,7 @@ function computeRank(
 
 // --- Component ---
 
-export type DetailTab = "local" | "roast";
+export type DetailTab = "summary";
 
 interface TabTheme {
   activeBg: string;
@@ -205,7 +213,7 @@ interface TabTheme {
 }
 
 const TAB_THEMES: Record<DetailTab, TabTheme> = {
-  local: {
+  summary: {
     activeBg: "bg-violet-50",
     activeText: "text-violet-800",
     activeBorder: "border-violet-200",
@@ -217,23 +225,10 @@ const TAB_THEMES: Record<DetailTab, TabTheme> = {
     tagBorder: "border-violet-200",
     tagText: "text-violet-400",
   },
-  roast: {
-    activeBg: "bg-orange-50",
-    activeText: "text-orange-400",
-    activeBorder: "border-orange-200",
-    inactiveText: "text-orange-400",
-    inactiveHoverBg: "hover:bg-orange-50/50",
-    bodyBg: "bg-orange-50",
-    bodyBorder: "border-orange-200",
-    tagBg: "bg-orange-100/60",
-    tagBorder: "border-orange-200",
-    tagText: "text-orange-400",
-  },
 };
 
 const DETAIL_TABS: { id: DetailTab; label: string; icon: ReactNode }[] = [
-  { id: "local", label: "Local's Take", icon: <LuMessageCircle className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5" /> },
-  { id: "roast", label: "Roast", icon: <LuFlame className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5" /> },
+  { id: "summary", label: "The Gist", icon: <LuSparkles className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5" /> },
 ];
 
 export interface PlaceDetailModalProps {
@@ -249,7 +244,7 @@ export interface PlaceDetailModalProps {
   onTabChange?: (tab: DetailTab) => void;
 }
 
-export default function PlaceDetailModal({ open, onClose, placeType, placeName, onNavigate, onCompare, onToggleFavorite, isFavorite, activeTab = "local", onTabChange }: PlaceDetailModalProps) {
+export default function PlaceDetailModal({ open, onClose, placeType, placeName, onNavigate, onCompare, onToggleFavorite, isFavorite, activeTab = "summary", onTabChange }: PlaceDetailModalProps) {
   const [properties, setProperties] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -258,6 +253,27 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
   const [tempUnit, setTempUnit] = useState<TempUnit>("F");
   const [sunMonth, setSunMonth] = useState(() => new Date().getMonth());
   const [sunSource, setSunSource] = useState<SunSource>("nsrdb");
+
+  // AI descriptions state
+  const [descriptions, setDescriptions] = useState<PlaceDescriptions | null>(null);
+  const [descLoading, setDescLoading] = useState(false);
+  const [descError, setDescError] = useState<string | null>(null);
+
+  // Fetch AI descriptions when modal opens or place changes
+  useEffect(() => {
+    if (!open || !placeName) {
+      setDescriptions(null);
+      return;
+    }
+    setDescLoading(true);
+    setDescError(null);
+    const slug = nameToSlug(placeName);
+    const url = `${import.meta.env.BASE_URL}data/descriptions/${DESCRIPTIONS_VERSION}/${placeType}/${slug}.json`;
+    fetchJsonCached(url)
+      .then((data) => setDescriptions(data as PlaceDescriptions))
+      .catch(() => setDescError("No AI summary available yet"))
+      .finally(() => setDescLoading(false));
+  }, [open, placeType, placeName]);
 
   // Place switcher state
   const [searchType, setSearchType] = useState<PlaceType>(placeType);
@@ -565,7 +581,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                       })}
                     </div>
                     {/* Tab body */}
-                    <div className={`${theme.bodyBg} border ${theme.bodyBorder} rounded-b-lg rounded-tr-lg ${activeTab !== "local" ? "rounded-tl-lg" : ""}`}>
+                    <div className={`${theme.bodyBg} border ${theme.bodyBorder} rounded-b-lg rounded-tr-lg ${activeTab !== DETAIL_TABS[0].id ? "rounded-tl-lg" : ""}`}>
                       {DETAIL_TABS.map((tab) => (
                         <div
                           key={tab.id}
@@ -574,9 +590,14 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                           aria-label={tab.label}
                         >
                           <div className="px-4 py-4 text-sm text-gray-600">
-                            <span className={`inline-block mb-2 rounded border ${theme.tagBorder} ${theme.tagBg} px-1.5 py-0.5 text-[8px] font-medium ${theme.tagText} uppercase tracking-wide`}>AI-Generated Summary Based on Actual Location Metrics. For entertainment purposes only — not housing or relocation advice.</span>
-                            {tab.id === "local" && <p>Local&apos;s perspective on {displayName} will appear here.</p>}
-                            {tab.id === "roast" && <p>Data-driven roast of {displayName} will appear here.</p>}
+                            {descLoading && <p className="text-gray-400 animate-pulse">Loading summary...</p>}
+                            {!descLoading && descError && <p className="text-gray-400 italic">{descError}</p>}
+                            {!descLoading && !descError && descriptions?.[tab.id] && (
+                              <>
+                                <span className={`inline-block mb-2 rounded border ${theme.tagBorder} ${theme.tagBg} px-1.5 py-0.5 text-[8px] font-medium ${theme.tagText} uppercase tracking-wide`}>AI-Generated Summary Based on Actual Location Metrics. Does not represent the views of local residents. For entertainment purposes only — not housing or relocation advice.</span>
+                                <p>{descriptions[tab.id]}</p>
+                              </>
+                            )}
                           </div>
                         </div>
                       ))}

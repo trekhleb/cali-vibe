@@ -178,7 +178,7 @@ const DEFAULTS = {
   about: false,
   detailType: null as PlaceType | null,
   detailName: null as string | null,
-  detailTab: "local" as "local" | "roast",
+  detailTab: "summary" as "summary",
   browseType: null as PlaceType | null,
 };
 
@@ -347,9 +347,9 @@ function readParams() {
     cssrc: str("cssrc", DEFAULTS.cssrc, ["nsrdb", "era5"] as const),
     ccrime: bool("ccrime", DEFAULTS.ccrime),
     about: bool("about", DEFAULTS.about),
+    detailTab: str("dtab", DEFAULTS.detailTab, ["summary"] as const),
     detailType: detailRoute?.type ?? null,
     detailSlug: detailRoute?.slug ?? null,
-    detailTab: str("dtab", DEFAULTS.detailTab, ["local", "roast"] as const),
     browseType: null as PlaceType | null,
   };
 }
@@ -497,7 +497,7 @@ export default function Home() {
   const [showAbout, setShowAbout] = useState(init.about);
   const [detailType, setDetailType] = useState<PlaceType | null>(init.detailType);
   const [detailName, setDetailName] = useState<string | null>(null);
-  const [detailTab, setDetailTab] = useState<"local" | "roast">(init.detailTab);
+  const [detailTab, setDetailTab] = useState<"summary">(init.detailTab);
   const [browseType, setBrowseType] = useState<PlaceType | null>(init.browseType);
   const isMobile = useIsMobile();
 
@@ -590,8 +590,8 @@ export default function Home() {
       setCompareSunSource(s.cssrc);
       setCompareCrimeAbsolute(s.ccrime);
       setShowAbout(s.about);
-      // Detail route
       setDetailTab(s.detailTab);
+      // Detail route
       if (s.detailType && s.detailSlug) {
         setDetailType(s.detailType);
         loadPlaceNames(s.detailType).then((names) => {
