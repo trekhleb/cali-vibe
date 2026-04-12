@@ -132,7 +132,7 @@ const DEMOGRAPHIC_CATEGORIES: CategoryDef[] = [
 
 // --- Helpers ---
 
-const DESCRIPTIONS_VERSION = "v2-opus";
+const DESCRIPTIONS_VERSION = "v1-opus";
 
 const DATA_URLS: Record<PlaceType, string> = {
   county: `${import.meta.env.BASE_URL}data/california-county-labels.geojson`,
