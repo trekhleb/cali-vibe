@@ -14,7 +14,8 @@
     "test:e2e": "playwright test",
     "test:e2e:update": "rm -rf e2e/visual-snapshots.spec.ts-snapshots && playwright test --update-snapshots",
     "generate-descriptions": "node scripts/generate-descriptions.mjs",
-    "review-descriptions": "node scripts/review-descriptions.mjs"
+    "review-descriptions": "node scripts/review-descriptions.mjs",
+    "audit-descriptions": "node scripts/audit-descriptions.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.88.0",

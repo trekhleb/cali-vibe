@@ -1164,7 +1164,7 @@ export default function Home() {
     clearOverlays();
     setShowSchools(true);
     setSelectedSchoolsCountyName(name);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const goToSchoolPointCity = useCallback((name: string) => {
@@ -1173,7 +1173,7 @@ export default function Home() {
     setShowCities(false);
     setShowCitySchools(true);
     setSelectedSchoolsCityName(name);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const hasAnyFavorites = favorites.length > 0;
@@ -1404,14 +1404,14 @@ export default function Home() {
               className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
             >
               <LuCompass className="h-3.5 w-3.5" />
-              Explore
+              Explore areas
             </button>
             <button
               onClick={() => openCompare(compareType ?? "county", compareNames)}
               className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
             >
               <LuColumns3 className="h-3.5 w-3.5" />
-              Compare
+              Compare areas
             </button>
           </div>
 
@@ -1491,8 +1491,8 @@ export default function Home() {
                             key={i}
                             onClick={() => setTempMonth(i)}
                             className={`rounded px-1 py-1 text-[11px] font-medium transition-colors ${tempMonth === i
-                                ? "bg-gray-900 text-white"
-                                : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                              ? "bg-gray-900 text-white"
+                              : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
                               }`}
                           >
                             {label}
@@ -1557,11 +1557,10 @@ export default function Home() {
                         <div className="flex items-center">
                           <button
                             onClick={() => setSunshineDataSource("nsrdb")}
-                            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                              sunshineDataSource === "nsrdb"
-                                ? "bg-black text-white"
-                                : "bg-white text-gray-700 hover:bg-gray-200"
-                            }`}
+                            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${sunshineDataSource === "nsrdb"
+                              ? "bg-black text-white"
+                              : "bg-white text-gray-700 hover:bg-gray-200"
+                              }`}
                           >
                             NSRDB
                           </button>
@@ -1579,30 +1578,29 @@ export default function Home() {
                         <div className="flex items-center">
                           <button
                             onClick={() => setSunshineDataSource("era5")}
-                            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                              sunshineDataSource === "era5"
-                                ? "bg-black text-white"
-                                : "bg-white text-gray-700 hover:bg-gray-200"
-                            }`}
+                            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${sunshineDataSource === "era5"
+                              ? "bg-black text-white"
+                              : "bg-white text-gray-700 hover:bg-gray-200"
+                              }`}
                           >
                             ERA5
                           </button>
                           <InfoTooltip>
-                          <a href="https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                            ERA5 Reanalysis (ECMWF)
-                          </a>
-                          {" "}via{" "}
-                          <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
-                            Open-Meteo
-                          </a>
-                          <br />
-                          ~31 km grid, 2014–2023 avg.
-                          <br />
-                          <br />
-                          Note: ERA5 grid resolution (~31 km) may
-                          underestimate fog effects in coastal areas
-                          (e.g. San Francisco), smoothing out microclimate
-                          differences with nearby inland locations.
+                            <a href="https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                              ERA5 Reanalysis (ECMWF)
+                            </a>
+                            {" "}via{" "}
+                            <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-gray-300 underline hover:text-white">
+                              Open-Meteo
+                            </a>
+                            <br />
+                            ~31 km grid, 2014–2023 avg.
+                            <br />
+                            <br />
+                            Note: ERA5 grid resolution (~31 km) may
+                            underestimate fog effects in coastal areas
+                            (e.g. San Francisco), smoothing out microclimate
+                            differences with nearby inland locations.
                           </InfoTooltip>
                         </div>
                       </div>
@@ -1614,8 +1612,8 @@ export default function Home() {
                             key={i}
                             onClick={() => setSunshineMonth(i)}
                             className={`rounded px-1 py-1 text-[11px] font-medium transition-colors ${sunshineMonth === i
-                                ? "bg-gray-900 text-white"
-                                : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                              ? "bg-gray-900 text-white"
+                              : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
                               }`}
                           >
                             {label}
@@ -1624,8 +1622,8 @@ export default function Home() {
                         <button
                           onClick={() => setSunshineMonth(ANNUAL_MONTH)}
                           className={`rounded px-1 py-1 text-[11px] font-medium transition-colors col-span-2 ${sunshineMonth === ANNUAL_MONTH
-                              ? "bg-gray-900 text-white"
-                              : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                            ? "bg-gray-900 text-white"
+                            : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
                             }`}
                         >
                           Year
@@ -1948,11 +1946,10 @@ export default function Home() {
                                 <button
                                   type="button"
                                   aria-label={isFocused ? "Unfocus" : "Focus"}
-                                  className={`flex cursor-pointer items-center rounded p-0.5 transition-colors ${
-                                    isFocused
-                                      ? "text-gray-900 hover:text-black"
-                                      : "text-gray-400 hover:text-gray-600"
-                                  }`}
+                                  className={`flex cursor-pointer items-center rounded p-0.5 transition-colors ${isFocused
+                                    ? "text-gray-900 hover:text-black"
+                                    : "text-gray-400 hover:text-gray-600"
+                                    }`}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     if (isFocused) {

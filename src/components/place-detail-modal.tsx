@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import LegalModal from "@/components/legal-modal";
-import { LuChevronDown, LuChevronRight, LuColumns3, LuSearch, LuThermometer, LuSun, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuCalendarDays, LuSchool, LuMapPin, LuLandmark, LuSparkles } from "react-icons/lu";
+import { LuChevronDown, LuChevronRight, LuExternalLink, LuColumns3, LuSearch, LuThermometer, LuSun, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuCalendarDays, LuSchool, LuMapPin, LuLandmark, LuSparkles } from "react-icons/lu";
 import HeartButton from "@/components/heart-button";
 import PlaceMiniMap from "@/components/place-mini-map";
 import { IoManOutline } from "react-icons/io5";
@@ -594,7 +594,7 @@ export default function PlaceDetailModal({ open, onClose, placeType, placeName, 
                             {!descLoading && descError && <p className="text-gray-400 italic">{descError}</p>}
                             {!descLoading && !descError && descriptions?.[tab.id] && (
                               <>
-                                <span className={`inline-block mb-2 rounded border ${theme.tagBorder} ${theme.tagBg} px-1.5 py-0.5 text-[8px] font-medium ${theme.tagText} uppercase tracking-wide`}>AI-Generated Summary Based on Actual Location Metrics. Does not represent the views of local residents. For entertainment purposes only — not housing or relocation advice.</span>
+                                <span className={`inline-block mb-2 rounded border ${theme.tagBorder} ${theme.tagBg} px-1.5 py-0.5 text-[8px] font-medium ${theme.tagText} uppercase tracking-wide`}>AI-Generated Summary Based on Actual Location Metrics. Does not represent the views of local residents. For entertainment purposes only — not housing or relocation advice. <a href="https://github.com/trekhleb/cali-vibe/issues/new" target="_blank" className="underline"><LuExternalLink className="inline align-text-bottom" /> Report inaccuracy</a></span>
                                 <p>{descriptions[tab.id]}</p>
                               </>
                             )}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import LegalModal from "@/components/legal-modal";
-import { LuChevronDown, LuX, LuSearch, LuPlus, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuThermometer, LuSun, LuGripVertical, LuCalendarDays, LuSchool, LuLandmark, LuMapPin } from "react-icons/lu";
+import { LuChevronDown, LuX, LuSearch, LuPlus, LuUsers, LuSiren, LuHouse, LuGraduationCap, LuTrendingDown, LuThermometer, LuSun, LuGripVertical, LuCalendarDays, LuSchool, LuLandmark, LuMapPin, LuArrowRight } from "react-icons/lu";
+import { detailUrl } from "@/utils/place-slugs";
 import { IoManOutline } from "react-icons/io5";
 import { fetchJsonCached } from "@/utils/fetch-json";
 
