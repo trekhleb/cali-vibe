@@ -96,6 +96,12 @@ Rotatable raised-relief view of California with labeled mountain peaks (feet or 
 
 ![California 3D terrain map with mountain peaks](./public/demo/01-framed.png)
 
+### Data-driven county/city summaries
+
+Since CaliVibe accumulated a descent amount of statistical data, it made it possible to generate the data-driven summary of cities and counties, blending the statistical data with broadly known observations about the place.
+
+![Data-driven county/city summaries](./public/demo/19-area-summary.png)
+
 ### Other features
 
 - **Compare** — compare any counties or cities side by side across all metrics (including school performance and age distribution) with color-coded rankings, shareable via URL
